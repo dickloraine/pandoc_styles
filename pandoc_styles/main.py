@@ -10,17 +10,19 @@ from shutil import copy
 from tempfile import TemporaryDirectory
 import yaml
 import sass
+from .format_mappings import FORMAT_TO_EXTENSION
 from .utils import (change_dir, file_read, file_write, has_extension,
                     make_list, run_process)
 
 
 class PandocStyles:
     """Handles the conversion with styles"""
-    def __init__(self, files, formats=None, styles=None, metadata="", target="",
-                 output_name=""):
+    def __init__(self, files, formats=None, sfrom="", styles=None, metadata="",
+                 target="", output_name=""):
         self.files = files
         self.metadata = metadata
         self.target = target
+        self.sfrom = sfrom
         self.output_name = f'{files[0].rpartition(".")[0]}' if not output_name \
                            else output_name
         self.config_dir = join(expanduser("~"), "pandoc_styles")
@@ -56,8 +58,9 @@ class PandocStyles:
         All attributes defined here change with each format
         """
         # initialize attributes
-        self.fmt = fmt
-        self.opt_fmt = "latex" if fmt == "pdf" else fmt
+        self.fmt = FORMAT_TO_EXTENSION.get(fmt, fmt)
+        self.opt_fmt = "latex" if self.fmt == "pdf" else self.fmt
+        self.to = "latex" if self.fmt == "pdf" else fmt
         self.output_file = f"{self.output_name}.{self.fmt}" if not self.target \
                            else join(self.target, f"{self.output_name}.{self.fmt}")
         self.cur_files = self.files.copy()
@@ -97,6 +100,11 @@ class PandocStyles:
         if  config.get("python-path"):
             self.python_path = normpath(config["python-path"])
 
+    def set_format(self, fmt):
+        self.to = fmt
+        self.fmt = FORMAT_TO_EXTENSION.get(fmt, fmt)
+        self.opt_fmt = "latex" if fmt == "pdf" else fmt
+
     def get_cfg(self):
         """Get the style configuration for the current format"""
         cfg = dict()
@@ -128,11 +136,13 @@ class PandocStyles:
 
     def get_pandoc_args(self):
         """Build the command line for pandoc out of the given configuration"""
-        pandoc_args = [f'-o "{self.output_file}"']
+        pandoc_args = [f'-t {self.to} -o "{self.output_file}"']
 
         for ffile in self.cur_files:
             pandoc_args.append(f'"{ffile}"')
 
+        if self.sfrom:
+            pandoc_args.append(f'--from {self.sfrom}')
         if self.metadata:
             pandoc_args.append(f'"{self.metadata}"')
 
@@ -337,6 +347,8 @@ def main():
                              'with the given extensions.')
     parser.add_argument('-t', '--to', nargs='*', default=[],
                         help='The formats that should be produced.')
+    parser.add_argument('--from-format', nargs='?', default="",
+                        help='The format of the source files.')
     parser.add_argument('-d', '--destination', nargs='?', default="",
                         help='The target folder')
     parser.add_argument('-o', '--output-name', nargs='?', default="",
@@ -367,8 +379,8 @@ def main():
         args.files.sort()
 
     with change_dir(args.working_dir):
-        PandocStyles(args.files, args.to, args.styles, args.metadata, args.destination,
-                     args.output_name).run()
+        PandocStyles(args.files, args.to, args.from_format, args.styles, args.metadata,
+                     args.destination, args.output_name).run()
 
 
 if __name__ == '__main__':
