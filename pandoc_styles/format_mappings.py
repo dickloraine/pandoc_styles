@@ -15,7 +15,7 @@ FORMAT_TO_EXTENSION = {
     "epub2": "epub",
     "epub3": "epub",
     "fb2": "fb2",
-    "gfm": ".md",
+    "gfm": "md",
     "haddock": "html",
     "html": "html",
     "html4": "html",
