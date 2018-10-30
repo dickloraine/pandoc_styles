@@ -15,6 +15,7 @@ from .utils import (change_dir, file_read, file_write, has_extension,
 
 
 class PandocStyles:
+    """Handles the conversion with styles"""
     def __init__(self, files, formats=None, styles=None, metadata="", target="",
                  output_name=""):
         self.files = files
@@ -40,6 +41,7 @@ class PandocStyles:
         self.do_user_config()
 
     def run(self):
+        """Convert to all given formats"""
         if self.target and not isdir(self.target):
             mkdir(self.target)
         for fmt in self.formats:
@@ -49,6 +51,10 @@ class PandocStyles:
                 logging.error(f"Failed to build {fmt}!")
 
     def make_format(self, fmt):
+        """
+        Converts to the given format.
+        All attributes defined here change with each format
+        """
         # initialize attributes
         self.fmt = fmt
         self.opt_fmt = "latex" if fmt == "pdf" else fmt
@@ -71,6 +77,7 @@ class PandocStyles:
         return success
 
     def get_yaml_block(self):
+        """Get the metadata yaml block in the first source file or given metadata file"""
         ffile = self.metadata if self.metadata else self.files[0]
         md = re.match(r'.?-{3}(.*?)(\n\.{3}\n|\n-{3}\n)',
                       file_read(ffile), flags=re.DOTALL)
@@ -80,6 +87,7 @@ class PandocStyles:
         return None
 
     def do_user_config(self):
+        """Read the config file and set the options"""
         try:
             config = yaml.load(file_read("config.yaml", self.config_dir))
         except FileNotFoundError:
@@ -90,6 +98,7 @@ class PandocStyles:
             self.python_path = normpath(config["python-path"])
 
     def get_cfg(self):
+        """Get the style configuration for the current format"""
         cfg = dict()
         if self.yaml_block is None:
             return cfg
@@ -118,6 +127,7 @@ class PandocStyles:
         return cfg
 
     def get_pandoc_args(self):
+        """Build the command line for pandoc out of the given configuration"""
         pandoc_args = [f'-o "{self.output_file}"']
 
         for ffile in self.cur_files:
@@ -143,6 +153,7 @@ class PandocStyles:
         return " ".join(pandoc_args)
 
     def add_files(self):
+        """Add files given in the style definition"""
         if "add-files" not in self.cfg:
             return
         self.cur_files = [file_write(f, "", self.temp_dir) for f
@@ -151,6 +162,7 @@ class PandocStyles:
                                in self.cfg["add-files"].get("bottom", [])])
 
     def preflight(self):
+        """Run all preflight scripts given in the style definition"""
         if "preflight" not in self.cfg:
             return
         cfg = self.make_cfg_file()
@@ -165,6 +177,7 @@ class PandocStyles:
                                 '--fmt {self.fmt}')
 
     def postflight(self):
+        """Run all postflight scripts given in the style definition"""
         if "postflight" not in self.cfg:
             return
         cfg = self.make_cfg_file()
@@ -176,6 +189,7 @@ class PandocStyles:
                         f'--fmt {self.fmt}')
 
     def process_sass(self):
+        """Build the css out of the sass informations given in the style definition"""
         if "sass" not in self.cfg:
             return
 
@@ -211,6 +225,7 @@ class PandocStyles:
         self.update_dict(self.cfg["metadata"], {"css": [css_file_path]})
 
     def add_to_template(self):
+        """Add code to the template given in the style definition"""
         if "add-to-template" not in self.cfg:
             return
         self.modify_template(
@@ -218,6 +233,7 @@ class PandocStyles:
             self.cfg["add-to-template"], True)
 
     def replace_in_template(self):
+        """Replace code in the template with other code given in the style definition"""
         if "replace-in-template" not in self.cfg:
             return
         for item in make_list(self.cfg["replace-in-template"]):
@@ -225,6 +241,7 @@ class PandocStyles:
                                  item.get("add", False), item.get("count", 0))
 
     def modify_template(self, pattern, repl, add=False, count=0):
+        """Helper method to do the actual replacement"""
         try:
             template = file_read(self.cfg["command-line"]["template"])
         except (KeyError, FileNotFoundError):
@@ -244,6 +261,7 @@ class PandocStyles:
             self.cfg["command-line"]["template"] = template
 
     def replace_in_output(self):
+        """Replace text in the output with text given in the style definition"""
         if "replace-in-output" not in self.cfg:
             return
         original_text = text = file_read(f"{self.output_name}.{self.fmt}")
@@ -254,6 +272,7 @@ class PandocStyles:
             file_write(self.output_file, text)
 
     def replace_in_text(self, pattern, repl, text, add=False, count=0):
+        """Helper method to replace text"""
         repl = "\n".join(item for item in make_list(repl))
         repl = repl.replace("\\", '\\\\')
         repl = fr"{repl}\n\1" if add else repl
@@ -261,6 +280,7 @@ class PandocStyles:
         return text
 
     def style_to_cfg(self, style):
+        """Transform a style to the configuration for the current format"""
         cfg = dict()
         for group in ["all", self.fmt]:
             if group in style:
@@ -268,6 +288,10 @@ class PandocStyles:
         return cfg
 
     def update_dict(self, dictionary, new):
+        """
+        Merge dictionary with new. Single keys are replaces, but nested dictionaries
+        and list are appended
+        """
         # we deepcopy new, so that it stays independent from our dictionary
         new = deepcopy(new)
         for key, value in new.items():
@@ -280,7 +304,12 @@ class PandocStyles:
             else:
                 dictionary[key] = value
 
-    def expand_directories(self, item, key):
+    def expand_directories(self, item, key=""):
+        """
+        Look if item is a file in the configuration directory and return the path if
+        it is. Searches first for the given path, then looks into a subfolder given by
+        key and finally in the "misc" subfolder. If no file is found, just return item.
+        """
         if isinstance(item, str) and "~/" in item:
             for folder in ["", key, "misc"]:
                 test_file = normpath(item.replace("~", join(self.config_dir, folder)))
@@ -289,10 +318,15 @@ class PandocStyles:
         return item
 
     def make_cfg_file(self):
+        """
+        Dump the configuration for a format into a file. This way filter and flight
+        scripts can read the configuration.
+        """
         return file_write("cfg.yaml", yaml.dump(self.cfg), self.temp_dir)
 
 
 def main():
+    """Parse the command line arguments and run PnadocStyles with the given args"""
     parser = ArgumentParser(description="Runs pandoc with options defined in styles")
     parser.add_argument('files', nargs='*', default=None,
                         help='The source files to be converted')

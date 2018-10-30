@@ -27,6 +27,7 @@ def file_write(file_name, string, *path, mode="w", encoding="utf-8"):
 
 
 def run_process(name, args=""):
+    """Run a process with the given args and return True if successfull """
     try:
         subprocess.run(f"{name} {args}", check=True)
         return True
@@ -48,6 +49,7 @@ def has_extension(ffile, extensions):
 
 
 def make_list(item):
+    """Make a list with item as its member, if item isn't a list already"""
     if not isinstance(item, list):
         return [item]
     return item
@@ -55,6 +57,7 @@ def make_list(item):
 
 @contextmanager
 def change_dir(new_dir):
+    """Changes to the given directory, returns to the current one after"""
     current_dir = getcwd()
     chdir(new_dir)
     yield

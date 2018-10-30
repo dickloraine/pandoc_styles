@@ -104,7 +104,7 @@ class TransformFilter():
         return self.doc.get_metadata(key, default)
 
     def get_pandoc_styles_metadata(self):
-        '''Gets metadata'''
+        '''Return the pandoc_styles cfg as a dictionary'''
         try:
             cfg = yaml.load(file_read(self.get_metadata('pandoc_styles_')))
         except FileNotFoundError:
