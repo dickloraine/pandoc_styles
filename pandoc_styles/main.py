@@ -184,6 +184,7 @@ class PandocStyles:
         sass_files = make_list(self.cfg["sass"]["files"])
         css_name = f"{basename(sass_files[0]).rpartition('.')[0]}.css"
         css.extend([file_read(self.expand_directories(f, "sass")) for f in sass_files])
+        css.extend(make_list(self.cfg["sass"].get("append", [])))
         css = "\n".join(css)
         css = sass.compile(string=css, output_style='expanded',
                            include_paths=[join(self.config_dir, "sass")])
