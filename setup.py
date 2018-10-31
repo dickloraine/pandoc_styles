@@ -1,4 +1,4 @@
-from os import path, mkdir
+from os import path
 from shutil import copytree
 from setuptools import setup
 from setuptools.command.develop import develop
