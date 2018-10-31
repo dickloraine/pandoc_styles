@@ -97,7 +97,7 @@ style-definition:
       toc: true
       toc-depth: 3
       highlight-style: tango
-      metadata:
+    metadata:
       language: en
   html:
     command-line:
