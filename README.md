@@ -1,10 +1,29 @@
-# Introduction
+# pandoc_styles
 
 This script allows you to define styles for pandoc. In styles you can define, with which arguments pandoc should be invoked for different formats. In addition it allows to run scripts before and after a conversion and gives much power to these scripts and to filters.
 
-# Installation
+- [pandoc_styles](#pandocstyles)
+  - [Installation](#installation)
+    - [Requirements](#requirements)
+    - [Install](#install)
+    - [Setup](#setup)
+  - [Usage](#usage)
+  - [Defining Styles](#defining-styles)
+    - [Basic Usage](#basic-usage)
+    - [Inheritance](#inheritance)
+  - [Advanced Feature](#advanced-feature)
+    - [Adressing files in the configuration folder](#adressing-files-in-the-configuration-folder)
+    - [Preflight scripts](#preflight-scripts)
+    - [Process Sass](#process-sass)
+    - [Add to template](#add-to-template)
+    - [Replace in template](#replace-in-template)
+    - [Replace in output](#replace-in-output)
+    - [Postflight](#postflight)
+    - [Advanced Example](#advanced-example)
 
-## Requirements
+## Installation
+
+### Requirements
 
 To use this script, you need the following:
 
@@ -14,18 +33,18 @@ To use this script, you need the following:
 2. Pandoc:
     You can download [pandoc here](http://pandoc.org/index.html).
 
-## Install
+### Install
 
 Now you need to install this script itself. Open the console and enter:
 
     pip3 install panovel
 
-## Setup
+### Setup
 
 Depending on your system, you may have to configure some settings for everything to work.
 Upon installation this script created the directory "pandoc_styles" in your user folder. Inside you can find the config.yaml file. Set the option in there that are needed for your system.
 
-# Usage
+## Usage
 
 The "pandoc_styles" folder can be used as a central point to store styles, scripts, filter etc. Some subfolders are pre-created for you to use.
 
@@ -44,9 +63,9 @@ The commandline script has many optional parameters to be useful in macros, batc
     pandoc_styles -h
 to see all the options.
 
-# Defining Styles
+## Defining Styles
 
-## Basic Usage
+### Basic Usage
 
 Styles are written in yaml, just like pandoc metadata-blocks. A style is defined like this:
 
@@ -61,7 +80,7 @@ Name:
 
 "Name" is how the style is adressed. A style directly defined in the metadata-block has no name. "Format" specifies for which format the following commands should be invoked. There is a special value: "all". Everything under "all" is used in any format. Under "command-line" you use the long version of pandoc parameters followed by the value, to invoke them. If a parameter is a flag, use "true". Parameters given the value "false" are ignored. Under "metadata" you enter the names and values of pandoc variables, this are most commonly used in templates.
 
-### A Basic example
+**A Basic example**
 
 This is an example metadata-block in a source file:
 
@@ -89,7 +108,7 @@ style-definition:
 ---
 ~~~
 
-## Inheritance
+### Inheritance
 
 A style can have a field named "inherit". This is a list of other styles it inherits from. Styles lower on the list update styles that are higher. The following rules are in place:
 
@@ -98,3 +117,205 @@ A style can have a field named "inherit". This is a list of other styles it inhe
 - If a value is a list, new values are appended to it.
 
 ## Advanced Feature
+
+### Adressing files in the configuration folder
+
+You can point to a file in the configuration directory, if you prepend the path with "~/". The script searches first for the given path and then looks in appropiatly named subfolders and finally in the "misc" subfolder. For example:
+
+~~~yaml
+command-line:
+  filter:
+    - ~/test-filter.py
+~~~
+
+Would find the file "test-filter.py" in the subfolder "filter" in the configuration directory.
+
+### Preflight scripts
+
+Preflight scripts are called before pandoc is run. They are written in python and have access to the style infos and files that should be converted.
+
+You specify them in the style defintion with the field "preflight".
+
+Here a basic example of a preflight script, that appends text given in the field "append-to-file" in the style definition to the end of the files:
+
+~~~python
+from pandoc_styles import run_preflight_script, file_read, file_write
+
+
+def preflight(files, cfg, fmt):
+    text_to_append = cfg["append-to-file"]
+    if isinstance(text_to_append, list):
+        text_to_append = "\n".join(text_to_append)
+    file_write(files[-1], f"{file_read(files[-1])}\n{text_to_append}")
+
+
+if __name__ == '__main__':
+    run_preflight_script(preflight)
+~~~
+
+Modify only the preflight function to include your code. If the function returns the style configuration, the main script uses this new configuration.
+
+And to run it in your style definition:
+
+~~~yaml
+Test-style:
+  html:
+    preflight:
+      - append-to-file.py
+    append-to-file: "Test"
+~~~
+
+### Process Sass
+
+You can point to sass-files that should be used for html output and this script converts them for you to css and uses that in the output. In addition you can define variables used in the sass file and specify, where the compiled css file shoud be copied.
+
+~~~yaml
+Test-style:
+  html:
+    sass:
+      files: ~/default.scss
+      output-path: temp
+      variables:
+        body-font-size: 10pt
+~~~
+
+"files" is a list of sass files to be included.
+
+"output-path" can be "~/" to output to the css folder in the configuration folder, "temp" for use with the "self-contained" parameter or a relative path. If ommited, the css output is in the same folder as the source files output.
+
+"variables" can be any variables in your sass files.
+
+### Add to template
+
+Sometimes you want to include some code directly into the template, instead of just including it in the header. Mostly, if you want to define and use your own template variables.
+
+This option just injects the given code directly into the head of the template.
+
+~~~yaml
+Test-style:
+  pdf:
+    add-to-template:
+      - |
+        \titlehead{{$titletop-left$
+        \hfill $titletop-right$\\}
+        $titlehead$}
+        \publishers{\small $titlebottom$}
+~~~
+
+### Replace in template
+
+As above, but instead of just adding the code to the head, it replaces arbitrary text in the template. You need to give it a pattern and a replacement text. Optionally you can use the flag "add" to not replace the text, but prepend to it and the field "count" if only some matches should be replaced.
+
+~~~yaml
+Test-style:
+  html:
+    replace-in-template:
+      - pattern: \$body\$
+        replacement-text: |
+          <div class="content">
+          $body$
+          </div>
+~~~
+
+### Replace in output
+
+Exactly the same as replace-in-template but for text in the output-file
+
+### Postflight
+
+These scripts are called after the source is converted. Pretty similar to preflight.
+
+~~~python
+from pandoc_styles import run_postflight_script, file_read, file_write
+
+
+def postflight(ffile, cfg, fmt):
+    text_to_append = cfg["append-to-output"]
+    if isinstance(text_to_append, list):
+        text_to_append = "\n".join(text_to_append)
+    file_write(ffile, f"{file_read(ffile)}\n{text_to_append}")
+
+
+if __name__ == '__main__':
+    run_preflight_script(postflight)
+~~~
+
+~~~yaml
+Test-style:
+  html:
+    preflight:
+      - append-to-output.py
+    append-to-output: "Test"
+~~~
+
+### Advanced Example
+
+Pandocs self-contained flag doesn't work for html if math is used, because mathjax can't be included. This style is not really self-contained, but it allows for single files with all css included. This example useses the default.sass file included in this script. Fonts are also just referenced instead of included, to make for small file-sizes.
+
+For code in pdfs, it introduces line-wrap in code blocks and ligatures in the font.
+
+In addition, inheritance is shown.
+
+~~~yaml
+All:
+  all:
+    metadata:
+      lang: en
+  pdf:
+    command-line:
+      pdf-engine: "xelatex"
+
+Math-document:
+  inherits:
+    - Code
+  html:
+    command-line:
+      self-contained: true
+      mathjax: true
+    sass:
+      files: ~/default.scss
+      output-path: temp
+    replace-in-template:
+      - pattern: \$body\$
+        replacement-text: |
+          <div class="content">
+          $body$
+          </div>
+      - pattern: \$table-of-contents\$
+        replacement-text: |
+          <div id="sidebar">
+          <input class="trigger" type="checkbox" id="mainNavButton">
+          <label for="mainNavButton" onclick></label>
+          $table-of-contents$
+          </div>
+    replace-in-output:
+      - pattern: (<\/head>)
+        count: 1
+        add: true
+        replacement-text: |
+          <link href="https://fonts.googleapis.com/css?family=Noto+Sans|Noto+Serif|Oswald" rel="stylesheet">
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/tonsky/FiraCode@1.206/distr/fira_code.css">
+      - pattern: <script type="text\/javascript">\/\*\n\s+\*\s+\/MathJax\.js.*?<\/script>
+        replacement-text: |
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_CHTML-full" type="text/javascript"></script>
+
+Code:
+  all:
+    command-line:
+      highlight-style: tango
+  pdf:
+    metadata:
+      monofont: Fira Code
+    # allow code line break
+    add-to-template:
+      - |
+        \usepackage{fvextra}
+        \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,breakautoindent=true,commandchars=\\\{\}}
+      - |
+        \setmonofont[
+          Contextuals={Alternate}
+        ]{$monofont$}
+        \makeatletter
+        \def\verbatim@nolig@list{}
+        \makeatother
+~~~
