@@ -237,7 +237,7 @@ def postflight(ffile, cfg, fmt):
 
 
 if __name__ == '__main__':
-    run_preflight_script(postflight)
+    run_postflight_script(postflight)
 ~~~
 
 ~~~yaml
