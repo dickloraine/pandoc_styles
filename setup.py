@@ -1,5 +1,5 @@
 from os import path, mkdir
-from shutil import copy
+from shutil import copytree
 from setuptools import setup
 from setuptools.command.develop import develop
 from setuptools.command.install import install
@@ -15,15 +15,7 @@ def init_user_config():
     base_dir = path.join(path.expanduser("~"), "pandoc_styles")
     if path.isdir(base_dir):
         return
-    mkdir(base_dir)
-    copy(resource_filename('pandoc_styles', 'styles.yaml'), base_dir)
-    copy(resource_filename('pandoc_styles', 'config.yaml'), base_dir)
-    mkdir(path.join(base_dir, "filter"))
-    mkdir(path.join(base_dir, "templates"))
-    mkdir(path.join(base_dir, "preflight"))
-    mkdir(path.join(base_dir, "postflight"))
-    mkdir(path.join(base_dir, "css"))
-    mkdir(path.join(base_dir, "misc"))
+    copytree(resource_filename('pandoc_styles', 'config_dir'), base_dir)
 
 class PostDevelopCommand(develop):
     """Post-installation for development mode."""
@@ -41,7 +33,7 @@ class PostInstallCommand(install):
 setup(
     name='pandoc_styles',
     version='0.2',
-    description='A script to make a novel out of markdown files with the help of pandoc',
+    description='A script to convert files with pandoc using styles',
     long_description=long_description,
     long_description_content_type='text/markdown',
     author='dickloraine',
@@ -61,7 +53,7 @@ setup(
     packages=['pandoc_styles'],
     python_requires='>=3.6',
     package_data={
-        'pandoc_styles': ['*.md', 'filter/*.*', '*.yaml', 'templates/*.*'],
+        'pandoc_styles': ['*.md', '*.yaml', 'config_dir/*.*'],
     },
     install_requires=[
         'pyYaml',

@@ -1,0 +1,255 @@
+body {
+  max-width: 800px;
+  grid-column-gap: 3em;
+  padding-top: 2em;
+  font-family: "Noto Serif", serif;
+  font-size: 10pt;
+  line-height: "1.2";
+  text-align: justify;
+  margin: 3em auto 0 auto;
+}
+
+.content {
+  margin: 1em;
+  padding-bottom: 2em;
+}
+
+@media only screen and (min-width: 600px) {
+  body {
+    font-size: 12pt;
+    line-height: "1.5";
+    -webkit-box-shadow: 1px 4px 14px #888;
+            box-shadow: 1px 4px 14px #888;
+  }
+  .content {
+    margin: 1em 3em 3em 3em;
+  }
+}
+
+header {
+  text-align: center;
+}
+
+h1 {
+  font-family: "Noto Sans", sans-serif;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  font-size: 1.5em;
+  text-align: left;
+  font-weight: bold;
+  page-break-before: always;
+  text-indent: 0;
+}
+
+h2 {
+  font-size: 1.3em;
+}
+
+h3 {
+  font-size: 1.2em;
+  page-break-before: auto;
+}
+
+p {
+  margin: 0;
+  text-indent: 0;
+}
+
+p + p {
+  margin-top: 1em;
+}
+
+a {
+  color: inherit;
+  -webkit-text-decoration: underline dotted;
+          text-decoration: underline dotted;
+}
+
+a .footnoteRef {
+  vertical-align: super;
+}
+
+*[id^='fn']:target {
+  background-color: #ffa;
+}
+
+.math {
+  font-family: "Noto Serif", serif;
+  font-size: 0.9em;
+}
+
+blockquote {
+  font-style: italic;
+}
+
+.citation {
+  font-style: normal;
+}
+
+section.footnotes {
+  margin-top: 2em;
+}
+
+code {
+  font-family: "Fira Code", monospace;
+  -webkit-font-variant-ligatures: contextual;
+          font-variant-ligatures: contextual;
+  -webkit-font-feature-settings: "calt" 1;
+          font-feature-settings: "calt" 1;
+  font-size: 0.9em;
+}
+
+figure {
+  text-align: center;
+  margin: 1em 0;
+  max-width: 100%;
+  max-height: 100%;
+  page-break-inside: avoid;
+  clear: both;
+}
+
+figure img {
+  max-height: 100%;
+  max-width: 100%;
+}
+
+figcaption {
+  text-indent: 0;
+  text-align: center;
+  font-style: italic;
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+ol.toc {
+  padding: 0;
+  margin-left: 1em;
+}
+
+ol.toc li {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+em, em em em, em em em em em {
+  font-style: italic;
+}
+
+em em, em em em em {
+  font-style: normal;
+}
+
+.date {
+  font-family: "Oswald", sans-serif;
+  margin-top: 1em;
+  margin-bottom: 3em;
+  text-indent: 0em;
+  font-size: 1.2em;
+  text-align: center;
+}
+
+.author {
+  font-family: "Oswald", sans-serif;
+  margin-top: 1em;
+  text-indent: 0em;
+  font-size: 1.5em;
+  text-align: center;
+}
+
+.main {
+  font-family: "Oswald", sans-serif;
+  margin-top: 2em;
+  text-indent: 0em;
+  font-size: 1.6em;
+  font-weight: bold;
+  text-align: center;
+}
+
+.title {
+  font-family: "Oswald", sans-serif;
+  text-indent: 0em;
+  font-size: 1.6em;
+  font-weight: bold;
+  text-align: center;
+}
+
+.subtitle {
+  font-family: "Oswald", sans-serif;
+  margin-top: 1em;
+  text-indent: 0em;
+  font-size: 1.4em;
+  font-style: italic;
+  text-align: center;
+}
+
+#sidebar {
+  right: 1em;
+  top: 3em;
+  z-index: 1;
+  margin: 0;
+  text-align: left;
+  padding: 0;
+  position: fixed;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-width: 350px;
+  max-height: 95%;
+  font-size: 10pt;
+}
+
+#sidebar ul {
+  display: none;
+  width: 100%;
+  list-style: none;
+  margin: 0;
+  background: #FFFFFF;
+}
+
+#sidebar ul li {
+  margin-right: 4em;
+}
+
+#sidebar ul li a {
+  display: block;
+  padding: 0.3em;
+  background: #FFFFFF;
+  color: #000000;
+  text-decoration: none;
+}
+
+#sidebar ul li a:hover {
+  color: #FFFFFF;
+  background: #555;
+}
+
+#sidebar input.trigger {
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
+}
+
+#sidebar input.trigger:checked ~ ul, #sidebar input.trigger:checked ~ ul li ul {
+  display: block !important;
+}
+
+#sidebar label {
+  position: fixed;
+  right: 0.5em;
+  top: .2em;
+  width: 1.2em;
+  height: 1.2em;
+  text-align: center;
+  font-size: 2em;
+  background: #FFFFFF;
+  color: #000000;
+}
+
+#sidebar label:after {
+  content: "\2261";
+}
+
+#sidebar label:hover {
+  color: #FFFFFF;
+  background: #555;
+}

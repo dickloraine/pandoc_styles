@@ -1,0 +1,602 @@
+---
+All:
+  all:
+    metadata:
+      lang: de-DE
+
+  pdf:
+    command-line:
+      pdf-engine: xelatex
+
+# Styles
+# ----------------------------------------------------------------------------
+Letter:
+  pdf: &pdf-letter
+    command-line:
+      template: ~/scrlttr2.tex
+    metadata:
+      paper: a4
+      letteroption:
+        - DIN
+      fromaddress: |
+        Sven Krüger  
+        Matternstraße 6  
+        Berlin
+  latex:
+    << : *pdf-letter
+
+Assignment:
+  inherits:
+    - Code
+    - Code-ligatures
+    - Math
+    - Widows
+    - Html-self-contained
+  pdf: &pdf-assignment
+    metadata:
+      mainfont: Adobe Garamond Pro
+      geometry: "a4paper, twoside, top=2cm, bottom=2cm, left=2.5cm"
+      header-includes:
+        - |
+          \usepackage{titling}
+          \pretitle{\begin{center}\LARGE\textbf}
+          \posttitle{\par\end{center}\vskip 0.5em}
+          \preauthor{\begin{center}
+          \large \lineskip 0.5em%
+          \begin{tabular}[t]{c}}
+          \postauthor{\end{tabular}\par\end{center}}
+          \predate{\begin{center}\large}
+          \postdate{\par\end{center}}
+  latex:
+    << : *pdf-assignment
+
+Assignment-monochrom:
+  inherits:
+    - Assignment
+    - Code-monochrom
+
+Assignment-no-highlight:
+  inherits:
+    - Assignment
+    - Code-no-highlight
+
+# only for single documents
+Hausarbeit:
+  inherits:
+    - Italic-quotes
+    - Widows
+    - Bibliography
+    - Html-self-contained
+  all:
+    preflight:
+      - ~/append_to_file.py
+    append-to-file: 
+      - |
+        # Literaturverzeichnis{.unnumbered}
+    command-line:
+      number-sections: true
+      toc: true
+      toc-depth: 3
+  html:
+    sass:
+      variables:
+        indent: true
+  pdf: &pdf-hausarbeit
+    metadata:
+      documentclass: scrreprt
+      indent: true
+      mainfont: Calibri
+      sansfont: Cambria
+      fontsize: 12pt
+      geometry: "a4paper, top=2cm, bottom=2.5cm, left=2.5cm, right=4cm"
+      linestretch: 1.25
+    append-to-file: 
+      - |
+        \setlength{\parindent}{-0.5in}
+        \setlength{\leftskip}{0.5in}
+        \setlength{\parskip}{8pt}
+        \noindent
+    add-to-template:
+      - |
+        \titlehead{{$titletop-left$
+        \hfill $titletop-right$\\}
+        $titlehead$}
+        \publishers{\small $titlebottom$}    
+  latex:
+    << : *pdf-hausarbeit
+
+# special fonts and mathjax are not embedded.
+Html-self-contained:
+  html:
+    command-line:
+      self-contained: true
+      toc: true
+      toc-depth: 2
+    sass:
+      files: ~/default.scss
+      output-path: temp
+    replace-in-template:
+      - pattern: \$body\$
+        replacement-text: |
+          <div class="content">
+          $body$
+          </div>
+      - pattern: \$table-of-contents\$
+        replacement-text: |
+          <div id="sidebar">
+          <input class="trigger" type="checkbox" id="mainNavButton">
+          <label for="mainNavButton" onclick></label>
+          $table-of-contents$
+          </div>
+    replace-in-output:
+      - pattern: (<\/head>)
+        count: 1
+        add: true
+        replacement-text: |
+          <link href="https://fonts.googleapis.com/css?family=Noto+Sans|Noto+Serif|Oswald" rel="stylesheet">
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/tonsky/FiraCode@1.206/distr/fira_code.css">
+      - pattern: <script type="text\/javascript">\/\*\n\s+\*\s+\/MathJax\.js.*?<\/script>
+        replacement-text: |
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_CHTML-full" type="text/javascript"></script>
+
+Novel:
+  inherits: Extra-styles
+  pdf: &pdf-novel
+    command-line:
+      template: ~/novel.tex
+      top-level-division: chapter
+      toc: true
+      toc-depth: 3
+      filter:
+        - ~/dedication.py
+        - ~/copyrights.py
+    metadata:
+      documentclass: scrbook
+      DIV: calc
+      paper: 6in:9in
+      BCOR: 2mm
+      center-headings: true
+      fontsize: 10
+      mainfont: Garamond
+      sansfont: Questrial
+      pagestyle: plain
+  latex:
+    << : *pdf-novel
+
+Eisvogel:
+  pdf: &pdf-eisvogel
+    command-line:
+      template: ~/eisvogel.tex
+      listings: true
+    metadata:
+      notitle: false
+      titlepage: false
+      titlepage-text-color: "5F5F5F"
+      titlepage-rule-color: "435488"
+      titlepage-rule-height: 4
+      caption-justification: raggedright
+      toc-own-page: false
+      listings-disable-line-numbers: false
+      disable-header-and-footer: false
+      # example options: \headertitle: title, \headerauthor: author, \headerdate: date,
+      # \thepage: page number, \leftmark: chapter, \rightmark: section
+      header-left: \headertitle
+      header-center: false
+      header-right: \nouppercase\leftmark
+      footer-left: \headerauthor
+      footer-center: false
+      footer-right: \thepage
+  latex:
+    << : *pdf-eisvogel
+
+# Mixins
+# ----------------------------------------------------------------------------
+Widows:
+  pdf:
+    metadata:
+      header-includes:
+        - |
+          \widowpenalties=3 10000 10000 150
+
+Italic-quotes:
+  pdf: &pdf-italic-quotes
+    metadata:
+      header-includes:
+        - |
+          \makeatletter
+          \g@addto@macro{\quote}{\itshape}
+          \makeatother
+  latex:
+    << : *pdf-italic-quotes
+
+Bibliography:
+  all:
+    command-line:
+      csl: ~/chicago-de.csl
+      filter:
+        - pandoc-citeproc
+
+Math:
+  html:
+    command-line:
+      mathjax: true
+  pdf: &pdf-math
+    metadata:
+      header-includes:
+        - |
+          \usepackage{newunicodechar}
+          \newunicodechar{√}{\sqrt}
+  latex:
+    << : *pdf-math
+
+Code:
+  all:
+    command-line:
+      highlight-style: tango
+  pdf: &pdf-code
+    metadata:
+      monofont: Fira Code
+    # allow code line break
+    add-to-template:
+      - |
+        \usepackage{fvextra}
+        \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,breakautoindent=true,commandchars=\\\{\}}
+  latex:
+    << : *pdf-code
+
+Code-listings:
+  inherits:
+    - Code
+    - Listings
+
+Code-no-highlight:
+  inherits: Code
+  all:
+    highlight-style: false
+    no-highlight: true
+
+Code-monochrom:
+  inherits:
+    - Code
+  all:
+    command-line:
+      highlight-style: ~/mono.theme
+
+Code-monochrom-listings:
+  inherits:
+    - Code-monochrom
+    - Listings
+  pdf: &pdf-code-monochrom
+    command-line:
+      highlight-style: false
+      listings: true
+    metadata:
+      listings-disable-line-numbers: true
+      listings-frame: none
+      listings-text-size: normalsize
+      listings-linespread: 1
+      listing-background: false
+      listing-rule: "B3B2B3"
+      listing-numbers: "B3B2B3"
+      listing-text-color: "000000"
+      listing-keyword: "000000"
+      listing-identifier: "000000"
+      listing-string: "00999A"
+      listing-comment: "8E8E8E"
+  latex:
+    << : *pdf-code-monochrom
+
+Code-numbered:
+  all:
+    command-line:
+      filter:
+        - ~/numbered_code.py
+
+Code-ligatures:
+  pdf:
+    add-to-template:
+      - |
+        \setmonofont[
+          Contextuals={Alternate}
+        ]{$monofont$}
+        \makeatletter
+        \def\verbatim@nolig@list{}
+        \makeatother
+
+Code-frame:
+  pdf:
+    metadata:
+      code-background-color: "F7F7F7"
+      border-size: 1pt
+    add-to-template:
+      - |
+        \usepackage{tcolorbox,tikz}
+        \tcbuselibrary{skins,breakable}
+        \definecolor{code-background}{HTML}{$code-background-color$}
+        \DefineVerbatimEnvironment{Highlightingextra}{Verbatim}{breaklines,breakautoindent=true,commandchars=\\\{\}}
+        \renewenvironment{Highlighting}
+        {\VerbatimEnvironment
+          \begin{tcolorbox}[
+            colback=code-background,
+            boxrule=$border-size$,
+            colframe=black,
+            sharp corners
+          ]%
+          \begin{Highlightingextra}}
+        {\end{Highlightingextra}\end{tcolorbox}}
+
+Extra-styles:
+  all:
+    command-line:
+      filter:
+        - ~/remove_comments.py
+        - ~/new_page.py
+        - ~/epigraph.py
+        - ~/noindent.py
+        - ~/alignment.py
+        - ~/quote.py
+        - ~/poem.py
+        - ~/custom_styles.py
+    scenes:
+      new-scene-style: default
+      new-scene-text: "* * *"
+      new-scene-image: false
+    preflight: ~/scenes.py
+  pdf: &pdf-extra-styles
+    metadata:
+      indent: true
+  latex:
+    << : *pdf-extra-styles
+
+Fancy-header:
+  pdf: &pdf-fancy-header
+    metadata:
+      disable-header: false
+      disable-footer: false
+      # example options: \headertitle: title, \headerauthor: author, \headerdate: date,
+      # \thepage: page number, \leftmark: chapter, \rightmark: section
+      header-left: \headertitle
+      header-center: false
+      header-right: \nouppercase\leftmark
+      footer-left: \headerauthor
+      footer-center: false
+      footer-right: \thepage
+      headrule: true
+      footrule: true
+    add-to-template:
+      - |
+        \newcommand{\headertitle}{$title$}
+        \newcommand{\headerauthor}{$for(author)$$author$$sep$, $endfor$}
+        \newcommand{\headerdate}{$date$}
+        \usepackage{fancyhdr}
+        \pagestyle{fancy}
+
+        $if(disable-header)$
+        \fancyhead{}
+        \renewcommand{\headrulewidth}{0pt}
+        $else$
+        \fancyhead{}
+        \lhead[$if(header-right)$$header-right$$else$$date$$endif$]{$if(header-left)$$header-left$$else$$title$$endif$}
+        \chead[$if(header-center)$$header-center$$else$$endif$]{$if(header-center)$$header-center$$else$$endif$}
+        \rhead[$if(header-left)$$header-left$$else$$title$$endif$]{$if(header-right)$$header-right$$else$$date$$endif$}
+        $if(headrule)$
+        \renewcommand{\headrulewidth}{0.4pt}
+        $else$
+        \renewcommand{\headrulewidth}{0pt}
+        $endif$
+        $endif$
+
+        $if(disable-footer)$
+        \renewcommand{\footrulewidth}{0pt}
+        $else$
+        \fancyfoot{}
+        \lfoot[$if(footer-right)$$footer-right$$else$\thepage$endif$]{$if(footer-left)$$footer-left$$else$$for(author)$$author$$sep$, $endfor$$endif$}
+        \cfoot[$if(footer-center)$$footer-center$$else$$endif$]{$if(footer-center)$$footer-center$$else$$endif$}
+        \rfoot[$if(footer-left)$$footer-left$$else$$for(author)$$author$$sep$, $endfor$$endif$]{$if(footer-right)$$footer-right$$else$\thepage$endif$}
+        $if(footrule)$
+        \renewcommand{\footrulewidth}{0.4pt}
+        $else$
+        \renewcommand{\footrulewidth}{0pt}
+        $endif$
+        $endif$
+  latex:
+    << : *pdf-fancy-header
+
+# report, book etc. classes for better header/footers
+Renew-chaptermark:
+  pdf:
+    add-to-template:
+      - |
+        \renewcommand{\chaptermark}[1]{ \markboth{#1}{} }
+        \renewcommand{\sectionmark}[1]{ \markright{#1}{} }
+
+Eisvogel-title:
+  pdf: &pdf-eisvogel-title
+    metadata:
+      header-includes:
+        - |
+          \usepackage{pagecolor}
+          \usepackage{afterpage}
+          \usepackage{xcolor}
+          \usepackage{setspace}
+    replace-in-template: 
+      - pattern: \\maketitle
+        replacement-text: |
+          \begin{titlepage}
+          \newgeometry{left=6cm}
+          $if(titlepage-color)$
+          \definecolor{titlepage-color}{HTML}{$titlepage-color$}
+          \newpagecolor{titlepage-color}\afterpage{\restorepagecolor}
+          $endif$
+          \newcommand{\colorRule}[3][black]{\textcolor[HTML]{#1}{\rule{#2}{#3}}}
+          \begin{flushleft}
+          \noindent
+          \\[-1em]
+          \color[HTML]{$if(titlepage-text-color)$$titlepage-text-color$$else$5F5F5F$endif$}
+          \makebox[0pt][l]{\colorRule[$if(titlepage-rule-color)$$titlepage-rule-color$$else$435488$endif$]{1.3\textwidth}{$if(titlepage-rule-height)$$titlepage-rule-height$$else$4$endif$pt}}
+          \par
+          \noindent
+
+          {
+          \setstretch{1.4}
+          \vfill
+          \noindent {\huge \textbf{\textsf{$title$}}}
+          $if(subtitle)$
+          \vskip 1em
+          {\Large \textsf{$subtitle$}}
+          $endif$
+          \vskip 2em
+          \noindent
+          {\Large \textsf{$for(author)$$author$$sep$, $endfor$}
+          \vfill
+          }
+
+          $if(logo)$
+          \noindent
+          \includegraphics[width=$if(logo-width)$$logo-width$$else$100$endif$pt, left]{$logo$}
+          $endif$
+
+          \textsf{$date$}}
+          \end{flushleft}
+          \end{titlepage}
+          \restoregeometry
+  latex:
+    << : *pdf-eisvogel-title
+
+Listings:
+  pdf: &pdf-listings
+    command-line:
+      highlight-style: false
+      listings: true
+    metadata:
+      listings-disable-line-numbers: false
+      listings-frame: single
+      listings-text-size: small
+      listings-text-style: ttfamily
+      listing-numbers-size: tiny
+      listing-keyword-style: bfseries
+      listing-identifier-style: upshape
+      listing-comment-style: itshape
+      listings-linespread: 1.15
+      listing-background-color: "F7F7F7"
+      listing-rule-color: "B3B2B3"
+      listing-numbers-color: "B3B2B3"
+      listing-text-color: "000000"
+      listing-keyword-color: "435489"
+      listing-identifier-color: "000000"
+      listing-string-color: "719B6E" 
+      listing-comment-color: "8E8E8E"
+    add-to-template:
+      - |
+        $if(listings)$
+        \usepackage{xcolor}
+        $if(listing-background-color)$
+        \definecolor{listing-background}{HTML}{$listing-background-color$}
+        $endif$
+        \definecolor{listing-rule}{HTML}{$listing-rule-color$}
+        \definecolor{listing-numbers}{HTML}{$listing-numbers-color$}
+        \definecolor{listing-text-color}{HTML}{$listing-text-color$}
+        \definecolor{listing-keyword}{HTML}{$listing-keyword-color$}
+        \definecolor{listing-identifier}{HTML}{$listing-identifier-color$}
+        \definecolor{listing-string}{HTML}{$listing-string-color$}
+        \definecolor{listing-comment}{HTML}{$listing-comment-color$}
+
+        \lstset{
+        $if(listings-disable-line-numbers)$
+          xleftmargin      = 0.6em,
+          framexleftmargin = 0.4em,
+        $else$
+          numbers          = left,
+          xleftmargin      = 2.7em,
+          framexleftmargin = 2.5em,
+        $endif$
+          $if(listing-background-color)$
+          backgroundcolor  = \color{listing-background},
+          $endif$
+          basicstyle       = \color{listing-text-color}\$listings-text-size$\$listings-text-style${}\linespread{$listings-linespread$},
+          breaklines       = true,
+          breakatwhitespace= true,
+          breakautoindent  = true,
+          frame            = $listings-frame$,
+          framesep         = 0.6mm,
+          rulecolor        = \color{listing-rule},
+          frameround       = ffff,
+          tabsize          = 4,
+          numberstyle      = \$listing-numbers-size$\color{listing-numbers},
+          aboveskip        = 1.0em,
+          belowcaptionskip = 1.0em,
+          keywordstyle     = \color{listing-keyword}\$listing-keyword-style$,
+          classoffset      = 0,
+          sensitive        = true,
+          identifierstyle  = \color{listing-identifier}\$listing-identifier-style$,
+          commentstyle     = \color{listing-comment}\$listing-comment-style$,
+          stringstyle      = \color{listing-string},
+          showstringspaces = false,
+          escapeinside     = {/*@}{@*/}, % Allow LaTeX inside these special comments
+          literate         =
+          {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+          {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+          {à}{{\`a}}1 {è}{{\'e}}1 {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1
+          {À}{{\`A}}1 {È}{{\'E}}1 {Ì}{{\`I}}1 {Ò}{{\`O}}1 {Ù}{{\`U}}1
+          {ä}{{\"a}}1 {ë}{{\"e}}1 {ï}{{\"i}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+          {Ä}{{\"A}}1 {Ë}{{\"E}}1 {Ï}{{\"I}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+          {â}{{\^a}}1 {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1
+          {Â}{{\^A}}1 {Ê}{{\^E}}1 {Î}{{\^I}}1 {Ô}{{\^O}}1 {Û}{{\^U}}1
+          {œ}{{\oe}}1 {Œ}{{\OE}}1 {æ}{{\ae}}1 {Æ}{{\AE}}1 {ß}{{\ss}}1
+          {ç}{{\c c}}1 {Ç}{{\c C}}1 {ø}{{\o}}1 {å}{{\r a}}1 {Å}{{\r A}}1
+          {€}{{\EUR}}1 {£}{{\pounds}}1 {«}{{\guillemotleft}}1
+          {»}{{\guillemotright}}1 {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {¿}{{?`}}1
+          {…}{{\ldots}}1 {≥}{{>=}}1 {≤}{{<=}}1 {„}{{\glqq}}1 {“}{{\grqq}}1
+          {”}{{''}}1
+        }
+        $endif$
+  latex:
+    << : *pdf-listings
+
+# legacy style
+Assignment_Haskell:
+  inherits: Assignment-monochrom
+
+# Filter/Flight Styles
+# -----------------------------------------------------------------------------
+Poem:
+  all:
+    command-line:
+      filter:
+        - ~/poem.py
+    poem-style: bottom
+
+Spell-with-appendix:
+  all:
+    preflight:
+      - ~/appendices.py
+    command-line:
+      filter: ~/spell.py
+    data-files: spells.yaml
+    appendices:
+      spell:
+        title: Spells
+        data-file: spells.yaml
+        classes: .spell
+        sort: name
+        appendix-heading-level: 1
+        appendix-entry-heading-level: 2
+        hidden-heading: false
+
+Append-to-file:
+  all:
+    preflight:
+      - ~/append_to_file.py
+    append-to-file:
+      - |
+        Text to append
+
+Scenes:
+  all:
+    preflight:
+      - ~/scenes.py
+    scenes:
+      new-scene-style: default
+      new-scene-text: "* * *"
+      new-scene-image: none
+...
