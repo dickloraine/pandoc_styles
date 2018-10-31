@@ -58,11 +58,11 @@ class PandocStyles:
         All attributes defined here change with each format
         """
         # initialize attributes
-        self.fmt = FORMAT_TO_EXTENSION.get(fmt, fmt)
-        self.opt_fmt = "latex" if self.fmt == "pdf" else self.fmt
-        self.to = "latex" if self.fmt == "pdf" else fmt
-        self.output_file = f"{self.output_name}.{self.fmt}" if not self.target \
-                           else join(self.target, f"{self.output_name}.{self.fmt}")
+        self.fmt = fmt
+        self.to = "latex" if fmt == "pdf" else fmt
+        self.output_file = f"{self.output_name}.{FORMAT_TO_EXTENSION.get(fmt, fmt)}"
+        if self.target:
+            self.output_file = join(self.target, self.output_file)
         self.cur_files = self.files.copy()
         self.cfg = self.get_cfg()
 
@@ -99,11 +99,6 @@ class PandocStyles:
             sys.path.append(normpath(dirname(config["pandoc-path"])))
         if  config.get("python-path"):
             self.python_path = normpath(config["python-path"])
-
-    def set_format(self, fmt):
-        self.to = fmt
-        self.fmt = FORMAT_TO_EXTENSION.get(fmt, fmt)
-        self.opt_fmt = "latex" if fmt == "pdf" else fmt
 
     def get_cfg(self):
         """Get the style configuration for the current format"""
@@ -256,7 +251,7 @@ class PandocStyles:
             template = file_read(self.cfg["command-line"]["template"])
         except (KeyError, FileNotFoundError):
             try:
-                template = subprocess.run(f'pandoc -D {self.opt_fmt}',
+                template = subprocess.run(f'pandoc -D {self.to}',
                                           stdout=subprocess.PIPE, encoding="utf-8",
                                           check=True)
                 template = template.stdout
