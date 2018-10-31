@@ -63,10 +63,8 @@ class PandocStyles:
         self.output_file = f"{self.output_name}.{FORMAT_TO_EXTENSION.get(fmt, fmt)}"
         if self.target:
             self.output_file = join(self.target, self.output_file)
-        self.cur_files = self.files.copy()
         self.cfg = self.get_cfg()
 
-        self.add_files()
         self.preflight()
         self.process_sass()
         self.add_to_template()
@@ -113,6 +111,10 @@ class PandocStyles:
 
         if "style-definition" in self.yaml_block:
             self.update_dict(cfg, self.style_to_cfg(self.yaml_block["style-definition"]))
+
+        # add file list and temporary directory, so that preflight scripts can use them
+        cfg["current-files"] = self.files.copy()
+        cfg["temp-dir"] = self.temp_dir
         return cfg
 
     def get_styles(self, style):
@@ -133,7 +135,7 @@ class PandocStyles:
         """Build the command line for pandoc out of the given configuration"""
         pandoc_args = [f'-t {self.to} -o "{self.output_file}"']
 
-        for ffile in self.cur_files:
+        for ffile in self.cfg["current-files"]:
             pandoc_args.append(f'"{ffile}"')
 
         if self.sfrom:
@@ -157,29 +159,19 @@ class PandocStyles:
                             pandoc_args.append(f'{prefix}{key}="{item}"')
         return " ".join(pandoc_args)
 
-    def add_files(self):
-        """Add files given in the style definition"""
-        if "add-files" not in self.cfg:
-            return
-        self.cur_files = [file_write(f, "", self.temp_dir) for f
-                          in self.cfg["add-files"].get("top", [])] + self.cur_files
-        self.cur_files.extend([file_write(f, "", self.temp_dir) for f
-                               in self.cfg["add-files"].get("bottom", [])])
-
     def preflight(self):
         """Run all preflight scripts given in the style definition"""
         if "preflight" not in self.cfg:
             return
-        cfg = self.make_cfg_file()
+        self.cfg["current-files"] = [copy(f, self.temp_dir)
+                                     for f in self.cfg["current-files"]]
         for script in make_list(self.cfg["preflight"]):
             script = self.expand_directories(script, "preflight")
             if self.python_path and has_extension(script, "py"):
                 script = f'{self.python_path} "{script}"'
-            self.cur_files = [f'"{copy(f, self.temp_dir)}"'
-                              if not isfile(join(self.temp_dir, f)) else f'"{f}"'
-                              for f in self.cur_files]
-            run_process(script, f'{" ".join(self.cur_files)} --cfg "{cfg}" '
-                                '--fmt {self.fmt}')
+            cfg = self.make_cfg_file()
+            run_process(script, f'--cfg "{cfg}" --fmt {self.fmt}')
+            self.read_cfg_file()
 
     def postflight(self):
         """Run all postflight scripts given in the style definition"""
@@ -328,6 +320,10 @@ class PandocStyles:
         scripts can read the configuration.
         """
         return file_write("cfg.yaml", yaml.dump(self.cfg), self.temp_dir)
+
+    def read_cfg_file(self):
+        """Read the cfg file"""
+        self.cfg = yaml.load(file_read("cfg.yaml", self.temp_dir))
 
 
 def main():

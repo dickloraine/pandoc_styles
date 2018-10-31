@@ -7,7 +7,7 @@ from panflute import (  # pylint: disable=W0611
     CodeBlock, Link, Image, BulletList, OrderedList, DefinitionList,
     LineBlock, Header, Quoted, Cite, Table, ListContainer,
     convert_text, Element, run_filter)
-from .utils import file_read
+from .utils import file_read, file_write
 
 
 class TransformFilter():
@@ -110,6 +110,10 @@ class TransformFilter():
         except FileNotFoundError:
             cfg = {}
         return cfg
+
+    def set_pandoc_styles_metadata(self, cfg):
+        '''Save the given cfg in the cfg-file'''
+        file_write(self.get_metadata('pandoc_styles_'), yaml.dump(cfg))
 
     def convert_text(self, text=None, input_fmt='markdown', extra_args=None):
         '''Converts text in input_fmt to self.fmt'''
