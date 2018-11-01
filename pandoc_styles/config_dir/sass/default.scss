@@ -13,6 +13,7 @@ $mono-font: "Fira Code", monospace !default;
 $body-font: "Noto Serif", serif !default;
 
 $indent: false !default;
+$paper-box: true !default;
 $footnote-highlight: "true" !default;
 $footnote-highlight-color: #ffa !default;
 
@@ -37,7 +38,9 @@ body {
   body {
     font-size: $base-font-size;
     line-height: $paragraph-line-height;
-    box-shadow: 1px 4px 14px #888;
+    @if $paper-box == true {
+      box-shadow: 1px 4px 14px #888;
+    }
   }
   .content {
     margin: 1em 3em 3em 3em;

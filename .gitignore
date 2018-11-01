@@ -142,3 +142,4 @@ $RECYCLE.BIN/
 # =========================
 *.bat
 test/
+.vscode/
