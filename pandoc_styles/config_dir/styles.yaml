@@ -406,6 +406,13 @@ Poem:
     sass:
       files: 
         - ~/poem.scss
+  pdf: &pdf-poem
+    metadata:
+      header-includes:
+        - |
+          \usepackage{verse}
+  latex:
+    << : *pdf-poem
 
 Quote:
   all:
