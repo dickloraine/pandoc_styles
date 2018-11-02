@@ -2,7 +2,7 @@ from pandoc_styles import run_filter, CodeBlock
 
 
 def numbered(elem, doc):
-    if type(elem) == CodeBlock:
+    if isinstance(elem, CodeBlock):
         elem.classes.append("numberLines")
 
 
