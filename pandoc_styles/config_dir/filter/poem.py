@@ -1,3 +1,15 @@
+"""
+Formats poems. The poem has to be inside a Code block with the class "poem".
+There are many optional attributes that can be set:
+author: The author of the poem
+title: The title of the poem
+altverse: true or false
+poemlines: true or false
+
+In addition you can set a style. Either global by adding the "quote-style" field to
+the style definition or by setting the style as a class in the code block.
+The three styles are: "bottom", "top" and "one-line".
+"""
 import re
 from pandoc_styles import run_transform_filter, strip_html_tag
 

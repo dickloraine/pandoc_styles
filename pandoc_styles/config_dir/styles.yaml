@@ -402,6 +402,21 @@ Poem:
       filter:
         - ~/poem.py
     poem-style: bottom
+  html:
+    sass:
+      files: 
+        - ~/poem.scss
+
+Quote:
+  all:
+    command-line:
+      filter:
+        - ~/quote.py
+    quote-style: bottom
+  html:
+    sass:
+      files: 
+        - ~/quote.scss
 
 Append-to-file:
   all:
@@ -419,4 +434,8 @@ Scenes:
       new-scene-style: default
       new-scene-text: "* * *"
       new-scene-image: none
+  html:
+    sass:
+      files: 
+        - ~/scenes.scss
 ...
