@@ -10,7 +10,108 @@ from panflute import (  # pylint: disable=W0611
 from .utils import file_read, file_write
 
 
-class TransformFilter():
+class PandocStylesFilter():
+    '''
+    Base class for filters. Defines methods to help writing filters and to
+    run them.
+    '''
+    def __init__(self, func, filter_type=None, tags=None):
+        self._add_method(func, "func")
+        self.filter_type = filter_type
+        self.tags = tags
+
+    def run(self):
+        run_filter(self._pandoc_filter)
+
+    def _pandoc_filter(self, elem, doc):
+        self._init_filter(elem, doc)
+        if not self.check():
+            return
+        self.new_text = self.func()  # pylint: disable=E1128
+        return self._return_filter()
+
+    def _init_filter(self, elem, doc):
+        self.elem = elem
+        self.doc = doc
+        self.cfg = self._get_pandoc_styles_metadata()
+        self._get_format()
+        self.classes = elem.classes if hasattr(elem, "classes") else None
+        self.attributes = elem.attributes if hasattr(elem, "attributes") else None
+        self.text = elem.text if hasattr(elem, "text") else None
+        self.content = elem.content if hasattr(elem, "content") else None
+
+    def _return_filter(self):
+        if self.new_text is None:
+            return
+        elif self.new_text == [] or is_pandoc_element(self.new_text):
+            return self.new_text
+        return convert_text(self.new_text)
+
+    def _get_format(self):
+        self.fmt = self.doc.format
+        self.real_fmt = self.fmt
+        if self.fmt == "pdf":
+            self.fmt = "latex"
+        elif self.fmt == "epub" or self.fmt == "epub3":
+            self.fmt = "html"
+
+    def check(self):
+        return (self.filter_type is None or isinstance(self.elem, self.filter_type)) \
+               and (not self.tags or any(x in self.tags for x in self.classes))
+
+    def func(self):
+        return
+
+    def _add_method(self, var, name):
+        if var is not None:
+            if callable(var):
+                setattr(self, name, var.__get__(self))
+            else:
+                raise TypeError("Only strings and functions are allowed in filter generation!")
+
+    def get_metadata(self, key, default=None):
+        '''Gets metadata'''
+        return self.doc.get_metadata(key, default)
+
+    def _get_pandoc_styles_metadata(self):
+        '''Return the pandoc_styles cfg as a dictionary'''
+        try:
+            cfg = yaml.load(file_read(self.get_metadata('pandoc_styles_')))
+        except FileNotFoundError:
+            cfg = {}
+        return cfg
+
+    def save_pandoc_styles_metadata(self):
+        '''Save the given cfg in the cfg-file'''
+        file_write(self.get_metadata('pandoc_styles_'), yaml.dump(self.cfg))
+
+    def stringify(self, elem=None):
+        '''Stringify an element'''
+        if elem is None:
+            elem = self.elem
+        return stringify(elem)
+
+    def raw_block(self, *args):
+        '''Return a RawBlock pandoc element in self.fmt. Accepts strings, tuples
+        and lists as arguments.
+        '''
+        return raw(self.fmt, *args)
+
+    def raw_inline(self, *args):
+        '''Return a RawInline pandoc element in self.fmt. Accepts strings, tuples
+        and lists as arguments.
+        '''
+        return raw(self.fmt, *args, element_type=RawInline)
+
+
+def run_pandoc_styles_filter(func, filter_type=None, tags=None):
+    """
+    Run a filter with the given func. The function is now a method to a filter object
+    and you can access its contents through self.
+    """
+    PandocStylesFilter(func, filter_type, tags).run()
+
+class TransformFilter(PandocStylesFilter):
     '''
     Base class for filters. Defines methods to help writing filters and to
     run them.
@@ -18,6 +119,7 @@ class TransformFilter():
     tags = []
     filter_type = CodeBlock
 
+    # pylint: disable=W0231
     def __init__(self, tags=None, latex=None, html=None, other=None,
                  all_formats=None, filter_type=None, check=None):
         if tags is not None:
@@ -30,9 +132,6 @@ class TransformFilter():
         self._add_method(all_formats, "all_formats")
         self._add_method(check, "check")
 
-    def run(self):
-        run_filter(self._pandoc_filter)
-
     def _pandoc_filter(self, elem, doc):
         self._init_filter(elem, doc)
         if not self.check():
@@ -41,15 +140,6 @@ class TransformFilter():
         self.all_formats()
         self._call_filter()
         return self._return_filter()
-
-    def _init_filter(self, elem, doc):
-        self.elem = elem
-        self.doc = doc
-        self._get_format()
-        self.classes = elem.classes if hasattr(elem, "classes") else None
-        self.attributes = elem.attributes if hasattr(elem, "attributes") else None
-        self.text = elem.text if hasattr(elem, "text") else None
-        self.content = elem.content if hasattr(elem, "content") else None
 
     # pylint: disable=E1128
     def _call_filter(self):
@@ -66,18 +156,6 @@ class TransformFilter():
         elif self.new_text == [] or is_pandoc_element(self.new_text):
             return self.new_text
         return self.raw_block(self.new_text)
-
-    def _get_format(self):
-        self.fmt = self.doc.format
-        self.real_fmt = self.fmt
-        if self.fmt == "pdf":
-            self.fmt = "latex"
-        elif self.fmt == "epub" or self.fmt == "epub3":
-            self.fmt = "html"
-
-    def check(self):
-        return isinstance(self.elem, self.filter_type) \
-               and (not self.tags or any(x in self.tags for x in self.classes))
 
     def all_formats(self):
         return
@@ -100,45 +178,11 @@ class TransformFilter():
             else:
                 raise TypeError("Only strings and functions are allowed in filter generation!")
 
-    def get_metadata(self, key, default=None):
-        '''Gets metadata'''
-        return self.doc.get_metadata(key, default)
-
-    def get_pandoc_styles_metadata(self):
-        '''Return the pandoc_styles cfg as a dictionary'''
-        try:
-            cfg = yaml.load(file_read(self.get_metadata('pandoc_styles_')))
-        except FileNotFoundError:
-            cfg = {}
-        return cfg
-
-    def set_pandoc_styles_metadata(self, cfg):
-        '''Save the given cfg in the cfg-file'''
-        file_write(self.get_metadata('pandoc_styles_'), yaml.dump(cfg))
-
     def convert_text(self, text=None, input_fmt='markdown', extra_args=None):
         '''Converts text in input_fmt to self.fmt'''
         if text is None:
             text = self.text
         return convert_text(text, input_fmt, self.fmt, False, extra_args)
-
-    def stringify(self, elem=None):
-        '''Stringify an element'''
-        if elem is None:
-            elem = self.elem
-        return stringify(elem)
-
-    def raw_block(self, *args):
-        '''Return a RawBlock pandoc element in self.fmt. Accepts strings, tuples
-        and lists as arguments.
-        '''
-        return raw(self.fmt, *args)
-
-    def raw_inline(self, *args):
-        '''Return a RawInline pandoc element in self.fmt. Accepts strings, tuples
-        and lists as arguments.
-        '''
-        return raw(self.fmt, *args, element_type=RawInline)
 
 
 def run_transform_filter(tags=None, latex=None, html=None, other=None,
