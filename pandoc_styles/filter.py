@@ -51,6 +51,7 @@ class TransformFilter():
         self.text = elem.text if hasattr(elem, "text") else None
         self.content = elem.content if hasattr(elem, "content") else None
 
+    # pylint: disable=E1128
     def _call_filter(self):
         if self.fmt == 'latex':
             self.new_text = self.latex()

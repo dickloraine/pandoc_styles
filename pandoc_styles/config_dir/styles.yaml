@@ -2,7 +2,7 @@
 All:
   all:
     metadata:
-      lang: de-DE
+      lang: en
 
   pdf:
     command-line:
@@ -19,16 +19,15 @@ Letter:
       letteroption:
         - DIN
       fromaddress: |
-        Sven Krüger  
-        Matternstraße 6  
-        Berlin
+        Sherlock Holmes
+        221B Baker Street
+        London
   latex:
     << : *pdf-letter
 
 Assignment:
   inherits:
     - Code
-    - Code-ligatures
     - Math
     - Widows
     - Html-self-contained
@@ -50,18 +49,8 @@ Assignment:
   latex:
     << : *pdf-assignment
 
-Assignment-monochrom:
-  inherits:
-    - Assignment
-    - Code-monochrom
-
-Assignment-no-highlight:
-  inherits:
-    - Assignment
-    - Code-no-highlight
-
 # only for single documents
-Hausarbeit:
+Report:
   inherits:
     - Italic-quotes
     - Widows
@@ -139,56 +128,6 @@ Html-self-contained:
         replacement-text: |
           <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_CHTML-full" type="text/javascript"></script>
 
-Novel:
-  inherits: Extra-styles
-  pdf: &pdf-novel
-    command-line:
-      template: ~/novel.tex
-      top-level-division: chapter
-      toc: true
-      toc-depth: 3
-      filter:
-        - ~/dedication.py
-        - ~/copyrights.py
-    metadata:
-      documentclass: scrbook
-      DIV: calc
-      paper: 6in:9in
-      BCOR: 2mm
-      center-headings: true
-      fontsize: 10
-      mainfont: Garamond
-      sansfont: Questrial
-      pagestyle: plain
-  latex:
-    << : *pdf-novel
-
-Eisvogel:
-  pdf: &pdf-eisvogel
-    command-line:
-      template: ~/eisvogel.tex
-      listings: true
-    metadata:
-      notitle: false
-      titlepage: false
-      titlepage-text-color: "5F5F5F"
-      titlepage-rule-color: "435488"
-      titlepage-rule-height: 4
-      caption-justification: raggedright
-      toc-own-page: false
-      listings-disable-line-numbers: false
-      disable-header-and-footer: false
-      # example options: \headertitle: title, \headerauthor: author, \headerdate: date,
-      # \thepage: page number, \leftmark: chapter, \rightmark: section
-      header-left: \headertitle
-      header-center: false
-      header-right: \nouppercase\leftmark
-      footer-left: \headerauthor
-      footer-center: false
-      footer-right: \thepage
-  latex:
-    << : *pdf-eisvogel
-
 # Mixins
 # ----------------------------------------------------------------------------
 Widows:
@@ -212,7 +151,6 @@ Italic-quotes:
 Bibliography:
   all:
     command-line:
-      csl: ~/chicago-de.csl
       filter:
         - pandoc-citeproc
 
@@ -241,60 +179,6 @@ Code:
       - |
         \usepackage{fvextra}
         \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,breakautoindent=true,commandchars=\\\{\}}
-  latex:
-    << : *pdf-code
-
-Code-listings:
-  inherits:
-    - Code
-    - Listings
-
-Code-no-highlight:
-  inherits: Code
-  all:
-    highlight-style: false
-    no-highlight: true
-
-Code-monochrom:
-  inherits:
-    - Code
-  all:
-    command-line:
-      highlight-style: ~/mono.theme
-
-Code-monochrom-listings:
-  inherits:
-    - Code-monochrom
-    - Listings
-  pdf: &pdf-code-monochrom
-    command-line:
-      highlight-style: false
-      listings: true
-    metadata:
-      listings-disable-line-numbers: true
-      listings-frame: none
-      listings-text-size: normalsize
-      listings-linespread: 1
-      listing-background: false
-      listing-rule: "B3B2B3"
-      listing-numbers: "B3B2B3"
-      listing-text-color: "000000"
-      listing-keyword: "000000"
-      listing-identifier: "000000"
-      listing-string: "00999A"
-      listing-comment: "8E8E8E"
-  latex:
-    << : *pdf-code-monochrom
-
-Code-numbered:
-  all:
-    command-line:
-      filter:
-        - ~/numbered_code.py
-
-Code-ligatures:
-  pdf:
-    add-to-template:
       - |
         \setmonofont[
           Contextuals={Alternate}
@@ -302,51 +186,8 @@ Code-ligatures:
         \makeatletter
         \def\verbatim@nolig@list{}
         \makeatother
-
-Code-frame:
-  pdf:
-    metadata:
-      code-background-color: "F7F7F7"
-      border-size: 1pt
-    add-to-template:
-      - |
-        \usepackage{tcolorbox,tikz}
-        \tcbuselibrary{skins,breakable}
-        \definecolor{code-background}{HTML}{$code-background-color$}
-        \DefineVerbatimEnvironment{Highlightingextra}{Verbatim}{breaklines,breakautoindent=true,commandchars=\\\{\}}
-        \renewenvironment{Highlighting}
-        {\VerbatimEnvironment
-          \begin{tcolorbox}[
-            colback=code-background,
-            boxrule=$border-size$,
-            colframe=black,
-            sharp corners
-          ]%
-          \begin{Highlightingextra}}
-        {\end{Highlightingextra}\end{tcolorbox}}
-
-Extra-styles:
-  all:
-    command-line:
-      filter:
-        - ~/remove_comments.py
-        - ~/new_page.py
-        - ~/epigraph.py
-        - ~/noindent.py
-        - ~/alignment.py
-        - ~/quote.py
-        - ~/poem.py
-        - ~/custom_styles.py
-    scenes:
-      new-scene-style: default
-      new-scene-text: "* * *"
-      new-scene-image: false
-    preflight: ~/scenes.py
-  pdf: &pdf-extra-styles
-    metadata:
-      indent: true
   latex:
-    << : *pdf-extra-styles
+    << : *pdf-code
 
 Fancy-header:
   pdf: &pdf-fancy-header
@@ -410,8 +251,8 @@ Renew-chaptermark:
         \renewcommand{\chaptermark}[1]{ \markboth{#1}{} }
         \renewcommand{\sectionmark}[1]{ \markright{#1}{} }
 
-Eisvogel-title:
-  pdf: &pdf-eisvogel-title
+Pdf-title:
+  pdf: &pdf-title
     metadata:
       header-includes:
         - |
@@ -461,7 +302,7 @@ Eisvogel-title:
           \end{titlepage}
           \restoregeometry
   latex:
-    << : *pdf-eisvogel-title
+    << : *pdf-title
 
 Listings:
   pdf: &pdf-listings
@@ -553,10 +394,6 @@ Listings:
   latex:
     << : *pdf-listings
 
-# legacy style
-Assignment_Haskell:
-  inherits: Assignment-monochrom
-
 # Filter/Flight Styles
 # -----------------------------------------------------------------------------
 Poem:
@@ -565,23 +402,6 @@ Poem:
       filter:
         - ~/poem.py
     poem-style: bottom
-
-Spell-with-appendix:
-  all:
-    preflight:
-      - ~/appendices.py
-    command-line:
-      filter: ~/spell.py
-    data-files: spells.yaml
-    appendices:
-      spell:
-        title: Spells
-        data-file: spells.yaml
-        classes: .spell
-        sort: name
-        appendix-heading-level: 1
-        appendix-entry-heading-level: 2
-        hidden-heading: false
 
 Append-to-file:
   all:
