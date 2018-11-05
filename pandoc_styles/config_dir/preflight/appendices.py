@@ -4,22 +4,22 @@ import yaml
 from pandoc_styles import run_preflight_script, file_read, file_write
 
 
-def make_appendices(files, cfg, fmt):
+def make_appendices(self):
     '''
     Make appendices out of data-files and style options that render this data.
     These are given in the metadata with a list called 'appendices'.
     '''
-    if not cfg.get("appendices"):
+    if not self.cfg.get("appendices"):
         return
 
-    if any(appendix.get('only-linked') for appendix in cfg["appendices"].values()):
+    if any(appendix.get('only-linked') for appendix in self.cfg["appendices"].values()):
         # search for links possibly containing a link to an item in the databases
         link_pattern = re.compile(r'\[.*?\]\(#(.*?)\)', re.DOTALL)
-        candidates = [x for f in files for x in link_pattern.findall(file_read(f))]
+        candidates = [x for f in self.files for x in link_pattern.findall(file_read(f))]
 
-    for name, appendix in cfg["appendices"].items():
+    for name, appendix in self.cfg["appendices"].items():
         try:
-            data = appendix.get("data-file", cfg.get("data-file", {}).get(name, ""))
+            data = appendix.get("data-file", self.cfg.get("data-file", {}).get(name, ""))
             data = yaml.load_all(file_read(data))
         except FileNotFoundError:
             logging.error(f'{appendix["data-file"]} not found.')
@@ -33,8 +33,8 @@ def make_appendices(files, cfg, fmt):
         appendix_heading_level = appendix.get("appendix-heading-level", 1)
         header = ".hidden-heading" if appendix.get('hidden-heading') else "-"
         title = appendix.get("title", name.capitalize())
-        entry_heading_level = cfg.get("appendix-entry-heading-level",
-                                      appendix_heading_level + 1)
+        entry_heading_level = self.cfg.get("appendix-entry-heading-level",
+                                           appendix_heading_level + 1)
 
         data_text = [f'{"#" * appendix_heading_level} {title}\n']
         for entry in data:
@@ -52,7 +52,7 @@ def make_appendices(files, cfg, fmt):
             data_text.append(f'{entry["name"]}\n~~~\n')
 
         data_text = '\n'.join(data_text)
-        file_write(files[-1], f"{file_read(files[-1])}\n{data_text}")
+        file_write(self.files[-1], f"{file_read(self.files[-1])}\n{data_text}")
 
 
 if __name__ == '__main__':

@@ -115,6 +115,7 @@ class PandocStyles:
         # add file list and temporary directory, so that preflight scripts can use them
         cfg["current-files"] = self.files.copy()
         cfg["temp-dir"] = self.temp_dir
+        cfg["config-dir"] = self.config_dir
         return cfg
 
     def get_styles(self, style):

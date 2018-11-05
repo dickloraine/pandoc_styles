@@ -5,10 +5,10 @@ for the path to the current file.
 from pandoc_styles import run_preflight_script, run_process
 
 
-def preflight(files, cfg, fmt):
-    for command in cfg.get("preflight-apps", []):
+def preflight(self):
+    for command in self.cfg.get("preflight-apps", []):
         command = command.replace("<file>", "{}")
-        for ffile in files:
+        for ffile in self.files:
             run_process(command.format(ffile))
 
 

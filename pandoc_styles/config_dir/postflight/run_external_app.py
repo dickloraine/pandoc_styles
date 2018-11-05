@@ -5,10 +5,10 @@ options for the path to the file.
 from pandoc_styles import run_postflight_script, run_process
 
 
-def postflight(ffile, cfg, fmt):
-    for command in cfg.get("postflight-apps", []):
+def postflight(self):
+    for command in self.cfg.get("postflight-apps", []):
         command = command.replace("<file>", "{}")
-        run_process(command.format(ffile))
+        run_process(command.format(self.files))
 
 
 if __name__ == '__main__':
