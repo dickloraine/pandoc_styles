@@ -14,6 +14,7 @@ from pandoc_styles import run_transform_filter
 
 
 def all_formats(self):
+    self.get_pandoc_styles_metadata()
     self.style = self.cfg.get("quote-style", "bottom")
     if "top" in self.classes:
         self.style = "top"

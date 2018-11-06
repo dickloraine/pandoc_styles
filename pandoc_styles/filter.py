@@ -34,7 +34,7 @@ class PandocStylesFilter():
     def _init_filter(self, elem, doc):
         self.elem = elem
         self.doc = doc
-        self.cfg = self._get_pandoc_styles_metadata()
+        self.cfg = dict()
         self._get_format()
         self.classes = elem.classes if hasattr(elem, "classes") else None
         self.attributes = elem.attributes if hasattr(elem, "attributes") else None
@@ -74,13 +74,13 @@ class PandocStylesFilter():
         '''Gets metadata'''
         return self.doc.get_metadata(key, default)
 
-    def _get_pandoc_styles_metadata(self):
+    def get_pandoc_styles_metadata(self):
         '''Return the pandoc_styles cfg as a dictionary'''
         try:
-            cfg = yaml.load(file_read(self.get_metadata('pandoc_styles_')))
+            self.cfg = yaml.load(file_read(self.get_metadata('pandoc_styles_')))
         except FileNotFoundError:
-            cfg = {}
-        return cfg
+            self.cfg = {}
+        return self.cfg
 
     def save_pandoc_styles_metadata(self):
         '''Save the given cfg in the cfg-file'''
