@@ -312,7 +312,7 @@ class PandocStyles:
             for folder in ["", key, "misc"]:
                 test_file = normpath(item.replace("~", join(self.config_dir, folder)))
                 if isfile(test_file):
-                    return test_file
+                    return test_file.replace("\\", "/")
         return item
 
     def make_cfg_file(self):
