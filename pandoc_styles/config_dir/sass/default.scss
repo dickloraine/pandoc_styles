@@ -1,5 +1,5 @@
-$media-breakpoint: 600px;
-$body-max-width: 800px;
+$media-breakpoint: 600px !default;
+$body-max-width: 800px !default;
 $base-font-size: 12pt !default;
 $paragraph-line-height: "1.5" !default;
 $media-font-size: 10pt !default;
@@ -168,6 +168,16 @@ em em, em em em em {
 	font-style: normal;
 }
 
+.DefinitionTerm{
+	margin: 0;
+	font-weight: bold;
+	text-indent: 0em;
+}
+.DefinitionDescription{
+	margin-left: 2em;
+	text-indent: 0em;
+}
+
 .date {
   font-family: $author-font;
 	margin-top: 1em;
@@ -205,70 +215,4 @@ em em, em em em em {
 	font-size: 1.4em;
 	font-style: italic;
 	text-align: center;
-}
-
-#sidebar {
-  right: 1em;
-  top: 3em;
-  z-index: 1;
-  margin: 0;
-  text-align: left;
-  padding: 0;
-  position: fixed;
-  overflow-y: auto;
-  overflow-x: hidden;
-  max-width: 350px;  
-  max-height: 95%;
-  font-size: 10pt;
-    
-  ul {
-    display:none;
-    width:100%;
-    list-style:none;
-    margin:0;
-    background: #FFFFFF;
-    
-    li {
-      margin-right: 4em;
-      a {
-        display:block;
-        padding:0.3em;
-        background: #FFFFFF;
-        color: #000000;
-        text-decoration:none;
-        &:hover {
-          color:#FFFFFF;
-          background: #555;
-        }
-      }
-    }
-  } 
-
-  input.trigger {
-    position: absolute;
-    top: -9999px;
-    left: -9999px;
-    &:checked ~ ul,&:checked ~ ul li ul {
-      display:block !important;
-    }
-  }
-    
-  label {
-    position: fixed;
-    right: 0.5em;  
-    top: .2em;
-    width: 1.2em;
-    height: 1.2em;
-    text-align: center;
-    font-size:2em;
-    background:#FFFFFF;
-    color:#000000;
-    &:after {
-      content:"\2261";
-    }
-    &:hover {
-      color:#FFFFFF;
-      background: #555;
-    }
-  }
 }

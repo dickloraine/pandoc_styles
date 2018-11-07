@@ -96,6 +96,7 @@ Report:
 
 # special fonts and mathjax are not embedded.
 Html-self-contained:
+  inherits: Navbar
   html:
     command-line:
       self-contained: true
@@ -130,6 +131,36 @@ Html-self-contained:
 
 # Mixins
 # ----------------------------------------------------------------------------
+Navbar:
+  html:
+    sass:
+      files: 
+        - ~/navigation.scss
+      variables:
+        nav-top: false
+        nav-font-size: 11pt
+        nav-media-breakpoint: 600px
+        nav-sub-nav-width: 200px
+        nav-background-color: "#FFFFFF"
+        nav-hover-background-color: "#555"
+        nav-text-color: "#000000"
+        nav-hover-text-color: "#FFFFFF"
+    replace-in-template:
+      - pattern: \$table-of-contents\$
+        replacement-text: |
+          <div id="navbar">
+          <input class="trigger" type="checkbox" id="mainNavButton">
+          <label for="mainNavButton" onclick></label>
+          $table-of-contents$
+          </div>
+
+Navbar-top:
+  inherits: Navbar
+  html:
+    sass:
+      variables:
+        nav-top: true
+
 Widows:
   pdf:
     metadata:
