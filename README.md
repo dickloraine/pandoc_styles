@@ -35,9 +35,9 @@ To use this script, you need the following:
 
 ### Install
 
-Now you need to install this script itself. Open the console and enter:
+Now you need to install this script itself. Download or clone it and navigate to its folder. Open the console in the folder and enter:
 
-    pip3 install panovel
+    pip3 install pandoc_styles
 
 ### Setup
 
@@ -50,11 +50,12 @@ The "pandoc_styles" folder can be used as a central point to store styles, scrip
 
 The "styles.yaml" file contains all the styles. Here you define your styles and the script looks here for styles specified in the metadata block of your files.
 
-To use your styles, your source files need to have a metadata block. Three commands in the block are recognized by this script:
+To use your styles, your source files need to have a metadata block. These commands in the block are recognized by this script:
 
 - styles: A list of styles to be used for the file
 - style-defintion: In addition of defining styles in the "styles.yaml" file, you can define a style here too. Style settings given here have precedence over those given in "styles.yaml"
 - formats: A list of formats the source file should be converted to.
+- fields that exist in the style. They override the default given in the style.
 
 Then to convert your file, open the console and enter:
     pandoc_styles "your_file"
