@@ -109,6 +109,16 @@ class PandocStyles:
             start_style["inherits"] = self.pandoc_metadata["style"]
             cfg = self.get_styles(start_style)
 
+        # update fields in the cfg with fields in the document metadata, if they exist
+        # in the cfg
+        for key, val in self.pandoc_metadata.items():
+            if key in cfg["metadata"]:
+                cfg["metadata"][key] = val
+            elif key in cfg["command-line"]:
+                cfg["command-line"][key] = val
+            elif key in cfg:
+                self.update_dict(cfg, {key: val})
+
         if "style-definition" in self.pandoc_metadata:
             self.update_dict(cfg,
                              self.style_to_cfg(self.pandoc_metadata["style-definition"]))
@@ -141,10 +151,10 @@ class PandocStyles:
         for ffile in self.cfg["current-files"]:
             pandoc_args.append(f'"{ffile}"')
 
-        if self.sfrom:
-            pandoc_args.append(f'--from {self.sfrom}')
         if self.metadata:
             pandoc_args.append(f'"{self.metadata}"')
+        if self.sfrom:
+            pandoc_args.append(f'--from {self.sfrom}')
 
         # add pandoc_styles cfg, so that filters can use it
         pandoc_args.append(f'-M pandoc_styles_="{self.make_cfg_file()}"')
@@ -295,7 +305,7 @@ class PandocStyles:
         # we deepcopy new, so that it stays independent from our dictionary
         new = deepcopy(new)
         for key, value in new.items():
-            if key not in dictionary:
+            if not dictionary.get(key):
                 dictionary[key] = value
             elif isinstance(value, dict):
                 self.update_dict(dictionary[key], value)
