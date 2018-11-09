@@ -112,9 +112,9 @@ class PandocStyles:
         # update fields in the cfg with fields in the document metadata, if they exist
         # in the cfg
         for key, val in self.pandoc_metadata.items():
-            if key in cfg["metadata"]:
+            if key in cfg.get("metadata", {}):
                 cfg["metadata"][key] = val
-            elif key in cfg["command-line"]:
+            elif key in cfg.get("command-line", {}):
                 cfg["command-line"][key] = val
             elif key in cfg:
                 self.update_dict(cfg, {key: val})
