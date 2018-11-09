@@ -21,7 +21,6 @@ class PandocStyles:
                  target="", output_name=""):
         self.files = files
         self.metadata = metadata
-        self.target = target
         self.sfrom = sfrom
         self.output_name = f'{files[0].rpartition(".")[0]}' if not output_name \
                            else output_name
@@ -31,6 +30,7 @@ class PandocStyles:
         else:
             self.styles = yaml.load(file_read("styles.yaml", self.config_dir))
         self.pandoc_metadata = self.get_pandoc_metadata()
+        self.target = target if target else self.pandoc_metadata.get("destination", "")
         if formats:
             self.formats = formats
         elif "formats" in self.pandoc_metadata:
