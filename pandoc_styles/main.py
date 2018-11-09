@@ -30,11 +30,11 @@ class PandocStyles:
             self.styles = yaml.load(file_read(styles))
         else:
             self.styles = yaml.load(file_read("styles.yaml", self.config_dir))
-        self.yaml_block = self.get_yaml_block()
+        self.pandoc_metadata = self.get_pandoc_metadata()
         if formats:
             self.formats = formats
-        elif "formats" in self.yaml_block:
-            self.formats = make_list(self.yaml_block["formats"])
+        elif "formats" in self.pandoc_metadata:
+            self.formats = make_list(self.pandoc_metadata["formats"])
         else:
             self.formats = ["pdf", "html"]
         self.actual_temp_dir = TemporaryDirectory()
@@ -77,7 +77,7 @@ class PandocStyles:
             self.postflight()
         return success
 
-    def get_yaml_block(self):
+    def get_pandoc_metadata(self):
         """Get the metadata yaml block in the first source file or given metadata file"""
         ffile = self.metadata if self.metadata else self.files[0]
         md = re.match(r'.?-{3}(.*?)(\n\.{3}\n|\n-{3}\n)',
@@ -101,21 +101,23 @@ class PandocStyles:
     def get_cfg(self):
         """Get the style configuration for the current format"""
         cfg = dict()
-        if self.yaml_block is None:
+        if self.pandoc_metadata is None:
             return cfg
 
-        if "style" in self.yaml_block:
+        if "style" in self.pandoc_metadata:
             start_style = self.styles.get("All", {})
-            start_style["inherits"] = self.yaml_block["style"]
+            start_style["inherits"] = self.pandoc_metadata["style"]
             cfg = self.get_styles(start_style)
 
-        if "style-definition" in self.yaml_block:
-            self.update_dict(cfg, self.style_to_cfg(self.yaml_block["style-definition"]))
+        if "style-definition" in self.pandoc_metadata:
+            self.update_dict(cfg,
+                             self.style_to_cfg(self.pandoc_metadata["style-definition"]))
 
         # add file list and temporary directory, so that preflight scripts can use them
         cfg["current-files"] = self.files.copy()
         cfg["temp-dir"] = self.temp_dir
         cfg["config-dir"] = self.config_dir
+        cfg["pandoc-metadata"] = self.pandoc_metadata
         return cfg
 
     def get_styles(self, style):
