@@ -17,16 +17,17 @@ from .utils import (change_dir, file_read, file_write, has_extension,
 
 class PandocStyles:
     """Handles the conversion with styles"""
-    def __init__(self, files, formats=None, sfrom="", styles=None, metadata="",
-                 target="", output_name=""):
+    def __init__(self, files, formats=None, sfrom="", use_styles=None, metadata="",
+                 target="", output_name="", style_file=None):
         self.files = files
         self.metadata = metadata
         self.sfrom = sfrom
         self.output_name = f'{files[0].rpartition(".")[0]}' if not output_name \
                            else output_name
         self.config_dir = join(expanduser("~"), "pandoc_styles")
-        if styles:
-            self.styles = yaml.load(file_read(styles))
+        self.use_styles = use_styles if use_styles else []
+        if style_file:
+            self.styles = yaml.load(file_read(style_file))
         else:
             self.styles = yaml.load(file_read("styles.yaml", self.config_dir))
         self.pandoc_metadata = self.get_pandoc_metadata()
@@ -104,9 +105,10 @@ class PandocStyles:
         if self.pandoc_metadata is None:
             return cfg
 
-        if "style" in self.pandoc_metadata:
+        styles = self.use_styles if self.use_styles else self.pandoc_metadata.get("style")
+        if styles:
             start_style = self.styles.get("All", {})
-            start_style["inherits"] = self.pandoc_metadata["style"]
+            start_style["inherits"] = styles
             cfg = self.get_styles(start_style)
 
         # update fields in the cfg with fields in the document metadata, if they exist
@@ -358,9 +360,11 @@ def main():
     parser.add_argument('-o', '--output-name', nargs='?', default="",
                         help='The name of the output file without an extension. '
                              'Defaults to the name of the first input file.')
-    parser.add_argument('-s', '--styles', nargs='?', default=None,
+    parser.add_argument('-s', '--styles', nargs='*', default=[],
+                        help='Styles to use for the conversion.')
+    parser.add_argument('--style-file', nargs='?', default=None,
                         help='Path to the style file that should be used. '
-                             'Defaults to the style file on the configuration folder.')
+                             'Defaults to the style file in the configuration folder.')
     parser.add_argument('-m', '--metadata', nargs='?', default=None,
                         help='Path to the metadata file that should be used.')
     parser.add_argument('-w', '--working-dir', nargs='?', default=getcwd(),
@@ -384,7 +388,7 @@ def main():
 
     with change_dir(args.working_dir):
         PandocStyles(args.files, args.to, args.from_format, args.styles, args.metadata,
-                     args.destination, args.output_name).run()
+                     args.destination, args.output_name, args.style_file).run()
 
 
 if __name__ == '__main__':
