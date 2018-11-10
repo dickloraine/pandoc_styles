@@ -278,7 +278,7 @@ class PandocStyles:
         """Replace text in the output with text given in the style definition"""
         if "replace-in-output" not in self.cfg:
             return
-        original_text = text = file_read(f"{self.output_name}.{self.fmt}")
+        original_text = text = file_read(self.output_file)
         for item in self.cfg["replace-in-output"]:
             text = self.replace_in_text(item["pattern"], item.get("replacement-text", ""),
                                         text, item.get("add"), item.get("count", 0))
