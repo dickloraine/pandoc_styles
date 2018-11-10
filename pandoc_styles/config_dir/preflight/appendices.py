@@ -12,17 +12,17 @@ def make_appendices(self):
     if not self.cfg.get("appendices"):
         return
 
-    if any(appendix.get('only-linked') for appendix in self.cfg["appendices"].values()):
+    if any(appendix.get('only-linked') for appendix in self.cfg["appendices"]):
         # search for links possibly containing a link to an item in the databases
         link_pattern = re.compile(r'\[.*?\]\(#(.*?)\)', re.DOTALL)
         candidates = [x for f in self.files for x in link_pattern.findall(file_read(f))]
 
-    for name, appendix in self.cfg["appendices"].items():
+    for appendix in self.cfg["appendices"]:
+        name = appendix["filter"]
         try:
-            data = appendix.get("data-file", self.cfg.get("data-file", {}).get(name, ""))
+            data = appendix.get("data-file", self.cfg["metadata"]["data-files"][name])
             data = yaml.load_all(file_read(data))
-        except FileNotFoundError:
-            logging.error(f'{appendix["data-file"]} not found.')
+        except (FileNotFoundError, KeyError):
             continue
 
         if appendix.get('sort'):

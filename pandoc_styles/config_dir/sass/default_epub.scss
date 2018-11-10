@@ -1,0 +1,183 @@
+$heading-alignment: left !default;
+
+@page {
+  margin: 5pt;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  text-align: justify;
+}
+
+code {
+  font-family: monospace;
+}
+
+.math {
+  font-size: 0.9em;
+}
+
+p {
+  margin: 0;
+  text-align: justify;
+  text-indent: 1.2em;
+}
+
+h1+p,
+h2+p,
+h3+p,
+h4+p,
+h5+p,
+h6+p {
+  margin: 0;
+  text-align: justify;
+  text-indent: 0;
+}
+
+.pagebreak {
+  page-break-after: always;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  .footnoteRef {
+    vertical-align: super;
+  }
+}
+
+h1 {
+  margin-top: 1em;
+  margin-bottom: 2em;
+  font-size: 1.5em;
+  text-align: $heading-alignment;
+  font-weight: bold;
+  text-indent: 0;
+}
+
+h2 {
+  margin-top: 1em;
+  margin-bottom: 1.5em;
+  font-size: 1.3em;
+  text-align: $heading-alignment;
+  font-weight: bold;
+  text-indent: 0;
+}
+
+h3 {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  font-size: 1.2em;
+  text-align: $heading-alignment;
+  font-weight: bold;
+  text-indent: 0;
+}
+
+.header-section-number {
+  display: block;
+  padding-bottom: 1em;
+}
+
+blockquote {
+  font-style: italic;
+}
+
+figure {
+  text-align: center;
+  margin: 1em 0;
+  max-width: 100%;
+  max-height: 100%;
+  page-break-inside: avoid;
+  clear: both;
+  img {
+    max-height: 100%;
+    max-width: 100%;
+  }
+}
+
+figcaption {
+  text-indent: 0;
+  text-align: center;
+  font-style: italic;
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+.DefinitionTerm {
+  margin: 0;
+  font-weight: bold;
+  text-indent: 0em;
+}
+
+.DefinitionDescription {
+  margin-left: 2em;
+  text-indent: 0em;
+}
+
+.author {
+  margin-top: 3em;
+  margin-bottom: 3em;
+  text-indent: 0em;
+  font-size: 1.5em;
+  text-align: center;
+}
+
+.publisher {
+  margin-top: 3em;
+  margin-bottom: 3em;
+  text-indent: 0em;
+  font-size: 1.2em;
+  text-align: center;
+}
+
+.main {
+  margin-top: 2em;
+  text-indent: 0em;
+  font-size: 1.6em;
+  font-weight: bold;
+  text-align: center;
+}
+
+.title {
+  margin-top: 2em;
+  text-indent: 0em;
+  font-size: 1.6em;
+  font-weight: bold;
+  text-align: center;
+}
+
+.subtitle {
+  margin-top: 1em;
+  text-indent: 0em;
+  font-size: 1.4em;
+  font-style: italic;
+  text-align: center;
+}
+
+div#cover-image img {
+  max-height: 100%;
+  max-width: 100%;
+}
+
+ol.toc {
+  padding: 0;
+  margin-left: 1em;
+  li {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+em,
+em em em,
+em em em em em {
+  font-style: italic;
+}
+
+em em,
+em em em em {
+  font-style: normal;
+}

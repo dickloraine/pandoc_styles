@@ -19,6 +19,7 @@ This script allows you to define styles for pandoc. In styles you can define, wi
     - [Replace in template](#replace-in-template)
     - [Replace in output](#replace-in-output)
     - [Postflight](#postflight)
+    - [Filter](#filter)
     - [Advanced Example](#advanced-example)
 
 ## Installation
@@ -145,18 +146,18 @@ Here a basic example of a preflight script, that appends text given in the field
 from pandoc_styles import run_preflight_script, file_read, file_write
 
 
-def preflight(files, cfg, fmt):
-    text_to_append = cfg["append-to-file"]
+def preflight(self):
+    text_to_append = self.cfg["append-to-file"]
     if isinstance(text_to_append, list):
         text_to_append = "\n".join(text_to_append)
-    file_write(files[-1], f"{file_read(files[-1])}\n{text_to_append}")
+    file_write(self.files[-1], f"{file_read(self.files[-1])}\n{text_to_append}")
 
 
 if __name__ == '__main__':
     run_preflight_script(preflight)
 ~~~
 
-Modify only the preflight function to include your code. If the function returns the style configuration, the main script uses this new configuration.
+Modify only the preflight function to include your code.
 
 And to run it in your style definition:
 
@@ -232,8 +233,8 @@ These scripts are called after the source is converted. Pretty similar to prefli
 from pandoc_styles import run_postflight_script, file_read, file_write
 
 
-def postflight(ffile, cfg, fmt):
-    text_to_append = cfg["append-to-output"]
+def postflight(self):
+    text_to_append = self.cfg["append-to-output"]
     if isinstance(text_to_append, list):
         text_to_append = "\n".join(text_to_append)
     file_write(ffile, f"{file_read(ffile)}\n{text_to_append}")
@@ -250,6 +251,10 @@ Test-style:
       - append-to-output.py
     append-to-output: "Test"
 ~~~
+
+### Filter
+
+Filter are called in the command-line section. This script includes some functionality to make writing filters a little bit more easy. If possible, store data that filters should use in the metadata section, because loading the cfg file is resource intensive.
 
 ### Advanced Example
 

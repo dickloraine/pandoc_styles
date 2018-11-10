@@ -30,7 +30,7 @@ Assignment:
     - Code
     - Math
     - Widows
-    - Html-self-contained
+    - Html-self-contained-math
   pdf: &pdf-assignment
     metadata:
       mainfont: Adobe Garamond Pro
@@ -57,11 +57,6 @@ Report:
     - Bibliography
     - Html-self-contained
   all:
-    preflight:
-      - ~/append_to_file.py
-    append-to-file: 
-      - |
-        # Literaturverzeichnis{.unnumbered}
     command-line:
       number-sections: true
       toc: true
@@ -79,12 +74,6 @@ Report:
       fontsize: 12pt
       geometry: "a4paper, top=2cm, bottom=2.5cm, left=2.5cm, right=4cm"
       linestretch: 1.25
-    append-to-file: 
-      - |
-        \setlength{\parindent}{-0.5in}
-        \setlength{\leftskip}{0.5in}
-        \setlength{\parskip}{8pt}
-        \noindent
     add-to-template:
       - |
         \titlehead{{$titletop-left$
@@ -94,29 +83,59 @@ Report:
   latex:
     << : *pdf-hausarbeit
 
-# special fonts and mathjax are not embedded.
-Html-self-contained:
+Novel:
+  inherits:
+    - Html-self-contained
+    - Extra-styles
+  pdf: &pdf-novel
+    command-line:
+      template: ~/novel.tex
+      top-level-division: chapter
+      toc: true
+      toc-depth: 3
+    metadata:
+      documentclass: scrbook
+      DIV: calc
+      paper: 6in:9in
+      BCOR: 2mm
+      center-headings: true
+      fontsize: 10pt
+      mainfont: Adobe Garamond Pro
+      sansfont: Questrial
+      pagestyle: plain
+  latex:
+    << : *pdf-novel
+  epub:
+    preflight:
+      - ~/dedication.py
+      - ~/copyrights.py
+    sass:
+      files: 
+        - ~/default_epub.scss
+      output-path: temp
+  html:
+    preflight:
+      - ~/dedication.py
+      - ~/copyrights.py
+    sass:
+      variables:
+        indent: true
+
+# Mixins
+# ----------------------------------------------------------------------------
+Default-html:
   inherits: Navbar
   html:
     command-line:
-      self-contained: true
       toc: true
-      toc-depth: 2
     sass:
-      files: ~/default.scss
-      output-path: temp
+      files: 
+        - ~/default.scss
     replace-in-template:
       - pattern: \$body\$
         replacement-text: |
           <div class="content">
           $body$
-          </div>
-      - pattern: \$table-of-contents\$
-        replacement-text: |
-          <div id="sidebar">
-          <input class="trigger" type="checkbox" id="mainNavButton">
-          <label for="mainNavButton" onclick></label>
-          $table-of-contents$
           </div>
     replace-in-output:
       - pattern: (<\/head>)
@@ -125,12 +144,35 @@ Html-self-contained:
         replacement-text: |
           <link href="https://fonts.googleapis.com/css?family=Noto+Sans|Noto+Serif|Oswald" rel="stylesheet">
           <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/tonsky/FiraCode@1.206/distr/fira_code.css">
+  epub:
+    sass:
+      files: 
+        - ~/default_epub.scss
+
+# special fonts are not embedded.
+Html-self-contained:
+  inherits: Default-html
+  html:
+    command-line:
+      self-contained: true
+    sass:
+      output-path: temp
+    replace-in-template:
+      - pattern: \$body\$
+        replacement-text: |
+          <div class="content">
+          $body$
+          </div>
+
+# mathjax is not embedded.
+Html-self-contained-math:
+  inherits: Html-self-contained
+  html:
+    replace-in-output:
       - pattern: <script type="text\/javascript">\/\*\n\s+\*\s+\/MathJax\.js.*?<\/script>
         replacement-text: |
           <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_CHTML-full" type="text/javascript"></script>
 
-# Mixins
-# ----------------------------------------------------------------------------
 Navbar:
   html:
     sass:
@@ -161,6 +203,34 @@ Navbar-top:
       variables:
         nav-top: true
 
+Extra-styles:
+  all:
+    preflight:
+      - ~/scenes.py
+    command-line:
+      filter:
+        - ~/new_page.py
+        - ~/epigraph.py
+        - ~/noindent.py
+        - ~/alignment.py
+        - ~/quote.py
+        - ~/poem.py
+        - ~/custom_styles.py
+    poem-style: bottom
+    quote-style: bottom
+    scenes:
+      new-scene-style: default
+      new-scene-text: "* * *"
+      new-scene-image: false
+  html:
+    sass:
+      files: 
+        - ~/extra_styles.scss
+  epub:
+    sass:
+      files: 
+        - ~/extra_styles.scss
+
 Widows:
   pdf:
     metadata:
@@ -181,9 +251,22 @@ Italic-quotes:
 
 Bibliography:
   all:
+    preflight:
+      - ~/append_to_file.py
+    append-to-file: 
+      - |
+        # References{.unnumbered}
     command-line:
+      csl: ~/chicago-de.csl
       filter:
         - pandoc-citeproc
+  pdf:
+    append-to-file: 
+      - |
+        \setlength{\parindent}{-0.5in}
+        \setlength{\leftskip}{0.5in}
+        \setlength{\parskip}{8pt}
+        \noindent
 
 Math:
   html:
@@ -424,56 +507,4 @@ Listings:
         $endif$
   latex:
     << : *pdf-listings
-
-# Filter/Flight Styles
-# -----------------------------------------------------------------------------
-Poem:
-  all:
-    command-line:
-      filter:
-        - ~/poem.py
-    poem-style: bottom
-  html:
-    sass:
-      files: 
-        - ~/poem.scss
-  pdf: &pdf-poem
-    metadata:
-      header-includes:
-        - |
-          \usepackage{verse}
-  latex:
-    << : *pdf-poem
-
-Quote:
-  all:
-    command-line:
-      filter:
-        - ~/quote.py
-    quote-style: bottom
-  html:
-    sass:
-      files: 
-        - ~/quote.scss
-
-Append-to-file:
-  all:
-    preflight:
-      - ~/append_to_file.py
-    append-to-file:
-      - |
-        Text to append
-
-Scenes:
-  all:
-    preflight:
-      - ~/scenes.py
-    scenes:
-      new-scene-style: default
-      new-scene-text: "* * *"
-      new-scene-image: none
-  html:
-    sass:
-      files: 
-        - ~/scenes.scss
 ...

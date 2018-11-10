@@ -152,38 +152,45 @@ class PandocStyles:
         """Build the command line for pandoc out of the given configuration"""
         pandoc_args = [f'-t {self.to} -o "{self.output_file}"']
 
-        if self.sfrom:
-            pandoc_args.append(f'--from {self.sfrom}')
-
-        # add pandoc_styles cfg, so that filters can use it
-        pandoc_args.append(f'-M pandoc_styles_="{self.make_cfg_file()}"')
-
-        complex_data = {}
-        for group, prefix in [("command-line", "--"), ("metadata", "-V ")]:
-            if group in self.cfg:
-                for key, value in self.cfg[group].items():
-                    for item in make_list(value):
-                        if not item:
-                            continue
-                        elif item is True:
-                            pandoc_args.append(f'{prefix}{key}')
-                        elif isinstance(item, dict):
-                            complex_data[key] = value
-                            break
-                        else:
-                            item = self.expand_directories(item, key)
-                            pandoc_args.append(f'{prefix}{key}="{item}"')
-        
         for ffile in self.cfg["current-files"]:
             pandoc_args.append(f'"{ffile}"')
 
         if self.metadata:
             pandoc_args.append(f'"{self.metadata}"')
 
-        if complex_data:
-            complex_data = f'---\n{yaml.dump(complex_data)}\n...\n'
-            complex_data = file_write("cur_metadata.yaml", complex_data, self.temp_dir)
-            pandoc_args.append(f'"{complex_data}"')
+        # metadata variables are handled via a metadata.yaml file
+        if "metadata" in self.cfg:
+            #  pathes need to be treated special
+            for key, value in self.cfg["metadata"].items:
+                if isinstance(value, list):
+                    for i, item in enumerate(value):
+                        item_ = self.expand_directories(item, key)
+                        if item != item_:
+                            value[i] = item_
+                else:
+                    item_ = self.expand_directories(item, key)
+                    if item != item_:
+                        self.cfg["metadata"][key] = item_
+            cur_metadata = f'---\n{yaml.dump(self.cfg["metadata"])}\n...\n'
+            pandoc_args.append(file_write("cur_metadata.yaml", cur_metadata,
+                                          self.temp_dir))
+        if self.sfrom:
+            pandoc_args.append(f'--from {self.sfrom}')
+
+        # add pandoc_styles cfg, so that filters can use it
+        pandoc_args.append(f'-M pandoc_styles_="{self.make_cfg_file()}"')
+
+        # add command-line arguments
+        if "command-line" in self.cfg:
+            for key, value in self.cfg["command-line"].items():
+                for item in make_list(value):
+                    if not item:
+                        continue
+                    elif item is True:
+                        pandoc_args.append(f'--{key}')
+                    else:
+                        item = self.expand_directories(item, key)
+                        pandoc_args.append(f'--{key}="{item}"')
         return " ".join(pandoc_args)
 
     def preflight(self):

@@ -7,7 +7,7 @@ altverse: true or false
 poemlines: true or false
 
 In addition you can set a style. Either global by adding the "quote-style" field to
-the style definition or by setting the style as a class in the code block.
+the metadata style definition or by setting the style as a class in the code block.
 The three styles are: "bottom", "top" and "one-line".
 """
 import re
@@ -15,8 +15,7 @@ from pandoc_styles import run_transform_filter, strip_html_tag
 
 
 def all_formats(self):
-    self.get_pandoc_styles_metadata()
-    self.style = self.cfg.get("poem-style", "bottom")
+    self.style = self.get_metadata("poem-style", "bottom")
     if "top" in self.classes:
         self.style = "top"
     elif "bottom" in self.classes:

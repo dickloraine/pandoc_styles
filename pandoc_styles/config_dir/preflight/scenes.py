@@ -23,11 +23,11 @@ def scenes(self):
         if self.fmt in ("html", "epub", "epub3"):
             if style == "text":
                 text = re.sub(r"([^\w])", r"\\\1", cfg.get("new-scene-text", "* * *"))
-                return f'<p class="NewScene">{text}</p>'
+                return f'\n<p class="NewScene">{text}</p>'
             if style == "fleuron":
-                return '<div class="NewScene"><img alt="***" class="szeneimg" '\
+                return '\n<div class="NewScene"><img alt="***" class="szeneimg" '\
                        f'src="{cfg.get("new-scene-image")}" /></div>'
-            return '<p class="NewScene"> </p>'
+            return '\n<p class="NewScene"> </p>'
         return "\n                            * * *\n"
 
     for ffile in self.files:

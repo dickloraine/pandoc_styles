@@ -6,7 +6,7 @@ author: The author of the quote
 title: The title/source of the quote
 
 In addition you can set a style. Either global by adding the "quote-style" field to
-the style definition or by setting the style as a class in the code block.
+the metadata style definition or by setting the style as a class in the code block.
 The three styles are: "bottom", "top" and "one-line".
 """
 
@@ -14,8 +14,7 @@ from pandoc_styles import run_transform_filter
 
 
 def all_formats(self):
-    self.get_pandoc_styles_metadata()
-    self.style = self.cfg.get("quote-style", "bottom")
+    self.style = self.get_metadata("quote-style", "bottom")
     if "top" in self.classes:
         self.style = "top"
     elif "bottom" in self.classes:
