@@ -54,8 +54,9 @@ To use your styles, your source files need to have a metadata block. These comma
 
 - styles: A list of styles to be used for the file
 - style-defintion: In addition of defining styles in the "styles.yaml" file, you can define a style here too. Style settings given here have precedence over those given in "styles.yaml"
-- formats: A list of formats the source file should be converted to.
-- destination: A directory to create the output in
+- formats: A list of formats the source file should be converted to. If none is given, html- and pdf-files are build.
+- destination: A directory to create the output in.
+- output-name: The desired name of the outputfile without extension. In none is given, the filename is used.
 - fields that exist in the style. They override the default given in the style.
 
 Then to convert your file, open the console and enter:

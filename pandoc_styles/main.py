@@ -22,16 +22,18 @@ class PandocStyles:
         self.files = files
         self.metadata = metadata
         self.sfrom = sfrom
-        self.output_name = f'{files[0].rpartition(".")[0]}' if not output_name \
-                           else output_name
         self.config_dir = join(expanduser("~"), "pandoc_styles")
         self.use_styles = use_styles if use_styles else []
-        if style_file:
-            self.styles = yaml.load(file_read(style_file))
-        else:
-            self.styles = yaml.load(file_read("styles.yaml", self.config_dir))
+        self.styles = yaml.load(file_read(style_file)) if style_file else \
+                      yaml.load(file_read("styles.yaml", self.config_dir))
         self.pandoc_metadata = self.get_pandoc_metadata()
         self.target = target if target else self.pandoc_metadata.get("destination", "")
+        if output_name:
+            self.output_name = output_name
+        elif self.pandoc_metadata.get("output-name"):
+            self.output_name = self.pandoc_metadata["output-name"]
+        else:
+            self.output_name = f'{files[0].rpartition(".")[0]}'
         if formats:
             self.formats = formats
         elif "formats" in self.pandoc_metadata:
