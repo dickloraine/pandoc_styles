@@ -19,8 +19,8 @@ Letter:
       letteroption:
         - DIN
       fromaddress: |
-        Sherlock Holmes
-        221B Baker Street
+        Sherlock Holmes  
+        221B Baker Street  
         London
   latex:
     << : *pdf-letter
@@ -79,7 +79,7 @@ Report:
         \titlehead{{$titletop-left$
         \hfill $titletop-right$\\}
         $titlehead$}
-        \publishers{\small $titlebottom$}    
+        \publishers{\small $titlebottom$}  
   latex:
     << : *pdf-hausarbeit
 
@@ -110,7 +110,7 @@ Novel:
       - ~/dedication.py
       - ~/copyrights.py
     sass:
-      files: 
+      files:
         - ~/default_epub.scss
       output-path: temp
   html:
@@ -129,7 +129,7 @@ Default-html:
     command-line:
       toc: true
     sass:
-      files: 
+      files:
         - ~/default.scss
     replace-in-template:
       - pattern: \$body\$
@@ -146,7 +146,7 @@ Default-html:
           <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/tonsky/FiraCode@1.206/distr/fira_code.css">
   epub:
     sass:
-      files: 
+      files:
         - ~/default_epub.scss
 
 # special fonts are not embedded.
@@ -176,7 +176,7 @@ Html-self-contained-math:
 Navbar:
   html:
     sass:
-      files: 
+      files:
         - ~/navigation.scss
       variables:
         nav-top: false
@@ -225,11 +225,11 @@ Extra-styles:
       new-scene-image: false
   html:
     sass:
-      files: 
+      files:
         - ~/extra_styles.scss
   epub:
     sass:
-      files: 
+      files:
         - ~/extra_styles.scss
 
 Widows:
@@ -254,14 +254,14 @@ Bibliography:
   all:
     preflight:
       - ~/append_to_file.py
-    append-to-file: 
+    append-to-file:
       - |
         # References{.unnumbered}
     command-line:
       filter:
         - pandoc-citeproc
   pdf:
-    append-to-file: 
+    append-to-file:
       - |
         \setlength{\parindent}{-0.5in}
         \setlength{\leftskip}{0.5in}
@@ -374,7 +374,7 @@ Pdf-title:
           \usepackage{afterpage}
           \usepackage{xcolor}
           \usepackage{setspace}
-    replace-in-template: 
+    replace-in-template:
       - pattern: \\maketitle
         replacement-text: |
           \begin{titlepage}
@@ -439,7 +439,7 @@ Listings:
       listing-text-color: "000000"
       listing-keyword-color: "435489"
       listing-identifier-color: "000000"
-      listing-string-color: "719B6E" 
+      listing-string-color: "719B6E"
       listing-comment-color: "8E8E8E"
     add-to-template:
       - |

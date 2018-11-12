@@ -89,7 +89,7 @@ def latex(self):
     new.append(r"\end{verse}")
 
     new = ''.join(new)
-    new = re.sub(r'\\\\\*\n\\\\!', '\\\\\!\n', new)
+    new = re.sub(r'\\\\\*\n\\\\!', '\\\\\!\n', new)  # pylint: disable=W1401
     return new
 
 

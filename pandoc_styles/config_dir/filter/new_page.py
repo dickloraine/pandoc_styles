@@ -9,6 +9,6 @@ def latex(self):
 
 if __name__ == "__main__":
     run_transform_filter(["new_page", "new-page"],
-                      latex,
-                      '<div class="pagebreak"></div>',
-                      "\n----\n")
+                         latex,
+                         '<div class="pagebreak"></div>',
+                         "\n----\n")
