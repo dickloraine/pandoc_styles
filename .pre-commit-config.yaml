@@ -10,9 +10,9 @@ repos:
   - repo: https://github.com/pre-commit/mirrors-pylint
     rev: 'v2.1.1'
     hooks:
-    - id: pylint
-      args: ["--disable=R, C0111, C0103, W0201, W1203"]
-      language: system
+      - id: pylint
+        args: ["--disable=R, C0111, C0103, W0201, W1203"]
+        language: system
   - repo: git://github.com/elidupuis/mirrors-sass-lint
     sha: '5cc4565'
     hooks:
