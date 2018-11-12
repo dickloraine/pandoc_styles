@@ -216,8 +216,9 @@ Extra-styles:
         - ~/quote.py
         - ~/poem.py
         - ~/custom_styles.py
-    poem-style: bottom
-    quote-style: bottom
+    metadata:
+      poem-style: bottom
+      quote-style: bottom
     scenes:
       new-scene-style: default
       new-scene-text: "* * *"
@@ -257,7 +258,6 @@ Bibliography:
       - |
         # References{.unnumbered}
     command-line:
-      csl: ~/chicago-de.csl
       filter:
         - pandoc-citeproc
   pdf:

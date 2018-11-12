@@ -1,5 +1,4 @@
 import re
-import logging
 import yaml
 from pandoc_styles import run_preflight_script, file_read, file_write
 
@@ -27,7 +26,7 @@ def make_appendices(self):
 
         if appendix.get('sort'):
             key = appendix.get('sort', "name")
-            data = sorted(data, key=lambda x: x[key])
+            data = sorted(data, key=lambda x: x[key])  # pylint: disable=W0640
 
         classes = appendix.get("classes", f".{name}")
         appendix_heading_level = appendix.get("appendix-heading-level", 1)

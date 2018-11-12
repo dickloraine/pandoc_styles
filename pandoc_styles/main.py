@@ -173,7 +173,7 @@ class PandocStyles:
                         else:
                             item = self.expand_directories(item, key)
                             pandoc_args.append(f'{prefix}{key}="{item}"')
-        
+
         for ffile in self.cfg["current-files"]:
             pandoc_args.append(f'"{ffile}"')
 
