@@ -49,7 +49,6 @@ Assignment:
   latex:
     << : *pdf-assignment
 
-# only for single documents
 Report:
   inherits:
     - Italic-quotes
@@ -65,7 +64,7 @@ Report:
     sass:
       variables:
         indent: true
-  pdf: &pdf-hausarbeit
+  pdf: &pdf-report
     metadata:
       documentclass: scrreprt
       indent: true
@@ -81,7 +80,7 @@ Report:
         $titlehead$}
         \publishers{\small $titlebottom$}  
   latex:
-    << : *pdf-hausarbeit
+    << : *pdf-report
 
 Novel:
   inherits:
