@@ -1,0 +1,111 @@
+---
+Test_01:
+  inherits:
+    - Test_02
+  all:
+    command-line:
+      test_01_all_cmd_01: true
+      test_01_all_cmd_02:
+        test_01_all_cmd_03:
+          test_01_all_cmd_04: true
+          test_01_all_cmd_05:
+            - all_cmd 1
+            - all_cmd 2
+        test_01_all_cmd_06: 3
+      test_01_all_cmd_07: test07
+    metadata:
+      test_01_all_md_01: true
+      test_01_all_md_02: all_md_1
+      test_01_all_md_03:
+        - all_md_2
+        - all_md_3
+  pdf: &pdf-test
+    command-line:
+      test_01_pdf_cmd_01: true
+      test_01_pdf_cmd_02:
+        test_01_pdf_cmd_03:
+          test_01_pdf_cmd_04: true
+          test_01_pdf_cmd_05:
+            - pdf_cmd 1
+            - pdf_cmd 2
+        test_01_pdf_cmd_06: 3
+      test_01_pdf_cmd_07: test07
+    metadata:
+      test_01_pdf_md_01: true
+      test_01_pdf_md_02: pdf_md_1
+      test_01_pdf_md_03:
+        - pdf_md_2
+        - pdf_md_3
+  latex:
+    << : *pdf-test
+  # used to test extending all
+  html:
+    command-line:
+      test_01_all_cmd_02:
+        test_01_all_cmd_03:
+          test_01_all_cmd_05:
+            - all_cmd 3
+            - all_cmd 4
+        test_01_html_cmd_08: 3
+    metadata:
+      test_01_html_md_01: true
+      test_01_html_md_02: html_md_1
+      test_01_html_md_03:
+        - html_md_2
+        - html_md_3
+
+Test_02:
+  all:
+    command-line:
+      test_02_all_cmd_01: true
+      test_02_all_cmd_02:
+        test_02_all_cmd_03:
+          test_02_all_cmd_04: true
+          test_02_all_cmd_05:
+            - all_cmd 3
+            - all_cmd 4
+        test_02_all_cmd_06: 3
+      test_02_all_cmd_07: test07
+    metadata:
+      test_02_all_md_01: true
+      test_02_all_md_02: all_md_1
+      test_02_all_md_03:
+        - all_md_4
+        - all_md_5
+  pdf: &pdf-test2
+    command-line:
+      test_02_pdf_cmd_01: true
+      test_02_pdf_cmd_02:
+        test_02_pdf_cmd_03:
+          test_02_pdf_cmd_04: true
+          test_02_pdf_cmd_05:
+            - pdf_cmd 3
+            - pdf_cmd 4
+        test_02_pdf_cmd_06: 3
+      test_02_pdf_cmd_07: test07
+    metadata:
+      test_02_pdf_md_01: true
+      test_02_pdf_md_02: pdf_md_1
+      test_02_pdf_md_03:
+        - pdf_md_4
+        - pdf_md_5
+  latex:
+    << : *pdf-test2
+  html:
+    command-line:
+      test_02_html_cmd_01: true
+      test_02_html_cmd_02:
+        test_02_html_cmd_03:
+          test_02_html_cmd_04: true
+          test_02_html_cmd_05:
+            - html_cmd 3
+            - html_cmd 4
+        test_02_html_cmd_06: 3
+      test_02_html_cmd_07: test07
+    metadata:
+      test_02_html_md_01: true
+      test_02_html_md_02: html_md_1
+      test_02_html_md_03:
+        - html_md_4
+        - html_md_5
+...
