@@ -5,14 +5,14 @@ import sys
 from argparse import ArgumentParser
 from copy import deepcopy
 from os import getcwd, listdir, mkdir
-from os.path import dirname, expanduser, isfile, join, normpath, isdir, basename, relpath
+from os.path import dirname, expanduser, join, normpath, isdir, basename, relpath
 from shutil import copy
 from tempfile import TemporaryDirectory
 import yaml
 import sass
 from .format_mappings import FORMAT_TO_EXTENSION
 from .utils import (change_dir, file_read, file_write, has_extension,
-                    make_list, run_process)
+                    make_list, run_process, expand_directories)
 
 
 class PandocStyles:
@@ -164,7 +164,7 @@ class PandocStyles:
                             complex_data[key] = value
                             break
                         else:
-                            item = self.expand_directories(item, key)
+                            item = expand_directories(item, key)
                             pandoc_args.append(f'{prefix}{key}="{item}"')
 
         for ffile in self.cfg["current-files"]:
@@ -186,7 +186,7 @@ class PandocStyles:
         self.cfg["current-files"] = [copy(f, self.temp_dir)
                                      for f in self.cfg["current-files"]]
         for script in make_list(self.cfg["preflight"]):
-            script = self.expand_directories(script, "preflight")
+            script = expand_directories(script, "preflight")
             if self.python_path and has_extension(script, "py"):
                 script = f'{self.python_path} "{script}"'
             cfg = self.make_cfg_file()
@@ -199,7 +199,7 @@ class PandocStyles:
             return
         cfg = self.make_cfg_file()
         for script in make_list(self.cfg["postflight"]):
-            script = self.expand_directories(script, "postflight")
+            script = expand_directories(script, "postflight")
             if self.python_path and has_extension(script, "py"):
                 script = f'{self.python_path} "{script}"'
             run_process(script, f'"{self.output_file}" --cfg "{cfg}" '
@@ -214,7 +214,7 @@ class PandocStyles:
                for var, val in self.cfg["sass"].get("variables", {}).items()]
         sass_files = make_list(self.cfg["sass"]["files"])
         css_name = f"{basename(sass_files[0]).rpartition('.')[0]}.css"
-        css.extend([file_read(self.expand_directories(f, "sass")) for f in sass_files])
+        css.extend([file_read(expand_directories(f, "sass")) for f in sass_files])
         css.extend(make_list(self.cfg["sass"].get("append", [])))
         css = "\n".join(css)
         css = sass.compile(string=css, output_style='expanded',
@@ -315,19 +315,6 @@ class PandocStyles:
                 dictionary[key].extend(value)
             else:
                 dictionary[key] = value
-
-    def expand_directories(self, item, key=""):
-        """
-        Look if item is a file in the configuration directory and return the path if
-        it is. Searches first for the given path, then looks into a subfolder given by
-        key and finally in the "misc" subfolder. If no file is found, just return item.
-        """
-        if isinstance(item, str) and "~/" in item:
-            for folder in ["", key, "misc"]:
-                test_file = normpath(item.replace("~", join(self.config_dir, folder)))
-                if isfile(test_file):
-                    return test_file.replace("\\", "/")
-        return item
 
     def make_cfg_file(self):
         """

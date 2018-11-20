@@ -1,4 +1,3 @@
-from os.path import isfile, join, normpath
 from argparse import ArgumentParser
 import yaml
 from .utils import file_read, file_write
@@ -17,20 +16,6 @@ class FlightScript:
 
     def save_cfg(self):
         file_write("cfg.yaml", yaml.dump(self.cfg), self.cfg.get("temp-dir"))
-
-    def expand_directories(self, item, key=""):
-        """
-        Look if item is a file in the configuration directory and return the path if
-        it is. Searches first for the given path, then looks into a subfolder given by
-        key and finally in the "misc" subfolder. If no file is found, just return item.
-        """
-        if isinstance(item, str) and "~/" in item:
-            for folder in ["", key, "misc"]:
-                test_file = normpath(item.replace("~", join(self.cfg.get("config-dir"),
-                                                            folder)))
-                if isfile(test_file):
-                    return test_file
-        return item
 
 
 class PreFlightScript(FlightScript):

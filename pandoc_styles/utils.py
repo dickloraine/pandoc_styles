@@ -3,7 +3,7 @@
 import logging
 import subprocess
 from os import chdir, getcwd
-from os.path import join as pjoin
+from os.path import join, expanduser, isfile, normpath
 from contextlib import contextmanager
 
 
@@ -11,7 +11,7 @@ def file_read(file_name, *path, encoding="utf-8"):
     '''Just a wrapper, since nearly always only read or write are used in this script'''
     if path:
         path = path + (file_name,)
-        file_name = pjoin(path[0], *path[1:])
+        file_name = join(path[0], *path[1:])
     with open(file_name, encoding=encoding) as ffile:
         return ffile.read()
 
@@ -20,7 +20,7 @@ def file_write(file_name, string, *path, mode="w", encoding="utf-8"):
     '''Just a wrapper, since nearly always only read or write are used in this script'''
     if path:
         path = path + (file_name,)
-        file_name = pjoin(path[0], *path[1:])
+        file_name = join(path[0], *path[1:])
     with open(file_name, mode, encoding=encoding) as ffile:
         ffile.write(string)
     return file_name
@@ -62,3 +62,17 @@ def change_dir(new_dir):
     chdir(new_dir)
     yield
     chdir(current_dir)
+
+def expand_directories(item, key=""):
+    """
+    Look if item is a file in the configuration directory and return the path if
+    it is. Searches first for the given path, then looks into a subfolder given by
+    key and finally in the "misc" subfolder. If no file is found, just return item.
+    """
+    if isinstance(item, str) and "~/" in item:
+        config_dir = join(expanduser("~"), "pandoc_styles")
+        for folder in ["", key, "misc"]:
+            test_file = normpath(item.replace("~", join(config_dir, folder)))
+            if isfile(test_file):
+                return test_file.replace("\\", "/")
+    return item
