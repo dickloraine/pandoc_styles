@@ -23,23 +23,15 @@ class PandocStyles:
         self.metadata = metadata
         self.sfrom = sfrom
         self.config_dir = join(expanduser("~"), "pandoc_styles")
-        self.use_styles = use_styles if use_styles else []
+        self.use_styles = use_styles or []
         self.styles = yaml.load(file_read(style_file)) if style_file else \
                       yaml.load(file_read("styles.yaml", self.config_dir))
         self.pandoc_metadata = self.get_pandoc_metadata()
-        self.target = target if target else self.pandoc_metadata.get("destination", "")
-        if output_name:
-            self.output_name = output_name
-        elif self.pandoc_metadata.get("output-name"):
-            self.output_name = self.pandoc_metadata["output-name"]
-        else:
-            self.output_name = f'{files[0].rpartition(".")[0]}'
-        if formats:
-            self.formats = formats
-        elif "formats" in self.pandoc_metadata:
-            self.formats = make_list(self.pandoc_metadata["formats"])
-        else:
-            self.formats = ["pdf", "html"]
+        self.target = target or self.pandoc_metadata.get("destination", "")
+        self.output_name = output_name or self.pandoc_metadata.get("output-name") or \
+                           f'{files[0].rpartition(".")[0]}'
+        self.formats = formats or make_list(self.pandoc_metadata.get("formats", [])) or \
+                       ["pdf", "html"]
         self.actual_temp_dir = TemporaryDirectory()
         self.temp_dir = self.actual_temp_dir.name
         self.python_path = ""
@@ -82,7 +74,7 @@ class PandocStyles:
 
     def get_pandoc_metadata(self):
         """Get the metadata yaml block in the first source file or given metadata file"""
-        ffile = self.metadata if self.metadata else self.files[0]
+        ffile = self.metadata or self.files[0]
         md = re.match(r'.?-{3}(.*?)(\n\.{3}\n|\n-{3}\n)',
                       file_read(ffile), flags=re.DOTALL)
         if md:
@@ -96,9 +88,9 @@ class PandocStyles:
             config = yaml.load(file_read("config.yaml", self.config_dir))
         except FileNotFoundError:
             return
-        if  config.get("pandoc-path"):
+        if config.get("pandoc-path"):
             sys.path.append(normpath(dirname(config["pandoc-path"])))
-        if  config.get("python-path"):
+        if config.get("python-path"):
             self.python_path = normpath(config["python-path"])
 
     def get_cfg(self):
@@ -107,7 +99,7 @@ class PandocStyles:
         if self.pandoc_metadata is None:
             return cfg
 
-        styles = self.use_styles if self.use_styles else self.pandoc_metadata.get("style")
+        styles = self.use_styles or self.pandoc_metadata.get("style")
         if styles:
             start_style = self.styles.get("All", {})
             start_style["inherits"] = styles
@@ -117,11 +109,12 @@ class PandocStyles:
         # in the cfg
         for key, val in self.pandoc_metadata.items():
             if key in cfg.get("metadata", {}):
-                cfg["metadata"][key] = val
+                cfg_ = cfg["metadata"]
             elif key in cfg.get("command-line", {}):
-                cfg["command-line"][key] = val
-            elif key in cfg:
-                self.update_dict(cfg, {key: val})
+                cfg_ = cfg["command-line"]
+            else:
+                cfg_ = cfg
+            self.update_dict(cfg_, {key: val})
 
         if "style-definition" in self.pandoc_metadata:
             self.update_dict(cfg,
@@ -243,10 +236,7 @@ class PandocStyles:
             css_file_path = relpath(css_file_path, self.target).replace("\\", "/")
         except ValueError:
             pass
-
-        if "command-line" not in self.cfg:
-            self.cfg["command-line"] = dict()
-        self.update_dict(self.cfg["command-line"], {"css": [css_file_path]})
+        self.update_dict(self.cfg, {"command-line": {"css": [css_file_path]}})
 
     def add_to_template(self):
         """Add code to the template given in the style definition"""
@@ -280,9 +270,7 @@ class PandocStyles:
         template = self.replace_in_text(pattern, repl, template, add, count)
         if original_template != template:
             template = file_write("new.template", template, self.temp_dir)
-            if "command-line" not in self.cfg:
-                self.cfg["command-line"] = dict()
-            self.cfg["command-line"]["template"] = template
+            self.update_dict(self.cfg, {"command-line": {"template": template}})
 
     def replace_in_output(self):
         """Replace text in the output with text given in the style definition"""
