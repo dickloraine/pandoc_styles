@@ -102,9 +102,9 @@ class PandocStyles:
             config = yaml.load(file_read(CFG_FILE, self.config_dir))
         except FileNotFoundError:
             return
-        if config.get("pandoc-path"):
+        if config.get(CFG_PANDOC_PATH):
             sys.path.append(normpath(dirname(config[CFG_PANDOC_PATH])))
-        if config.get("python-path"):
+        if config.get(CFG_PYTHON_PATH):
             self.python_path = normpath(config[CFG_PYTHON_PATH])
 
     def get_cfg(self):
