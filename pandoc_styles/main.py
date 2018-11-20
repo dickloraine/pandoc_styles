@@ -5,14 +5,28 @@ import sys
 from argparse import ArgumentParser
 from copy import deepcopy
 from os import getcwd, listdir, mkdir
-from os.path import dirname, expanduser, join, normpath, isdir, basename, relpath
+from os.path import (basename, dirname, expanduser, isdir, join, normpath, relpath)
 from shutil import copy
 from tempfile import TemporaryDirectory
-import yaml
+
 import sass
+import yaml
+
+from .constants import (ALL_FMTS, CFG_FILE, CFG_PANDOC_PATH, CFG_PYTHON_PATH,
+                        CFG_TEMP_FILE, CSS, HTML, LATEX, MD_ADD_TO_TEMPLATE,
+                        MD_CFG_DIR, MD_CMD_LINE, MD_CURRENT_FILES,
+                        MD_DESTINATION, MD_FORMATS, MD_INHERITS, MD_METADATA,
+                        MD_OUTPUT_NAME, MD_PANDOC_MD, MD_PANDOC_STYLES_MD,
+                        MD_POSTFLIGHT, MD_PREFLIGHT, MD_REPL_ADD,
+                        MD_REPL_COUNT, MD_REPL_IN_OUTPUT, MD_REPL_IN_TEMPLATE,
+                        MD_REPL_PATTERN, MD_REPL_TEXT, MD_SASS, MD_SASS_APPEND,
+                        MD_SASS_FILES, MD_SASS_OUTPUT_PATH, MD_SASS_VARS,
+                        MD_STYLE, MD_STYLE_DEF, MD_TEMP_DIR, MD_TEMPLATE,
+                        MODULE_NAME, PANDOC_CMD, PATH_CSS, PATH_SASS,
+                        PATH_TEMP, PDF, STYLES_FILE, USER_DIR_PREFIX)
 from .format_mappings import FORMAT_TO_EXTENSION
-from .utils import (change_dir, file_read, file_write, has_extension,
-                    make_list, run_process, expand_directories)
+from .utils import (change_dir, expand_directories, file_read, file_write,
+                    has_extension, make_list, run_process)
 
 
 class PandocStyles:
@@ -22,16 +36,16 @@ class PandocStyles:
         self.files = files
         self.metadata = metadata
         self.sfrom = sfrom
-        self.config_dir = join(expanduser("~"), "pandoc_styles")
+        self.config_dir = join(expanduser("~"), MODULE_NAME)
         self.use_styles = use_styles or []
         self.styles = yaml.load(file_read(style_file)) if style_file else \
-                      yaml.load(file_read("styles.yaml", self.config_dir))
+                      yaml.load(file_read(STYLES_FILE, self.config_dir))
         self.pandoc_metadata = self.get_pandoc_metadata()
-        self.target = target or self.pandoc_metadata.get("destination", "")
-        self.output_name = output_name or self.pandoc_metadata.get("output-name") or \
+        self.target = target or self.pandoc_metadata.get(MD_DESTINATION, "")
+        self.output_name = output_name or self.pandoc_metadata.get(MD_OUTPUT_NAME) or \
                            f'{files[0].rpartition(".")[0]}'
-        self.formats = formats or make_list(self.pandoc_metadata.get("formats", [])) or \
-                       ["pdf", "html"]
+        self.formats = formats or make_list(self.pandoc_metadata.get(MD_FORMATS, [])) or \
+                       [HTML, PDF]
         self.actual_temp_dir = TemporaryDirectory()
         self.temp_dir = self.actual_temp_dir.name
         self.python_path = ""
@@ -54,7 +68,7 @@ class PandocStyles:
         """
         # initialize attributes
         self.fmt = fmt
-        self.to = "latex" if fmt == "pdf" else fmt
+        self.to = LATEX if fmt == PDF else fmt
         self.output_file = f"{self.output_name}.{FORMAT_TO_EXTENSION.get(fmt, fmt)}"
         if self.target:
             self.output_file = join(self.target, self.output_file)
@@ -66,7 +80,7 @@ class PandocStyles:
         self.replace_in_template()
         pandoc_args = self.get_pandoc_args()
         logging.debug(f"Command-line args: {pandoc_args}")
-        success = run_process("pandoc", pandoc_args)
+        success = run_process(PANDOC_CMD, pandoc_args)
         if success:
             self.replace_in_output()
             self.postflight()
@@ -85,13 +99,13 @@ class PandocStyles:
     def do_user_config(self):
         """Read the config file and set the options"""
         try:
-            config = yaml.load(file_read("config.yaml", self.config_dir))
+            config = yaml.load(file_read(CFG_FILE, self.config_dir))
         except FileNotFoundError:
             return
         if config.get("pandoc-path"):
-            sys.path.append(normpath(dirname(config["pandoc-path"])))
+            sys.path.append(normpath(dirname(config[CFG_PANDOC_PATH])))
         if config.get("python-path"):
-            self.python_path = normpath(config["python-path"])
+            self.python_path = normpath(config[CFG_PYTHON_PATH])
 
     def get_cfg(self):
         """Get the style configuration for the current format"""
@@ -99,43 +113,45 @@ class PandocStyles:
         if self.pandoc_metadata is None:
             return cfg
 
-        styles = self.use_styles or self.pandoc_metadata.get("style")
+        styles = self.use_styles or self.pandoc_metadata.get(MD_STYLE)
         if styles:
-            start_style = self.styles.get("All", {})
-            start_style["inherits"] = styles
+            start_style = self.styles.get(ALL_FMTS, {})
+            start_style[MD_INHERITS] = styles
             cfg = self.get_styles(start_style)
 
         # update fields in the cfg with fields in the document metadata, if they exist
         # in the cfg
         for key, val in self.pandoc_metadata.items():
-            if key in cfg.get("metadata", {}):
-                cfg_ = cfg["metadata"]
-            elif key in cfg.get("command-line", {}):
-                cfg_ = cfg["command-line"]
-            else:
+            if key in cfg.get(MD_METADATA, {}):
+                cfg_ = cfg[MD_METADATA]
+            elif key in cfg.get(MD_CMD_LINE, {}):
+                cfg_ = cfg[MD_CMD_LINE]
+            elif key in cfg:
                 cfg_ = cfg
+            else:
+                continue
             self.update_dict(cfg_, {key: val})
 
-        if "style-definition" in self.pandoc_metadata:
+        if MD_STYLE_DEF in self.pandoc_metadata:
             self.update_dict(cfg,
-                             self.style_to_cfg(self.pandoc_metadata["style-definition"]))
+                             self.style_to_cfg(self.pandoc_metadata[MD_STYLE_DEF]))
 
         # add file list and temporary directory, so that preflight scripts can use them
-        cfg["current-files"] = self.files.copy()
-        cfg["temp-dir"] = self.temp_dir
-        cfg["config-dir"] = self.config_dir
-        cfg["pandoc-metadata"] = self.pandoc_metadata
+        cfg[MD_CURRENT_FILES] = self.files.copy()
+        cfg[MD_TEMP_DIR] = self.temp_dir
+        cfg[MD_CFG_DIR] = self.config_dir
+        cfg[MD_PANDOC_MD] = self.pandoc_metadata
         return cfg
 
     def get_styles(self, style):
         """
         Gets the data for all inherited styles
         """
-        if "inherits" not in style:
+        if not style.get(MD_INHERITS):
             return self.style_to_cfg(style)
 
         cfg = dict()
-        for extra_style in make_list(style["inherits"]):
+        for extra_style in make_list(style[MD_INHERITS]):
             extra_style = self.get_styles(self.styles[extra_style])
             self.update_dict(cfg, extra_style)
         self.update_dict(cfg, self.style_to_cfg(style))
@@ -149,10 +165,10 @@ class PandocStyles:
             pandoc_args.append(f'--from {self.sfrom}')
 
         # add pandoc_styles cfg, so that filters can use it
-        pandoc_args.append(f'-M pandoc_styles_="{self.make_cfg_file()}"')
+        pandoc_args.append(f'-M {MD_PANDOC_STYLES_MD}="{self.make_cfg_file()}"')
 
         complex_data = {}
-        for group, prefix in [("command-line", "--"), ("metadata", "-V ")]:
+        for group, prefix in [(MD_CMD_LINE, "--"), (MD_METADATA, "-V ")]:
             if group in self.cfg:
                 for key, value in self.cfg[group].items():
                     for item in make_list(value):
@@ -167,7 +183,7 @@ class PandocStyles:
                             item = expand_directories(item, key)
                             pandoc_args.append(f'{prefix}{key}="{item}"')
 
-        for ffile in self.cfg["current-files"]:
+        for ffile in self.cfg[MD_CURRENT_FILES]:
             pandoc_args.append(f'"{ffile}"')
 
         if self.metadata:
@@ -181,12 +197,12 @@ class PandocStyles:
 
     def preflight(self):
         """Run all preflight scripts given in the style definition"""
-        if "preflight" not in self.cfg:
+        if MD_PREFLIGHT not in self.cfg:
             return
-        self.cfg["current-files"] = [copy(f, self.temp_dir)
-                                     for f in self.cfg["current-files"]]
-        for script in make_list(self.cfg["preflight"]):
-            script = expand_directories(script, "preflight")
+        self.cfg[MD_CURRENT_FILES] = [copy(f, self.temp_dir)
+                                      for f in self.cfg[MD_CURRENT_FILES]]
+        for script in make_list(self.cfg[MD_PREFLIGHT]):
+            script = expand_directories(script, MD_PREFLIGHT)
             if self.python_path and has_extension(script, "py"):
                 script = f'{self.python_path} "{script}"'
             cfg = self.make_cfg_file()
@@ -195,11 +211,11 @@ class PandocStyles:
 
     def postflight(self):
         """Run all postflight scripts given in the style definition"""
-        if "postflight" not in self.cfg:
+        if MD_POSTFLIGHT not in self.cfg:
             return
         cfg = self.make_cfg_file()
-        for script in make_list(self.cfg["postflight"]):
-            script = expand_directories(script, "postflight")
+        for script in make_list(self.cfg[MD_POSTFLIGHT]):
+            script = expand_directories(script, MD_POSTFLIGHT)
             if self.python_path and has_extension(script, "py"):
                 script = f'{self.python_path} "{script}"'
             run_process(script, f'"{self.output_file}" --cfg "{cfg}" '
@@ -207,24 +223,24 @@ class PandocStyles:
 
     def process_sass(self):
         """Build the css out of the sass informations given in the style definition"""
-        if "sass" not in self.cfg:
+        if MD_SASS not in self.cfg:
             return
 
         css = [f'${var}: {str(val).lower() if isinstance(val, bool) else str(val)};'
-               for var, val in self.cfg["sass"].get("variables", {}).items()]
-        sass_files = make_list(self.cfg["sass"]["files"])
-        css_name = f"{basename(sass_files[0]).rpartition('.')[0]}.css"
-        css.extend([file_read(expand_directories(f, "sass")) for f in sass_files])
-        css.extend(make_list(self.cfg["sass"].get("append", [])))
+               for var, val in self.cfg[MD_SASS].get(MD_SASS_VARS, {}).items()]
+        sass_files = make_list(self.cfg[MD_SASS][MD_SASS_FILES])
+        css_name = f"{basename(sass_files[0]).rpartition('.')[0]}.{CSS}"
+        css.extend([file_read(expand_directories(f, MD_SASS)) for f in sass_files])
+        css.extend(make_list(self.cfg[MD_SASS].get(MD_SASS_APPEND, [])))
         css = "\n".join(css)
         css = sass.compile(string=css, output_style='expanded',
-                           include_paths=[join(self.config_dir, "sass")])
+                           include_paths=[join(self.config_dir, PATH_SASS)])
 
-        css_file_path = self.cfg["sass"].get("output-path")
-        if css_file_path == "temp":
+        css_file_path = self.cfg[MD_SASS].get(MD_SASS_OUTPUT_PATH)
+        if css_file_path == PATH_TEMP:
             css_file_path = self.temp_dir
-        elif css_file_path == "~/":
-            css_file_path = join(self.config_dir, "css")
+        elif css_file_path == USER_DIR_PREFIX:
+            css_file_path = join(self.config_dir, PATH_CSS)
         elif css_file_path:
             css_file_path = join(self.target, css_file_path)
         else:
@@ -236,7 +252,7 @@ class PandocStyles:
             css_file_path = relpath(css_file_path, self.target).replace("\\", "/")
         except ValueError:
             pass
-        self.update_dict(self.cfg, {"command-line": {"css": [css_file_path]}})
+        self.update_dict(self.cfg, {MD_CMD_LINE: {CSS: [css_file_path]}})
 
     def add_to_template(self):
         """Add code to the template given in the style definition"""
@@ -244,23 +260,23 @@ class PandocStyles:
             return
         self.modify_template(
             r'(\$for\(header-includes\)\$\n\$header-includes\$\n\$endfor\$)',
-            self.cfg["add-to-template"], True)
+            self.cfg[MD_ADD_TO_TEMPLATE], True)
 
     def replace_in_template(self):
         """Replace code in the template with other code given in the style definition"""
-        if "replace-in-template" not in self.cfg:
+        if MD_REPL_IN_TEMPLATE not in self.cfg:
             return
-        for item in make_list(self.cfg["replace-in-template"]):
-            self.modify_template(item["pattern"], item.get("replacement-text", ""),
-                                 item.get("add", False), item.get("count", 0))
+        for item in make_list(self.cfg[MD_REPL_IN_TEMPLATE]):
+            self.modify_template(item[MD_REPL_PATTERN], item.get(MD_REPL_TEXT, ""),
+                                 item.get(MD_REPL_ADD, False), item.get(MD_REPL_COUNT, 0))
 
     def modify_template(self, pattern, repl, add=False, count=0):
         """Helper method to do the actual replacement"""
         try:
-            template = file_read(self.cfg["command-line"]["template"])
+            template = file_read(self.cfg[MD_CMD_LINE][MD_TEMPLATE])
         except (KeyError, FileNotFoundError):
             try:
-                template = subprocess.run(f'pandoc -D {self.to}',
+                template = subprocess.run(f'{PANDOC_CMD} -D {self.to}',
                                           stdout=subprocess.PIPE, encoding="utf-8",
                                           check=True)
                 template = template.stdout
@@ -270,16 +286,16 @@ class PandocStyles:
         template = self.replace_in_text(pattern, repl, template, add, count)
         if original_template != template:
             template = file_write("new.template", template, self.temp_dir)
-            self.update_dict(self.cfg, {"command-line": {"template": template}})
+            self.update_dict(self.cfg, {MD_CMD_LINE: {MD_TEMPLATE: template}})
 
     def replace_in_output(self):
         """Replace text in the output with text given in the style definition"""
-        if "replace-in-output" not in self.cfg:
+        if MD_REPL_IN_OUTPUT not in self.cfg:
             return
         original_text = text = file_read(self.output_file)
-        for item in self.cfg["replace-in-output"]:
-            text = self.replace_in_text(item["pattern"], item.get("replacement-text", ""),
-                                        text, item.get("add"), item.get("count", 0))
+        for item in self.cfg[MD_REPL_IN_OUTPUT]:
+            text = self.replace_in_text(item[MD_REPL_PATTERN], item.get(MD_REPL_TEXT, ""),
+                                        text, item.get(MD_REPL_ADD), item.get(MD_REPL_COUNT, 0))
         if original_text != text:
             file_write(self.output_file, text)
 
@@ -294,7 +310,7 @@ class PandocStyles:
     def style_to_cfg(self, style):
         """Transform a style to the configuration for the current format"""
         cfg = dict()
-        for group in ["all", self.fmt]:
+        for group in [ALL_FMTS, self.fmt]:
             if group in style:
                 self.update_dict(cfg, style[group])
         return cfg
@@ -321,11 +337,11 @@ class PandocStyles:
         Dump the configuration for a format into a file. This way filter and flight
         scripts can read the configuration.
         """
-        return file_write("cfg.yaml", yaml.dump(self.cfg), self.temp_dir)
+        return file_write(CFG_TEMP_FILE, yaml.dump(self.cfg), self.temp_dir)
 
     def read_cfg_file(self):
         """Read the cfg file"""
-        self.cfg = yaml.load(file_read("cfg.yaml", self.temp_dir))
+        self.cfg = yaml.load(file_read(CFG_TEMP_FILE, self.temp_dir))
 
 
 def main():

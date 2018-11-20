@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 import yaml
+from .constants import CFG_TEMP_FILE, MD_TEMP_DIR, MD_CURRENT_FILES
 from .utils import file_read, file_write
 
 
@@ -15,7 +16,7 @@ class FlightScript:
         pass
 
     def save_cfg(self):
-        file_write("cfg.yaml", yaml.dump(self.cfg), self.cfg.get("temp-dir"))
+        file_write(CFG_TEMP_FILE, yaml.dump(self.cfg), self.cfg.get(MD_TEMP_DIR))
 
 
 class PreFlightScript(FlightScript):
@@ -30,7 +31,7 @@ class PreFlightScript(FlightScript):
         args = parser.parse_args()
 
         cfg = yaml.load(file_read(args.cfg))
-        return cfg, args.fmt, cfg["current-files"]
+        return cfg, args.fmt, cfg[MD_CURRENT_FILES]
 
 
 def run_preflight_script(func):

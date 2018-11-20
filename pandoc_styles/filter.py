@@ -7,6 +7,8 @@ from panflute import (  # pylint: disable=W0611
     CodeBlock, Link, Image, BulletList, OrderedList, DefinitionList,
     LineBlock, Header, Quoted, Cite, Table, ListContainer,
     convert_text, Element, run_filter)
+from .constants import (HTML, PDF, LATEX, EPUB, MD_PANDOC_STYLES_MD,
+                        FIL_OTHER, FIL_ALL, FIL_CHECK)
 from .utils import file_read, file_write
 
 
@@ -50,10 +52,10 @@ class PandocStylesFilter():
     def _get_format(self):
         self.fmt = self.doc.format
         self.real_fmt = self.fmt
-        if self.fmt == "pdf":
-            self.fmt = "latex"
-        elif self.fmt == "epub" or self.fmt == "epub3":
-            self.fmt = "html"
+        if self.fmt == PDF:
+            self.fmt = LATEX
+        elif self.fmt == EPUB:
+            self.fmt = HTML
 
     def check(self):
         return (self.filter_type is None or isinstance(self.elem, self.filter_type)) \
@@ -76,14 +78,14 @@ class PandocStylesFilter():
     def get_pandoc_styles_metadata(self):
         '''Return the pandoc_styles cfg as a dictionary'''
         try:
-            self.cfg = yaml.load(file_read(self.get_metadata('pandoc_styles_')))
+            self.cfg = yaml.load(file_read(self.get_metadata(MD_PANDOC_STYLES_MD)))
         except FileNotFoundError:
             self.cfg = {}
         return self.cfg
 
     def save_pandoc_styles_metadata(self):
         '''Save the given cfg in the cfg-file'''
-        file_write(self.get_metadata('pandoc_styles_'), yaml.dump(self.cfg))
+        file_write(self.get_metadata(MD_PANDOC_STYLES_MD), yaml.dump(self.cfg))
 
     def stringify(self, elem=None):
         '''Stringify an element'''
@@ -126,11 +128,11 @@ class TransformFilter(PandocStylesFilter):
             self.tags = tags
         if filter_type is not None:
             self.filter_type = filter_type
-        self._add_method(latex, "latex")
-        self._add_method(html, "html")
-        self._add_method(other, "other")
-        self._add_method(all_formats, "all_formats")
-        self._add_method(check, "check")
+        self._add_method(latex, LATEX)
+        self._add_method(html, HTML)
+        self._add_method(other, FIL_OTHER)
+        self._add_method(all_formats, FIL_ALL)
+        self._add_method(check, FIL_CHECK)
 
     def _pandoc_filter(self, elem, doc):
         self._init_filter(elem, doc)
@@ -143,9 +145,9 @@ class TransformFilter(PandocStylesFilter):
 
     # pylint: disable=E1128
     def _call_filter(self):
-        if self.fmt == 'latex':
+        if self.fmt == LATEX:
             self.new_text = self.latex()
-        elif self.fmt == 'html':
+        elif self.fmt == HTML:
             self.new_text = self.html()
         else:
             self.new_text = self.other()

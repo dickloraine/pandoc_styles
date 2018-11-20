@@ -5,6 +5,7 @@ import subprocess
 from os import chdir, getcwd
 from os.path import join, expanduser, isfile, normpath
 from contextlib import contextmanager
+from .constants import MODULE_NAME, USER_DIR_PREFIX, PATH_MISC
 
 
 def file_read(file_name, *path, encoding="utf-8"):
@@ -69,9 +70,9 @@ def expand_directories(item, key=""):
     it is. Searches first for the given path, then looks into a subfolder given by
     key and finally in the "misc" subfolder. If no file is found, just return item.
     """
-    if isinstance(item, str) and "~/" in item:
-        config_dir = join(expanduser("~"), "pandoc_styles")
-        for folder in ["", key, "misc"]:
+    if isinstance(item, str) and USER_DIR_PREFIX in item:
+        config_dir = join(expanduser("~"), MODULE_NAME)
+        for folder in ["", key, PATH_MISC]:
             test_file = normpath(item.replace("~", join(config_dir, folder)))
             if isfile(test_file):
                 return test_file.replace("\\", "/")
