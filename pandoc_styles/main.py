@@ -126,10 +126,8 @@ class PandocStyles:
                 cfg_ = cfg[MD_METADATA]
             elif key in cfg.get(MD_CMD_LINE, {}):
                 cfg_ = cfg[MD_CMD_LINE]
-            elif key in cfg:
-                cfg_ = cfg
             else:
-                continue
+                cfg_ = cfg
             self.update_dict(cfg_, {key: val})
 
         if MD_STYLE_DEF in self.pandoc_metadata:
