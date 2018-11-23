@@ -12,18 +12,7 @@ from tempfile import TemporaryDirectory
 import sass
 import yaml
 
-from .constants import (ALL_FMTS, CFG_FILE, CFG_PANDOC_PATH, CFG_PYTHON_PATH,
-                        CFG_TEMP_FILE, CSS, HTML, LATEX, MD_ADD_TO_TEMPLATE,
-                        MD_CFG_DIR, MD_CMD_LINE, MD_CURRENT_FILES,
-                        MD_DESTINATION, MD_FORMATS, MD_INHERITS, MD_METADATA,
-                        MD_OUTPUT_NAME, MD_PANDOC_MD, MD_PANDOC_STYLES_MD,
-                        MD_POSTFLIGHT, MD_PREFLIGHT, MD_REPL_ADD,
-                        MD_REPL_COUNT, MD_REPL_IN_OUTPUT, MD_REPL_IN_TEMPLATE,
-                        MD_REPL_PATTERN, MD_REPL_TEXT, MD_SASS, MD_SASS_APPEND,
-                        MD_SASS_FILES, MD_SASS_OUTPUT_PATH, MD_SASS_VARS,
-                        MD_STYLE, MD_STYLE_DEF, MD_TEMP_DIR, MD_TEMPLATE,
-                        MODULE_NAME, PANDOC_CMD, PATH_CSS, PATH_SASS,
-                        PATH_TEMP, PDF, STYLES_FILE, USER_DIR_PREFIX)
+from .constants import *  # pylint: disable=W0401, W0614
 from .format_mappings import FORMAT_TO_EXTENSION
 from .utils import (change_dir, expand_directories, file_read, file_write,
                     has_extension, make_list, run_process)
@@ -115,7 +104,7 @@ class PandocStyles:
 
         styles = self.use_styles or self.pandoc_metadata.get(MD_STYLE)
         if styles:
-            start_style = self.styles.get(ALL_FMTS, {})
+            start_style = self.styles.get(ALL_STYLE, {})
             start_style[MD_INHERITS] = styles
             cfg = self.get_styles(start_style)
 
