@@ -3,24 +3,24 @@
 This script allows you to define styles for pandoc. In styles you can define, with which arguments pandoc should be invoked for different formats. In addition it allows to run scripts before and after a conversion and gives much power to these scripts and to filters.
 
 - [pandoc_styles](#pandocstyles)
-  - [Installation](#installation)
-    - [Requirements](#requirements)
-    - [Install](#install)
-    - [Setup](#setup)
-  - [Usage](#usage)
-  - [Defining Styles](#defining-styles)
-    - [Basic Usage](#basic-usage)
-    - [Inheritance](#inheritance)
-  - [Advanced Feature](#advanced-feature)
-    - [Adressing files in the configuration folder](#adressing-files-in-the-configuration-folder)
-    - [Preflight scripts](#preflight-scripts)
-    - [Process Sass](#process-sass)
-    - [Add to template](#add-to-template)
-    - [Replace in template](#replace-in-template)
-    - [Replace in output](#replace-in-output)
-    - [Postflight](#postflight)
-    - [Filter](#filter)
-    - [Advanced Example](#advanced-example)
+    - [Installation](#installation)
+        - [Requirements](#requirements)
+        - [Install](#install)
+        - [Setup](#setup)
+    - [Usage](#usage)
+    - [Defining Styles](#defining-styles)
+        - [Basic Usage](#basic-usage)
+        - [Inheritance](#inheritance)
+    - [Advanced Feature](#advanced-feature)
+        - [Adressing files in the configuration folder](#adressing-files-in-the-configuration-folder)
+        - [Preflight scripts](#preflight-scripts)
+        - [Process Sass](#process-sass)
+        - [Add to template](#add-to-template)
+        - [Replace in template](#replace-in-template)
+        - [Replace in output](#replace-in-output)
+        - [Postflight](#postflight)
+        - [Filter](#filter)
+        - [Advanced Example](#advanced-example)
 
 ## Installation
 
@@ -37,6 +37,7 @@ To use this script, you need the following:
 ### Install
 
 Download the latest release and navigate to it. Open the console and enter:
+
     pip3 install "release_file_name"
 
 <!-- Now you need to install this script itself. Open the console in the folder and enter:
