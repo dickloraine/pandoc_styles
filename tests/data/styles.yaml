@@ -108,4 +108,27 @@ Test_02:
       test_02_html_md_03:
         - html_md_4
         - html_md_5
+
+Func_test:
+  all:
+    metadata:
+      lang: en
+
+  pdf:
+    command-line:
+      pdf-engine: xelatex
+    metadata:
+      mainfont: Adobe Garamond Pro
+      geometry: "a4paper, twoside, top=2cm, bottom=2cm, left=2.5cm"
+      header-includes:
+        - |
+          \usepackage{titling}
+          \pretitle{\begin{center}\LARGE\textbf}
+          \posttitle{\par\end{center}\vskip 0.5em}
+          \preauthor{\begin{center}
+          \large \lineskip 0.5em%
+          \begin{tabular}[t]{c}}
+          \postauthor{\end{tabular}\par\end{center}}
+          \predate{\begin{center}\large}
+          \postdate{\par\end{center}}
 ...

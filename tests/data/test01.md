@@ -13,7 +13,7 @@ cover-image: ./cover.jpg
 formats:
     - pdf
     - html
-style: Novel
+style: Func_test
 ...
 
 # Mr. Sherlock Holmes

@@ -36,14 +36,17 @@ To use this script, you need the following:
 
 ### Install
 
-Now you need to install this script itself. Download or clone it and navigate to its folder. Open the console in the folder and enter:
+Until I upload this package to pypi, you need to clone this repository and you need poetry to build it.
+
+<!-- Now you need to install this script itself. Open the console in the folder and enter:
 
     pip3 install pandoc_styles
+    pandoc_styles --init -->
 
 ### Setup
 
 Depending on your system, you may have to configure some settings for everything to work.
-Upon installation this script created the directory "pandoc_styles" in your user folder. Inside you can find the config.yaml file. Set the option in there that are needed for your system.
+Upon initialization this script created the directory "pandoc_styles" in your user folder. Inside you can find the config.yaml file. Set the option in there that are needed for your system.
 
 ## Usage
 

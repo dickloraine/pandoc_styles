@@ -6,8 +6,9 @@ from argparse import ArgumentParser
 from copy import deepcopy
 from os import getcwd, listdir, mkdir
 from os.path import (basename, dirname, expanduser, isdir, join, normpath, relpath)
-from shutil import copy
+from shutil import copy, copytree
 from tempfile import TemporaryDirectory
+from pkg_resources import resource_filename
 
 import sass
 import yaml
@@ -359,6 +360,8 @@ def main():
                         help='Path to the metadata file that should be used.')
     parser.add_argument('-w', '--working-dir', nargs='?', default=getcwd(),
                         help='The folder of the source files, for use in macros etc.')
+    parser.add_argument('--init', action='store_true',
+                        help='Create the user configuration folder')
     parser.add_argument('--log', nargs='?', default="INFO",
                         choices=["INFO", "DEBUG", "WARNING", "ERROR", "CRITICAL"],
                         help='The logging level. '
@@ -369,12 +372,24 @@ def main():
     logging.basicConfig(format='%(levelname)s: %(message)s',
                         level=getattr(logging, args.log))
 
+    # initialize config directory
+    if args.init:
+        config_dir = join(expanduser("~"), MODULE_NAME)
+        if not isdir(config_dir):
+            copytree(resource_filename(MODULE_NAME, 'config_dir'), config_dir)
+            logging.info("Created configuration directory: user/pandoc_styles!")
+        return
+
     if args.folder:
         if args.folder is True:
             args.folder = getcwd()
         args.files = [f for f in listdir(args.folder)
                       if has_extension(f, args.extensions)]
         args.files.sort()
+
+    if not args.files:
+        parser.print_help()
+        return
 
     with change_dir(args.working_dir):
         PandocStyles(args.files, args.to, args.from_format, args.styles, args.metadata,

@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "pandoc_styles"
+version = "0.3.0"
+description = "A script to convert files with pandoc using styles."
+authors = ["dickloraine <dickloraine@gmx.net>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/dickloraine/pandoc_styles"
+keywords = ["pandoc", "writing", "text", "conversion"]
+classifiers=[
+    'Development Status :: 4 - Beta',
+    'Programming Language :: Python :: 3.6',
+    'Operating System :: OS Independent',
+    'Natural Language :: English',
+    'Intended Audience :: End Users/Desktop',
+    'Topic :: Text Processing',
+    'License :: OSI Approved :: MIT License',
+]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+PyYAML = "^3.13"
+libsass = "^0.16.0"
+panflute = "^1.10"
+
+[tool.poetry.dev-dependencies]
+pylint = "^2.1"
+pytest = "^4.0"
+pre-commit = "^1.12.0"
+
+[tool.poetry.scripts]
+pandoc_styles = "pandoc_styles.main:main"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
