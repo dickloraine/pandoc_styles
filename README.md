@@ -36,7 +36,8 @@ To use this script, you need the following:
 
 ### Install
 
-Until I upload this package to pypi, you need to clone this repository and you need poetry to build it.
+Download the latest release and navigate to it. Open the console and enter:
+    pip3 install "release_file_name"
 
 <!-- Now you need to install this script itself. Open the console in the folder and enter:
 
