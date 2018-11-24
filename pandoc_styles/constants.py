@@ -4,7 +4,7 @@ from os.path import expanduser, join
 # Generel constants
 MODULE_NAME = "pandoc_styles"
 CONFIG_DIR = join(expanduser("~"), MODULE_NAME)
-STYLES_FILE = "styles.yaml"
+STYLE_FILE = join(CONFIG_DIR, "styles.yaml")
 PANDOC_CMD = "pandoc"
 CFG_TEMP_FILE = "cfg.yaml"
 ALL_STYLE = "All"
@@ -20,6 +20,8 @@ MD_CMD_LINE = "command-line"
 MD_DESTINATION = "destination"
 MD_OUTPUT_NAME = "output-name"
 MD_FORMATS = "formats"
+MD_FROM_FORMAT = "from-format"
+MD_STYLE_FILE = "style-file"
 MD_STYLE = "style"
 MD_INHERITS = "inherits"
 MD_STYLE_DEF = "style-definition"

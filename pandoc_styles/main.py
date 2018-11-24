@@ -23,13 +23,13 @@ class PandocStyles:
     """Handles the conversion with styles"""
     def __init__(self, files, formats=None, sfrom="", use_styles=None, metadata="",
                  target="", output_name="", style_file=None):
-        self.files = files
         self.metadata = metadata
-        self.sfrom = sfrom
-        self.use_styles = use_styles or []
-        self.styles = yaml.load(file_read(style_file)) if style_file else \
-                      yaml.load(file_read(STYLES_FILE, CONFIG_DIR))
+        self.files = files
         self.pandoc_metadata = self.get_pandoc_metadata()
+        self.sfrom = sfrom or self.pandoc_metadata.get(MD_FROM_FORMAT)
+        self.use_styles = use_styles or self.pandoc_metadata.get(MD_STYLE)
+        style_file = style_file or self.pandoc_metadata.get(MD_STYLE_FILE) or STYLE_FILE
+        self.styles = yaml.load(file_read(style_file))
         self.target = target or self.pandoc_metadata.get(MD_DESTINATION, "")
         self.output_name = output_name or self.pandoc_metadata.get(MD_OUTPUT_NAME) or \
                            f'{files[0].rpartition(".")[0]}'
@@ -102,10 +102,9 @@ class PandocStyles:
         if self.pandoc_metadata is None:
             return cfg
 
-        styles = self.use_styles or self.pandoc_metadata.get(MD_STYLE)
-        if styles:
+        if self.use_styles:
             start_style = self.styles.get(ALL_STYLE, {})
-            start_style[MD_INHERITS] = styles
+            start_style[MD_INHERITS] = self.use_styles
             cfg = self.get_styles(start_style)
 
         # update fields in the cfg with fields in the document metadata, if they exist
