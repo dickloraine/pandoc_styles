@@ -1,5 +1,9 @@
+from os.path import expanduser, join
+
+
 # Generel constants
 MODULE_NAME = "pandoc_styles"
+CONFIG_DIR = join(expanduser("~"), MODULE_NAME)
 STYLES_FILE = "styles.yaml"
 PANDOC_CMD = "pandoc"
 CFG_TEMP_FILE = "cfg.yaml"

@@ -5,7 +5,7 @@ import sys
 from argparse import ArgumentParser
 from copy import deepcopy
 from os import getcwd, listdir, mkdir
-from os.path import (basename, dirname, expanduser, isdir, join, normpath, relpath)
+from os.path import (basename, dirname, isdir, join, normpath, relpath)
 from shutil import copy, copytree
 from tempfile import TemporaryDirectory
 from pkg_resources import resource_filename
@@ -26,10 +26,9 @@ class PandocStyles:
         self.files = files
         self.metadata = metadata
         self.sfrom = sfrom
-        self.config_dir = join(expanduser("~"), MODULE_NAME)
         self.use_styles = use_styles or []
         self.styles = yaml.load(file_read(style_file)) if style_file else \
-                      yaml.load(file_read(STYLES_FILE, self.config_dir))
+                      yaml.load(file_read(STYLES_FILE, CONFIG_DIR))
         self.pandoc_metadata = self.get_pandoc_metadata()
         self.target = target or self.pandoc_metadata.get(MD_DESTINATION, "")
         self.output_name = output_name or self.pandoc_metadata.get(MD_OUTPUT_NAME) or \
@@ -89,7 +88,7 @@ class PandocStyles:
     def do_user_config(self):
         """Read the config file and set the options"""
         try:
-            config = yaml.load(file_read(CFG_FILE, self.config_dir))
+            config = yaml.load(file_read(CFG_FILE, CONFIG_DIR))
         except FileNotFoundError:
             return
         if config.get(CFG_PANDOC_PATH):
@@ -127,7 +126,7 @@ class PandocStyles:
         # add file list and temporary directory, so that preflight scripts can use them
         cfg[MD_CURRENT_FILES] = self.files.copy()
         cfg[MD_TEMP_DIR] = self.temp_dir
-        cfg[MD_CFG_DIR] = self.config_dir
+        cfg[MD_CFG_DIR] = CONFIG_DIR
         cfg[MD_PANDOC_MD] = self.pandoc_metadata
         return cfg
 
@@ -222,13 +221,13 @@ class PandocStyles:
         css.extend(make_list(self.cfg[MD_SASS].get(MD_SASS_APPEND, [])))
         css = "\n".join(css)
         css = sass.compile(string=css, output_style='expanded',
-                           include_paths=[join(self.config_dir, PATH_SASS)])
+                           include_paths=[join(CONFIG_DIR, PATH_SASS)])
 
         css_file_path = self.cfg[MD_SASS].get(MD_SASS_OUTPUT_PATH)
         if css_file_path == PATH_TEMP:
             css_file_path = self.temp_dir
         elif css_file_path == USER_DIR_PREFIX:
-            css_file_path = join(self.config_dir, PATH_CSS)
+            css_file_path = join(CONFIG_DIR, PATH_CSS)
         elif css_file_path:
             css_file_path = join(self.target, css_file_path)
         else:
@@ -374,9 +373,8 @@ def main():
 
     # initialize config directory
     if args.init:
-        config_dir = join(expanduser("~"), MODULE_NAME)
-        if not isdir(config_dir):
-            copytree(resource_filename(MODULE_NAME, 'config_dir'), config_dir)
+        if not isdir(CONFIG_DIR):
+            copytree(resource_filename(MODULE_NAME, 'config_dir'), CONFIG_DIR)
             logging.info("Created configuration directory: user/pandoc_styles!")
         return
 

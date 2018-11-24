@@ -3,9 +3,9 @@
 import logging
 import subprocess
 from os import chdir, getcwd
-from os.path import join, expanduser, isfile, normpath
+from os.path import join, isfile, normpath
 from contextlib import contextmanager
-from .constants import MODULE_NAME, USER_DIR_PREFIX, PATH_MISC
+from .constants import CONFIG_DIR, USER_DIR_PREFIX, PATH_MISC
 
 
 def file_read(file_name, *path, encoding="utf-8"):
@@ -71,9 +71,8 @@ def expand_directories(item, key=""):
     key and finally in the "misc" subfolder. If no file is found, just return item.
     """
     if isinstance(item, str) and USER_DIR_PREFIX in item:
-        config_dir = join(expanduser("~"), MODULE_NAME)
         for folder in ["", key, PATH_MISC]:
-            test_file = normpath(item.replace("~", join(config_dir, folder)))
+            test_file = normpath(item.replace("~", join(CONFIG_DIR, folder)))
             if isfile(test_file):
                 return test_file.replace("\\", "/")
     return item
