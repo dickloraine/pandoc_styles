@@ -243,7 +243,7 @@ class PandocStyles:
 
     def add_to_template(self):
         """Add code to the template given in the style definition"""
-        if "add-to-template" not in self.cfg:
+        if MD_ADD_TO_TEMPLATE not in self.cfg:
             return
         self.modify_template(
             r'(\$for\(header-includes\)\$\n\$header-includes\$\n\$endfor\$)',
