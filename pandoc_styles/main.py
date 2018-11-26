@@ -333,7 +333,7 @@ class PandocStyles:
 def main():
     """Parse the command line arguments and run PnadocStyles with the given args"""
     parser = ArgumentParser(description="Runs pandoc with options defined in styles")
-    parser.add_argument('files', nargs='?', default=None,
+    parser.add_argument('files', nargs='*', default=None,
                         help='The source files to be converted')
     parser.add_argument('-f', '--folder', nargs='?', const=True, default=None,
                         help='All files in the folder are converted together.')
