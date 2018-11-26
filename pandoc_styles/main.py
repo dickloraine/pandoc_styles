@@ -333,34 +333,36 @@ class PandocStyles:
 def main():
     """Parse the command line arguments and run PnadocStyles with the given args"""
     parser = ArgumentParser(description="Runs pandoc with options defined in styles")
-    parser.add_argument('files', nargs='*', default=None,
+    parser.add_argument('files', nargs='?', default=None,
                         help='The source files to be converted')
     parser.add_argument('-f', '--folder', nargs='?', const=True, default=None,
                         help='All files in the folder are converted together.')
-    parser.add_argument('--extensions', nargs='*', default=["md", "markdown"],
+    parser.add_argument('--extensions', nargs='+', default=["md", "markdown"],
+                        metavar="EXT",
                         help='If the folder option is used, only convert files '
                              'with the given extensions.')
-    parser.add_argument('-t', '--to', nargs='*', default=[],
+    parser.add_argument('-t', '--to', nargs='+', default=[], metavar="FMT",
                         help='The formats that should be produced.')
-    parser.add_argument('--from-format', nargs='?', default="",
+    parser.add_argument('--from-format', nargs=1, default="", metavar="FMT",
                         help='The format of the source files.')
-    parser.add_argument('-d', '--destination', nargs='?', default="",
+    parser.add_argument('-d', '--destination', nargs=1, default="", metavar="FOLDER",
                         help='The target folder')
-    parser.add_argument('-o', '--output-name', nargs='?', default="",
+    parser.add_argument('-o', '--output-name', nargs=1, default="",
                         help='The name of the output file without an extension. '
                              'Defaults to the name of the first input file.')
-    parser.add_argument('-s', '--styles', nargs='*', default=[],
+    parser.add_argument('-s', '--styles', nargs='+', default=[], metavar="STYLE",
                         help='Styles to use for the conversion.')
-    parser.add_argument('--style-file', nargs='?', default=None,
+    parser.add_argument('--style-file', nargs=1, default=None,
                         help='Path to the style file that should be used. '
                              'Defaults to the style file in the configuration folder.')
-    parser.add_argument('-m', '--metadata', nargs='?', default=None,
+    parser.add_argument('-m', '--metadata', nargs=1, default=None,
                         help='Path to the metadata file that should be used.')
-    parser.add_argument('-w', '--working-dir', nargs='?', default=getcwd(),
+    parser.add_argument('-w', '--working-dir', nargs=1, default=getcwd(),
+                        metavar="FOLDER",
                         help='The folder of the source files, for use in macros etc.')
     parser.add_argument('--init', action='store_true',
                         help='Create the user configuration folder')
-    parser.add_argument('--log', nargs='?', default="INFO",
+    parser.add_argument('--log', nargs=1, default="INFO",
                         choices=["INFO", "DEBUG", "WARNING", "ERROR", "CRITICAL"],
                         help='The logging level. '
                              'Defaults to "INFO"')
