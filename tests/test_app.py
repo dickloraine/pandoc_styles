@@ -15,7 +15,7 @@ def test_app(tmpdir):
         copy("./data/styles.yaml", tmpdir)
 
     ps = subprocess.run(f'{poetry_cmd()} run pandoc_styles test01.md -t html epub pdf '\
-                        f'--style-file=styles.yaml -w {tmpdir}',
+                        f'--style-file=styles.yaml -w "{tmpdir}"',
                         stdout=subprocess.PIPE, text=True)
     assert ps.returncode == 0
     assert ps.stdout == "INFO: Build html\nINFO: Build epub\nINFO: Build pdf\n"
