@@ -29,7 +29,8 @@ class PandocStyles:
         self.sfrom = sfrom or self.pandoc_metadata.get(MD_FROM_FORMAT)
         self.use_styles = use_styles or self.pandoc_metadata.get(MD_STYLE)
         style_file = style_file or \
-            expand_directories(self.pandoc_metadata.get(MD_STYLE_FILE)) or STYLE_FILE
+                     expand_directories(self.pandoc_metadata.get(MD_STYLE_FILE)) or \
+                     STYLE_FILE
         self.styles = yaml.load(file_read(style_file))
         self.target = target or self.pandoc_metadata.get(MD_DESTINATION, "")
         self.output_name = output_name or self.pandoc_metadata.get(MD_OUTPUT_NAME) or \
@@ -91,6 +92,8 @@ class PandocStyles:
         try:
             config = yaml.load(file_read(CFG_FILE, CONFIG_DIR))
         except FileNotFoundError:
+            logging.warning("No configuration file found! Please initialize "\
+                            "pandoc_styles with: pandoc_styles --init")
             return
         if config.get(CFG_PANDOC_PATH):
             sys.path.append(normpath(dirname(config[CFG_PANDOC_PATH])))
