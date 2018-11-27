@@ -376,7 +376,7 @@ def main():
     if args.init:
         if not isdir(CONFIG_DIR):
             copytree(resource_filename(MODULE_NAME, 'config_dir'), CONFIG_DIR)
-            logging.info("Created configuration directory: user/pandoc_styles!")
+            logging.info(f"Created configuration directory: {CONFIG_DIR}!")
         return
 
     if args.folder:
