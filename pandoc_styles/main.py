@@ -21,13 +21,14 @@ from .utils import (change_dir, expand_directories, file_read, file_write,
 
 class PandocStyles:
     """Handles the conversion with styles"""
-    def __init__(self, files, formats=None, sfrom="", use_styles=None, metadata="",
-                 target="", output_name="", style_file=None):
+    def __init__(self, files, formats=None, sfrom="", use_styles=None, add_styles=None,
+                 metadata="", target="", output_name="", style_file=None):
         self.metadata = metadata
         self.files = files
         self.pandoc_metadata = self.get_pandoc_metadata()
         self.sfrom = sfrom or self.pandoc_metadata.get(MD_FROM_FORMAT)
-        self.use_styles = use_styles or self.pandoc_metadata.get(MD_STYLE)
+        self.use_styles = use_styles or \
+            make_list(self.pandoc_metadata.get(MD_STYLE, [])).extend(add_styles or [])
         style_file = style_file or \
                      expand_directories(self.pandoc_metadata.get(MD_STYLE_FILE)) or \
                      STYLE_FILE
@@ -354,7 +355,11 @@ def main():
                         help='The name of the output file without an extension. '
                              'Defaults to the name of the first input file.')
     parser.add_argument('-s', '--styles', nargs='+', default=[], metavar="STYLE",
-                        help='Styles to use for the conversion.')
+                        help='Styles to use for the conversion. Replaces styles given '
+                             'in the file.')
+    parser.add_argument('-a', '--add-styles', nargs='+', default=[], metavar="STYLE",
+                        help='Styles to use for the conversion. Add the styles given '
+                             'to the styles given in the file.')
     parser.add_argument('--style-file',
                         help='Path to the style file that should be used. '
                              'Defaults to the style file in the configuration folder.')
@@ -394,8 +399,9 @@ def main():
         return
 
     with change_dir(args.working_dir):
-        PandocStyles(args.files, args.to, args.from_format, args.styles, args.metadata,
-                     args.destination, args.output_name, args.style_file).run()
+        PandocStyles(args.files, args.to, args.from_format, args.styles,
+                     args.add_styles, args.metadata, args.destination, args.output_name,
+                     args.style_file).run()
 
 
 if __name__ == '__main__':

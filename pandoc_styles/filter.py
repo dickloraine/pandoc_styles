@@ -58,7 +58,7 @@ class PandocStylesFilter():
             self.fmt = HTML
 
     def check(self):
-        return (self.filter_type is None or isinstance(self.elem, self.filter_type)) \
+        return (not self.filter_type or isinstance(self.elem, self.filter_type)) \
                and (not self.tags or any(x in self.tags for x in self.classes))
 
     def func(self):
@@ -118,16 +118,12 @@ class TransformFilter(PandocStylesFilter):
     Base class for filters. Defines methods to help writing filters and to
     run them.
     '''
-    tags = []
-    filter_type = CodeBlock
 
     # pylint: disable=W0231
     def __init__(self, tags=None, latex=None, html=None, other=None,
                  all_formats=None, filter_type=None, check=None):
-        if tags is not None:
-            self.tags = tags
-        if filter_type is not None:
-            self.filter_type = filter_type
+        self.tags = tags or []
+        self.filter_type = filter_type if filter_type is not None else CodeBlock
         self._add_method(latex, LATEX)
         self._add_method(html, HTML)
         self._add_method(other, FIL_OTHER)
