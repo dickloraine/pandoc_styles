@@ -111,8 +111,7 @@ class PandocStyles:
             start_style[MD_INHERITS] = self.use_styles
             cfg = self.get_styles(start_style)
 
-        # update fields in the cfg with fields in the document metadata, if they exist
-        # in the cfg
+        # update fields in the cfg with fields in the document metadata
         for key, val in self.pandoc_metadata.items():
             if key in cfg.get(MD_METADATA, {}):
                 cfg_ = cfg[MD_METADATA]
