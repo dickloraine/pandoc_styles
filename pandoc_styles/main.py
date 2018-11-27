@@ -28,7 +28,8 @@ class PandocStyles:
         self.pandoc_metadata = self.get_pandoc_metadata()
         self.sfrom = sfrom or self.pandoc_metadata.get(MD_FROM_FORMAT)
         self.use_styles = use_styles or self.pandoc_metadata.get(MD_STYLE)
-        style_file = style_file or self.pandoc_metadata.get(MD_STYLE_FILE) or STYLE_FILE
+        style_file = style_file or \
+            expand_directories(self.pandoc_metadata.get(MD_STYLE_FILE)) or STYLE_FILE
         self.styles = yaml.load(file_read(style_file))
         self.target = target or self.pandoc_metadata.get(MD_DESTINATION, "")
         self.output_name = output_name or self.pandoc_metadata.get(MD_OUTPUT_NAME) or \
