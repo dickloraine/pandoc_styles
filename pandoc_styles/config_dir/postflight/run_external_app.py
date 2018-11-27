@@ -1,6 +1,7 @@
 """
 Call an external script to run over the output-file. Use <file> in the command-line
-options for the path to the file.
+options for the path to the file. Make the command explicitly a string in the yaml by
+surrounding it with " or '
 """
 from pandoc_styles import run_postflight_script, run_process
 
