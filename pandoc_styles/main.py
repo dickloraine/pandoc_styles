@@ -192,24 +192,32 @@ class PandocStyles:
         self.cfg[MD_CURRENT_FILES] = [copy(f, self.temp_dir)
                                       for f in self.cfg[MD_CURRENT_FILES]]
         for script in make_list(self.cfg[MD_PREFLIGHT]):
-            script = expand_directories(script, MD_PREFLIGHT)
-            if self.python_path and has_extension(script, "py"):
-                script = f'{self.python_path} "{script}"'
-            cfg = self.make_cfg_file()
-            run_process(script, f'--cfg "{cfg}" --fmt {self.fmt}')
-            self.read_cfg_file()
+            if self.run_pandoc_styles_script(script):
+                continue
+            script = script.replace("<files>", "{}").format(self.cfg[MD_CURRENT_FILES])
+            run_process(script)
 
     def postflight(self):
         """Run all postflight scripts given in the style definition"""
         if MD_POSTFLIGHT not in self.cfg:
             return
-        cfg = self.make_cfg_file()
         for script in make_list(self.cfg[MD_POSTFLIGHT]):
-            script = expand_directories(script, MD_POSTFLIGHT)
-            if self.python_path and has_extension(script, "py"):
-                script = f'{self.python_path} "{script}"'
-            run_process(script, f'"{self.output_file}" --cfg "{cfg}" '
-                        f'--fmt {self.fmt}')
+            if self.run_pandoc_styles_script(script, True):
+                continue
+            script = script.replace("<file>", "{}").format(self.output_file)
+            run_process(script)
+
+    def run_pandoc_styles_script(self, script, postflight=False):
+        if len(script.split(" ")) > 1:
+            return False
+        cfg = self.make_cfg_file()
+        script = expand_directories(script, MD_POSTFLIGHT if postflight else MD_PREFLIGHT)
+        if self.python_path and has_extension(script, "py"):
+            script = f'{self.python_path} "{script}" '
+        ffile = f'"{self.output_file}" ' if postflight else ''
+        run_process(script, f'{ffile}--cfg "{cfg}" --fmt {self.fmt}')
+        self.read_cfg_file()
+        return True
 
     def process_sass(self):
         """Build the css out of the sass informations given in the style definition"""

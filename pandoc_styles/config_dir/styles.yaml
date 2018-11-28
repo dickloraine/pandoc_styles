@@ -125,8 +125,6 @@ Novel:
 Mobi:
   epub:
     postflight:
-      - ~/run_external_app.py
-    postflight-apps:
       - 'path/to/kindlegen <file>'
 
 Default-html:
