@@ -27,8 +27,8 @@ class PandocStyles:
         self.files = files
         self.pandoc_metadata = self.get_pandoc_metadata()
         self.sfrom = sfrom or self.pandoc_metadata.get(MD_FROM_FORMAT)
-        self.use_styles = use_styles or \
-            make_list(self.pandoc_metadata.get(MD_STYLE, [])).extend(add_styles or [])
+        self.use_styles = use_styles or make_list(self.pandoc_metadata.get(MD_STYLE, []))
+        self.use_styles.extend(add_styles or [])
         style_file = style_file or \
                      expand_directories(self.pandoc_metadata.get(MD_STYLE_FILE)) or \
                      STYLE_FILE
