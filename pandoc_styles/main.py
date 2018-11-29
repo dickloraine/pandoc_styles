@@ -194,7 +194,8 @@ class PandocStyles:
         for script in make_list(self.cfg[MD_PREFLIGHT]):
             if self.run_pandoc_styles_script(script):
                 continue
-            script = script.replace("<files>", "{}").format(self.cfg[MD_CURRENT_FILES])
+            script = script.replace("<files>", "{}")
+            script = script.format(" ".join(self.cfg[MD_CURRENT_FILES]))
             run_process(script)
 
     def postflight(self):
