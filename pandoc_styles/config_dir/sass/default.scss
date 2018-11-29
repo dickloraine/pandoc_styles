@@ -16,6 +16,8 @@ $indent: false !default;
 $paper-box: true !default;
 $footnote-highlight: "true" !default;
 $footnote-highlight-color: #ffa !default;
+$table-hover: "true" !default;
+$table-hover-color: #ffa !default;
 
 
 body {
@@ -112,6 +114,22 @@ a {
 
 blockquote {
   font-style: italic;
+}
+
+table {
+	width: 100%;
+	border-spacing: 0;
+	th, td {
+		padding: 5px;
+	}
+	th {
+		border-bottom: 1px solid;
+	}
+	@if $table-hover == "true" {
+		tr:hover {
+			background-color: $table-hover-color;
+		}
+	}
 }
 
 .citation {
