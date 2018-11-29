@@ -3,24 +3,24 @@
 This script allows you to define styles for pandoc. In styles you can define, with which arguments pandoc should be invoked for different formats. In addition it allows to run scripts before and after a conversion and gives much power to these scripts and to filters.
 
 - [pandoc_styles](#pandocstyles)
-    - [Installation](#installation)
-        - [Requirements](#requirements)
-        - [Install](#install)
-        - [Setup](#setup)
-    - [Usage](#usage)
-    - [Defining Styles](#defining-styles)
-        - [Basic Usage](#basic-usage)
-        - [Inheritance](#inheritance)
-    - [Advanced Feature](#advanced-feature)
-        - [Adressing files in the configuration folder](#adressing-files-in-the-configuration-folder)
-        - [Preflight scripts](#preflight-scripts)
-        - [Process Sass](#process-sass)
-        - [Add to template](#add-to-template)
-        - [Replace in template](#replace-in-template)
-        - [Replace in output](#replace-in-output)
-        - [Postflight](#postflight)
-        - [Filter](#filter)
-        - [Advanced Example](#advanced-example)
+  - [Installation](#installation)
+    - [Requirements](#requirements)
+    - [Install](#install)
+    - [Setup](#setup)
+  - [Usage](#usage)
+  - [Defining Styles](#defining-styles)
+    - [Basic Usage](#basic-usage)
+    - [Inheritance](#inheritance)
+  - [Advanced Feature](#advanced-feature)
+    - [Adressing files in the configuration folder](#adressing-files-in-the-configuration-folder)
+    - [Preflight](#preflight)
+    - [Process Sass](#process-sass)
+    - [Add to template](#add-to-template)
+    - [Replace in template](#replace-in-template)
+    - [Replace in output](#replace-in-output)
+    - [Postflight](#postflight)
+    - [Filter](#filter)
+    - [Advanced Example](#advanced-example)
 
 ## Installation
 
@@ -139,11 +139,18 @@ command-line:
 
 Would find the file "test-filter.py" in the subfolder "filter" in the configuration directory.
 
-### Preflight scripts
+### Preflight
 
-Preflight scripts are called before pandoc is run. They are written in python and have access to the style infos and files that should be converted.
+You can run other command-line apps and scripts before the conversion happens. Just enter the command-line command in the preflight field in the style definition. You can pass the files list to it with "<files>". Explicitly mark the value as a string, to avoid any hassle with special characters. For example:
 
-You specify them in the style defintion with the field "preflight".
+~~~yaml
+Test-style:
+  html:
+    preflight:
+      - 'some_app -d -f <files>'
+~~~
+
+If you give it just a single python file, it assumes that it is a special preflight script. These are written in python and have access to the style infos and files that should be converted.
 
 Here a basic example of a preflight script, that appends text given in the field "append-to-file" in the style definition to the end of the files:
 
@@ -232,7 +239,18 @@ Exactly the same as replace-in-template but for text in the output-file
 
 ### Postflight
 
-These scripts are called after the source is converted. Pretty similar to preflight.
+These scripts are called after the source is converted. Pretty similar to preflight, but instead of "<files>" it only accepts a single "<file>"
+
+**Some app:**
+
+~~~yaml
+Test-style:
+  html:
+    preflight:
+      - 'some_app -d -f <files>'
+~~~
+
+**Custome script:**
 
 ~~~python
 from pandoc_styles import run_postflight_script, file_read, file_write
