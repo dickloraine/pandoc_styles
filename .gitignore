@@ -144,3 +144,5 @@ $RECYCLE.BIN/
 test/
 .vscode/
 setup.py
+.mypy_cache/
+.pytest_cache/
