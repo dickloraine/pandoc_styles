@@ -22,12 +22,14 @@ from .utils import (change_dir, expand_directories, file_read, file_write,
 class PandocStyles:
     """Handles the conversion with styles"""
     def __init__(self, files, formats=None, from_format="", use_styles=None,
-                 metadata="", target="", output_name="", style_file=None):
+                 add_styles=None, metadata="", target="", output_name="",
+                 style_file=None):
         self.metadata = metadata
         self.files = files
         self.pandoc_metadata = self.get_pandoc_metadata()
         self.from_format = from_format or self.pandoc_metadata.get(MD_FROM_FORMAT)
         self.use_styles = use_styles or make_list(self.pandoc_metadata.get(MD_STYLE, []))
+        self.use_styles.extend(add_styles or [])
         style_file = style_file or \
                      expand_directories(self.pandoc_metadata.get(MD_STYLE_FILE)) or \
                      STYLE_FILE
@@ -401,10 +403,10 @@ def main():
         parser.print_help()
         return
 
-    args.styles.extend(args.add_styles or [])
     with change_dir(args.working_dir):
-        PandocStyles(args.files, args.to, args.from_format, args.styles, args.metadata,
-                     args.destination, args.output_name, args.style_file).run()
+        PandocStyles(args.files, args.to, args.from_format, args.styles,
+                     args.add_styles, args.metadata, args.destination,
+                     args.output_name, args.style_file).run()
 
 
 if __name__ == '__main__':
