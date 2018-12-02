@@ -1,16 +1,24 @@
 from argparse import ArgumentParser
 import yaml
-from .constants import CFG_TEMP_FILE, MD_TEMP_DIR, MD_CURRENT_FILES
+from .constants import CFG_TEMP_FILE, MD_TEMP_DIR, MD_CURRENT_FILES, FMT, OUTPUT_FILE
 from .utils import file_read, file_write
 
 
 class FlightScript:
-    def __init__(self, func):
+    def __init__(self, func, flight_type):
         setattr(self, "fligh_script", func.__get__(self))
-        self.cfg, self.fmt, self.files = self.parse()
 
-    def parse(self):
-        return dict, "", []
+        parser = ArgumentParser(description="")
+        parser.add_argument('--cfg', nargs='?', default="",
+                            help='The cfg from pandoc_styles')
+        args = parser.parse_args()
+
+        self.cfg = yaml.load(file_read(args.cfg))
+        self.fmt = self.cfg[FMT]
+        if flight_type == "preflight":
+            self.files = self.cfg[MD_CURRENT_FILES]
+        else:
+            self.file = self.cfg[OUTPUT_FILE]
 
     def fligh_script(self):
         pass
@@ -19,43 +27,11 @@ class FlightScript:
         file_write(CFG_TEMP_FILE, yaml.dump(self.cfg), self.cfg.get(MD_TEMP_DIR))
 
 
-class PreFlightScript(FlightScript):
-    def parse(self):
-        """Run the given script with arguments: file, cfg, fmt"""
-        parser = ArgumentParser(description="Appends the string given in the metadata "
-                                            "to the file")
-        parser.add_argument('--cfg', nargs='?', default="",
-                            help='The cfg from pandoc_styles')
-        parser.add_argument('--fmt', nargs='?', default="",
-                            help='The format of the file')
-        args = parser.parse_args()
-
-        cfg = yaml.load(file_read(args.cfg))
-        return cfg, args.fmt, cfg[MD_CURRENT_FILES]
-
-
 def run_preflight_script(func):
-    script = PreFlightScript(func)
+    script = FlightScript(func, "preflight")
     script.fligh_script()
 
 
-class PostFlightScript(FlightScript):
-    def parse(self):
-        """Run the given script with arguments: file, cfg, fmt"""
-        parser = ArgumentParser(description="Appends the string given in the metadata "
-                                            "to the file")
-        parser.add_argument('file', nargs='?', default=None,
-                            help='The source file to be converted')
-        parser.add_argument('--cfg', nargs='?', default="",
-                            help='The cfg from pandoc_styles')
-        parser.add_argument('--fmt', nargs='?', default="",
-                            help='The format of the file')
-        args = parser.parse_args()
-
-        cfg = yaml.load(file_read(args.cfg))
-        return cfg, args.fmt, args.file
-
-
 def run_postflight_script(func):
-    script = PostFlightScript(func)
+    script = FlightScript(func, "postflight")
     script.fligh_script()

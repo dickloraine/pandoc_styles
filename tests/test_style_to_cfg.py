@@ -32,16 +32,13 @@ def test_update_dict(ps, styles):
 
 def test_style_to_cfg(ps, styles):
     style = styles["Test_01"]
-    ps.fmt = "pdf"
-    assert ps.style_to_cfg(style) == DICT_ALL_PDF
-    ps.fmt = "html"
-    assert ps.style_to_cfg(style) == DICT_ALL_HTML
+    assert ps.style_to_cfg(style, "pdf") == DICT_ALL_PDF
+    assert ps.style_to_cfg(style, "html") == DICT_ALL_HTML
 
 
 def test_get_styles(ps, styles):
     ps.styles = styles
-    ps.fmt = "pdf"
-    assert ps.get_styles(styles["Test_01"]) == CFG_STYLE_01_PDF
+    assert ps.get_styles(styles["Test_01"], "pdf") == CFG_STYLE_01_PDF
 
 
 DICT_ALL_PDF = {
