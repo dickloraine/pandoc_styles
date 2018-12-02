@@ -48,7 +48,7 @@ MD_REPL_COUNT = "count"
 MD_TEMPLATE = "template"
 MD_REPL_IN_OUTPUT = "replace-in-output"
 
-# Configuarion constants
+# Configuartion constants
 CFG_FILE = "config.yaml"
 CFG_PANDOC_PATH = "pandoc-path"
 CFG_PYTHON_PATH = "python-path"
@@ -60,6 +60,8 @@ PDF = "pdf"
 LATEX = "latex"
 EPUB = "epub"
 CSS = "css"
+
+# Filter
 FIL_OTHER = "other"
 FIL_ALL = "all_formats"
 FIL_CHECK = "check"
