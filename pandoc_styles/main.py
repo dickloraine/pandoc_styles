@@ -204,11 +204,11 @@ class PandocStyles:
             run_process(script)
 
     def run_pandoc_styles_script(self, script, postflight=False):
-        if len(script.split(" ")) > 1:
+        if len(script.split(" ")) > 1 or not has_extension(script, "py"):
             return False
         cfg = self.make_cfg_file()
         script = expand_directories(script, MD_POSTFLIGHT if postflight else MD_PREFLIGHT)
-        if self.python_path and has_extension(script, "py"):
+        if self.python_path:
             script = f'{self.python_path} "{script}" '
         run_process(script, f'--cfg "{cfg}"')
         self.read_cfg_file()
@@ -338,7 +338,7 @@ class PandocStyles:
 
 
 def main():
-    """Parse the command line arguments and run PnadocStyles with the given args"""
+    """Parse the command line arguments and run PandocStyles with the given args"""
     parser = ArgumentParser(description="Runs pandoc with options defined in styles")
     parser.add_argument('files', nargs='*',
                         help='The source files to be converted')
