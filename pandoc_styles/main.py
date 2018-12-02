@@ -187,7 +187,7 @@ class PandocStyles:
         self.cfg[MD_CURRENT_FILES] = [copy(f, self.temp_dir)
                                       for f in self.cfg[MD_CURRENT_FILES]]
         for script in make_list(self.cfg[MD_PREFLIGHT]):
-            if self.run_pandoc_styles_script(script):
+            if self.run_pandoc_styles_script(script, MD_PREFLIGHT):
                 continue
             script = script.replace("<files>", "{}")
             script = script.format(" ".join(self.cfg[MD_CURRENT_FILES]))
@@ -198,16 +198,16 @@ class PandocStyles:
         if MD_POSTFLIGHT not in self.cfg:
             return
         for script in make_list(self.cfg[MD_POSTFLIGHT]):
-            if self.run_pandoc_styles_script(script, True):
+            if self.run_pandoc_styles_script(script, MD_POSTFLIGHT):
                 continue
             script = script.replace("<file>", "{}").format(self.cfg[OUTPUT_FILE])
             run_process(script)
 
-    def run_pandoc_styles_script(self, script, postflight=False):
+    def run_pandoc_styles_script(self, script, flight_type):
         if len(script.split(" ")) > 1 or not has_extension(script, "py"):
             return False
         cfg = self.make_cfg_file()
-        script = expand_directories(script, MD_POSTFLIGHT if postflight else MD_PREFLIGHT)
+        script = expand_directories(script, flight_type)
         if self.python_path:
             script = f'{self.python_path} "{script}" '
         run_process(script, f'--cfg "{cfg}"')
