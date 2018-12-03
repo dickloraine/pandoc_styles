@@ -313,7 +313,7 @@ class PandocStyles:
         Merge dictionary with new. Single keys are replaces, but nested dictionaries
         and list are appended
         """
-        # we deepcopy new, so that it stays independent from our dictionary
+        # we deepcopy new, so that it stays independent from the source
         new = deepcopy(new)
         for key, value in new.items():
             if not dictionary.get(key):

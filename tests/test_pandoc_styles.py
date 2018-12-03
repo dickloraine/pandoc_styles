@@ -14,7 +14,6 @@ TEST_DATA_DIR = join(TEST_DIR, "data")
 
 @pytest.fixture
 def test_file():
-    """Gives a PandocStyles instance"""
     return join(TEST_DATA_DIR, "test01.md")
 
 
