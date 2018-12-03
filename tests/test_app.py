@@ -2,7 +2,6 @@ from shutil import copy, copytree
 from os.path import dirname, abspath, join, expanduser
 import subprocess
 import pytest
-from pandoc_styles.utils import change_dir
 # pylint: disable=W0621, W0613
 
 
@@ -24,8 +23,7 @@ def run_script(tmpdir):
 @pytest.fixture
 def config_dir(tmpdir):
     config_dir = join(tmpdir, "config_dir")
-    with change_dir(TEST_DIR):
-        copytree("../pandoc_styles/config_dir", config_dir)
+    copytree("./pandoc_styles/config_dir", config_dir)
     return config_dir
 
 
