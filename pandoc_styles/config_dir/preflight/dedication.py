@@ -3,8 +3,8 @@ from pandoc_styles import run_preflight_script, file_read, file_write
 
 
 def preflight(self):
-    dedication = self.cfg["pandoc-metadata"].get("dedication")
-    dedication_header = self.cfg["pandoc-metadata"].get("dedication-header", "Dedication")
+    dedication = self.cfg.get("dedication")
+    dedication_header = self.cfg.get("dedication-header", "Dedication")
     if dedication:
         dedication = f'# {dedication_header}{{.hidden}}\n<div class="dedication">'\
                      f'{dedication}\n</div>\n'
