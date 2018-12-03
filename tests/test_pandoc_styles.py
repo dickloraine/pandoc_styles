@@ -5,8 +5,6 @@ import yaml
 from pandoc_styles.main import PandocStyles
 from pandoc_styles.constants import *  # pylint: disable=W0401, W0614
 from pandoc_styles.utils import file_read
-
-
 # pylint: disable=W0621
 
 
@@ -32,9 +30,12 @@ def ps(test_file):
 
 
 def test_update_dict(ps, styles):
-    dictionary = styles["Test_01"]["all"]
+    dictionary = deepcopy(styles["Test_01"]["all"])
     ps.update_dict(dictionary, styles["Test_01"]["pdf"])
     assert dictionary == DICT_ALL_PDF
+    dictionary = deepcopy(styles["Test_01"]["all"])
+    ps.update_dict(dictionary, styles["Test_01"]["html"])
+    assert dictionary == DICT_ALL_HTML
 
 
 def test_style_to_cfg(ps, styles):
@@ -49,9 +50,16 @@ def test_get_styles(ps, styles):
 
 
 def test_get_pandoc_metadata(ps, test_file):
-    ps.metadata = test_file
-    assert ps.get_pandoc_metadata() == yaml.safe_load(file_read("test01_only_yaml.yaml",
-                                                                TEST_DATA_DIR))
+    test_against = yaml.safe_load(file_read("test01_only_yaml.yaml", TEST_DATA_DIR))
+    ps.metadata = None
+    ps.files = [test_file]
+    assert ps.get_pandoc_metadata() == test_against
+    ps.metadata = join(TEST_DATA_DIR, "test01_only_yaml.yaml")
+    ps.files = []
+    assert ps.get_pandoc_metadata() == test_against
+    ps.metadata = None
+    ps.files = [join(TEST_DATA_DIR, "no_metadata.md")]
+    assert ps.get_pandoc_metadata() == {}
 
 
 def test_get_cfg(ps, styles, test_file):
@@ -70,7 +78,7 @@ def test_get_cfg(ps, styles, test_file):
         "formats": ["pdf", "html"],
         "style": "Func_test",
         MD_CURRENT_FILES: [test_file],
-        OUTPUT_FILE: join(TEST_DIR, "data", "test01.pdf"),
+        OUTPUT_FILE: join(TEST_DATA_DIR, "test01.pdf"),
         FMT: "pdf",
         TO_FMT: LATEX,
         MD_TEMP_DIR: temp_dir,

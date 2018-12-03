@@ -75,13 +75,11 @@ class PandocStyles:
 
     def get_pandoc_metadata(self):
         """Get the metadata yaml block in the first source file or given metadata file"""
-        ffile = self.metadata or self.files[0]
-        md = re.match(r'.?-{3}(.*?)(\n\.{3}\n|\n-{3}\n)',
-                      file_read(ffile), flags=re.DOTALL)
-        if md:
-            return yaml.safe_load(md.group(1))
-        logging.warning('No metadata found in the file!')
-        return None
+        md = file_read(self.metadata or self.files[0])
+        if not self.metadata:
+            md = re.match(r'.?-{3}(.*?)(\n\.{3}\n|\n-{3}\n)', md, flags=re.DOTALL)
+            md = md.group(1) if md else False
+        return yaml.safe_load(md) if md else {}
 
     def do_user_config(self):
         """Read the config file and set the options"""

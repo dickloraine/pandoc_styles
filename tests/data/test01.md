@@ -14,7 +14,7 @@ formats:
     - pdf
     - html
 style: Func_test
-...
+---
 
 # Mr. Sherlock Holmes
 
