@@ -1,5 +1,3 @@
-"""Indirectly tests update_dict too"""
-
 from os.path import dirname, abspath, join
 from copy import deepcopy
 import pytest
