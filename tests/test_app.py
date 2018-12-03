@@ -1,21 +1,50 @@
-from shutil import copy
+from shutil import copy, copytree
 from os.path import dirname, abspath, join, expanduser
 import subprocess
+import pytest
 from pandoc_styles.utils import change_dir
+# pylint: disable=W0621, W0613
 
 
-def poetry_cmd():
-    return f'python {join(expanduser("~"), ".poetry/bin/poetry")}'
+TEST_DIR = dirname(abspath(__file__))
+TEST_DATA_DIR = join(TEST_DIR, "data")
+POETRY = f'python {join(expanduser("~"), ".poetry/bin/poetry")}'
 
-def test_app(tmpdir):
-    test_dir = dirname(abspath(__file__))
-    with change_dir(test_dir):
-        copy("./data/test01.md", tmpdir)
-        copy("./data/cover.jpg", tmpdir)
-        copy("./data/styles.yaml", tmpdir)
 
-    ps = subprocess.run(f'{poetry_cmd()} run pandoc_styles test01.md -t html epub pdf '\
-                        f'--style-file=styles.yaml -w "{tmpdir}"',
-                        stdout=subprocess.PIPE, text=True)
+@pytest.fixture
+def run_script(tmpdir):
+    def _run_script(args):
+        return subprocess.run(f'{POETRY} run pandoc_styles --style-file=styles.yaml '
+                              f'-w "{tmpdir}" {args}', stdout=subprocess.PIPE,
+                              stderr=subprocess.STDOUT, text=True, shell=True)
+    return _run_script
+
+
+@pytest.fixture
+def config_dir(tmpdir):
+    config_dir = join(tmpdir, "config_dir")
+    with change_dir(TEST_DIR):
+        copytree("../pandoc_styles/config_dir", config_dir)
+    return config_dir
+
+
+@pytest.fixture
+def copy_from_data(tmpdir):
+    def _copy_from_data(*files):
+        for f in files:
+            copy(join(TEST_DATA_DIR, f), tmpdir)
+    return _copy_from_data
+
+
+def test_app(run_script, copy_from_data):
+    copy_from_data("test01.md", "cover.jpg", "styles.yaml")
+    ps = run_script("test01.md -t html epub pdf")
     assert ps.returncode == 0
     assert ps.stdout == "INFO: Build html\nINFO: Build epub\nINFO: Build pdf\n"
+
+
+def test_app2(config_dir, run_script, copy_from_data):
+    copy_from_data("test02.md", "styles.yaml")
+    ps = run_script("test02.md -t html pdf")
+    assert ps.returncode == 0
+    assert ps.stdout == "INFO: Build html\nINFO: Build pdf\n"

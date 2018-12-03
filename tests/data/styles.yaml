@@ -131,4 +131,134 @@ Func_test:
           \postauthor{\end{tabular}\par\end{center}}
           \predate{\begin{center}\large}
           \postdate{\par\end{center}}
+
+Novel:
+  inherits:
+    - Html-self-contained
+    - Extra-styles
+  pdf: &pdf-novel
+    command-line:
+      template: ./config_dir/template/novel.tex
+      top-level-division: chapter
+      toc: true
+      toc-depth: 3
+    metadata:
+      documentclass: scrbook
+      DIV: calc
+      paper: 6in:9in
+      BCOR: 2mm
+      center-headings: true
+      fontsize: 10pt
+      mainfont: Adobe Garamond Pro
+      sansfont: Questrial
+      pagestyle: plain
+      pdf-cover: false
+      headsepline: false
+      footsepline: false
+      noindent: false
+      toc-dots: false
+  latex:
+    << : *pdf-novel
+  epub:
+    preflight:
+      - ./config_dir/preflight/dedication.py
+      - ./config_dir/preflight/copyrights.py
+    sass:
+      files:
+        - ./config_dir/sass/default_epub.scss
+      output-path: temp
+  html:
+    preflight:
+      - ./config_dir/preflight/dedication.py
+      - ./config_dir/preflight/copyrights.py
+    sass:
+      variables:
+        indent: true
+
+Default-html:
+  inherits: Navbar
+  html:
+    command-line:
+      toc: true
+    sass:
+      files:
+        - ./config_dir/sass/default.scss
+    replace-in-template:
+      - pattern: \$body\$
+        replacement-text: |
+          <div class="content">
+          $body$
+          </div>
+    replace-in-output:
+      - pattern: (<\/head>)
+        count: 1
+        add: true
+        replacement-text: |
+          <link href="https://fonts.googleapis.com/css?family=Noto+Sans|Noto+Serif|Oswald" rel="stylesheet">
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/tonsky/FiraCode@1.206/distr/fira_code.css">
+  epub:
+    sass:
+      files:
+        - ./config_dir/sass/default_epub.scss
+
+# special fonts are not embedded.
+Html-self-contained:
+  inherits: Default-html
+  html:
+    command-line:
+      self-contained: true
+    sass:
+      output-path: temp
+
+Navbar:
+  html:
+    sass:
+      files:
+        - ./config_dir/sass/navigation.scss
+      variables:
+        nav-top: false
+        nav-font-size: 11pt
+        nav-media-breakpoint: 600px
+        nav-sub-nav-width: 200px
+        nav-background-color: "#FFFFFF"
+        nav-hover-background-color: "#555"
+        nav-text-color: "#000000"
+        nav-hover-text-color: "#FFFFFF"
+    replace-in-template:
+      - pattern: \$table-of-contents\$
+        replacement-text: |
+          <div id="navbar">
+          <input class="trigger" type="checkbox" id="mainNavButton">
+          <label for="mainNavButton" onclick></label>
+          $table-of-contents$
+          </div>
+
+Extra-styles:
+  all:
+    preflight:
+      - ./config_dir/preflight/scenes.py
+    command-line:
+      filter:
+        - ./config_dir/filter/new_page.py
+        - ./config_dir/filter/epigraph.py
+        - ./config_dir/filter/noindent.py
+        - ./config_dir/filter/alignment.py
+        - ./config_dir/filter/quote.py
+        - ./config_dir/filter/poem.py
+        - ./config_dir/filter/custom_styles.py
+    metadata:
+      poem-style: bottom
+      quote-style: bottom
+    scenes:
+      new-scene-style: default
+      new-scene-text: "* * *"
+      new-scene-image: false
+  html:
+    sass:
+      files:
+        - ./config_dir/sass/extra_styles.scss
+  epub:
+    sass:
+      files:
+        - ./config_dir/sass/extra_styles.scss
 ...
