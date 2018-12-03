@@ -79,7 +79,7 @@ class PandocStyles:
         md = re.match(r'.?-{3}(.*?)(\n\.{3}\n|\n-{3}\n)',
                       file_read(ffile), flags=re.DOTALL)
         if md:
-            return yaml.load(md.group(1))
+            return yaml.safe_load(md.group(1))
         logging.warning('No metadata found in the file!')
         return None
 

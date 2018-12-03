@@ -1,0 +1,15 @@
+title: Test
+author: Test Author
+language: en-US
+description: |
+    This is the description of the novel.
+dedication: _for Elise_
+copyrights: |
+    test copyrights  
+    in more than  
+    one line
+cover-image: ./cover.jpg
+formats:
+    - pdf
+    - html
+style: Func_test
