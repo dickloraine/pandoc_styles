@@ -86,7 +86,7 @@ class PandocStyles:
     def do_user_config(self):
         """Read the config file and set the options"""
         try:
-            config = yaml.load(file_read(CFG_FILE, CONFIG_DIR))
+            config = yaml.safe_load(file_read(CFG_FILE, CONFIG_DIR))
         except FileNotFoundError:
             logging.warning("No configuration file found! Please initialize "\
                             "pandoc_styles with: pandoc_styles --init")
@@ -336,7 +336,7 @@ class PandocStyles:
 
     def read_cfg_file(self):
         """Read the cfg file"""
-        self.cfg = yaml.load(file_read(CFG_TEMP_FILE, self.temp_dir))
+        self.cfg = yaml.safe_load(file_read(CFG_TEMP_FILE, self.temp_dir))
 
 
 def main():

@@ -21,7 +21,7 @@ def ps():
 
 @pytest.fixture
 def styles():
-    return yaml.load(file_read(join(TEST_DIR, "data", "styles.yaml")))
+    return yaml.safe_load(file_read(join(TEST_DIR, "data", "styles.yaml")))
 
 
 def test_update_dict(ps, styles):

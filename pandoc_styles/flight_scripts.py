@@ -13,7 +13,7 @@ class FlightScript:
                             help='The cfg from pandoc_styles')
         args = parser.parse_args()
 
-        self.cfg = yaml.load(file_read(args.cfg))
+        self.cfg = yaml.safe_load(file_read(args.cfg))
         self.fmt = self.cfg[FMT]
         if flight_type == "preflight":
             self.files = self.cfg[MD_CURRENT_FILES]

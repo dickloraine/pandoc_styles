@@ -78,7 +78,7 @@ class PandocStylesFilter():
     def get_pandoc_styles_metadata(self):
         '''Return the pandoc_styles cfg as a dictionary'''
         try:
-            self.cfg = yaml.load(file_read(self.get_metadata(MD_PANDOC_STYLES_MD)))
+            self.cfg = yaml.safe_load(file_read(self.get_metadata(MD_PANDOC_STYLES_MD)))
         except FileNotFoundError:
             self.cfg = {}
         return self.cfg
