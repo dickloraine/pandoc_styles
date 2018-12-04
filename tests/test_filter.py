@@ -26,7 +26,6 @@ def test_alignment(test_filter):
                  ('latex', TF_LATEX_BASE, '\\begin{center}\n', '\n\end{center}')])
 
 
-
 def test_custom_styles(test_filter):
     test_filter('custom_styles.py', '.custom .teststyle',
                 [('html', TF_HTML_BASE, '<div class="teststyle">', '</div>'),
@@ -75,6 +74,36 @@ def test_noindent(test_filter):
     test_filter('noindent.py', '.noindent',
                 [('html', TF_HTML_BASE, '<div class="noindent">', '</div>'),
                  ('latex', TF_LATEX_BASE, '\\noindent\n', '')])
+
+
+def test_quote(test_filter):
+    test_filter('quote.py', '.quote author="Sher Holm" title=Test',
+                [('html', TF_HTML_BASE,
+                  '<div class="QuoteBlock">',
+                  '<p class="QuoteScource">Test</p>\n'
+                  '<p class="QuoteAuthor">Sher Holm</p>\n</div>'),
+                 ('latex', TF_LATEX_BASE,
+                  "\\begin{quote}\n",
+                  "\n\n\\hspace*{\\fill}\\textbf{Test}\\linebreak"
+                  "\\hspace*{\\fill}\\textit{Sher Holm}\n\\end{quote}")])
+    test_filter('quote.py', '.quote .one-line author="Sher Holm" title=Test',
+                [('html', TF_HTML_BASE,
+                  '<div class="QuoteBlock">',
+                  '<p class="QuoteSingle"><em>Sher Holm</em> &mdash; '
+                  "<strong>Test</strong></p>\n</div>"),
+                 ('latex', TF_LATEX_BASE,
+                  "\\begin{quote}\n",
+                  "\n\\hfill \\textit{Sher Holm} --- \\textbf{Test}\n\\end{quote}")])
+    test_filter('quote.py', '.quote .top author="Sher Holm" title=Test',
+                [('html', TF_HTML_BASE,
+                  '<div class="QuoteBlock">\n'
+                  '<p class="QuoteScourceTop">Test</p>\n'
+                  '<p class="QuoteAuthorTop">Sher Holm</p>',
+                  "</div>"),
+                 ('latex', TF_LATEX_BASE,
+                  "\\begin{quote}\n\\begin{center}\n\\large\\textbf{Test}\n"
+                  "\n\\normalsize\\textit{Sher Holm}\n\\end{center}\n",
+                  "\n\\end{quote}")])
 
 
 BASE = """\
