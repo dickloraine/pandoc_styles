@@ -25,6 +25,17 @@ def test_alignment(config_dir, test_filter):
                  ('latex', TF_LATEX_BASE, '\\begin{center}\n', '\n\end{center}')])
 
 
+
+def test_custom_styles(config_dir, test_filter):
+    test_filter('custom_styles.py', '.custom .teststyle',
+                [('html', TF_HTML_BASE, '<div class="teststyle">', '</div>'),
+                 ('latex', TF_LATEX_BASE, '\\begin{teststyle}\n', '\n\end{teststyle}')])
+    test_filter('custom_styles.py', '.custom pdf=pdf_teststyle html=html_teststyle',
+                [('html', TF_HTML_BASE, '<div class="html_teststyle">', '</div>'),
+                 ('latex', TF_LATEX_BASE, '\\begin{pdf_teststyle}\n',
+                  '\n\end{pdf_teststyle}')])
+
+
 def test_epigraph(config_dir, test_filter):
     test_filter('epigraph.py', '.epigraph',
                 [('html', TF_HTML_BASE, '<div class="Epigraph">', '</div>'),
