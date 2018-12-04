@@ -60,21 +60,21 @@ def latex(self):
 def html(self):
     new = ['<div class="QuoteBlock">']
     if self.style == "top" and "title" in self.attributes:
-        new.extend(["\n<p class='QuoteScourceTop'>",
+        new.extend(['\n<p class="QuoteScourceTop">',
                     self.attributes["title"], "</p>"])
     if self.style == "top" and "author" in self.attributes:
-        new.extend(["\n<p class='QuoteAuthorTop'>",
+        new.extend(['\n<p class="QuoteAuthorTop">',
                     self.attributes["author"], "</p>"])
     new.extend(["\n", self.convert_text()])
     if self.style == "one-line" and "author" in self.attributes and\
             "title" in self.attributes:
-        new.extend(["\n<p class='QuoteSingle'><em>", self.attributes["author"], "</em>",
+        new.extend(['\n<p class="QuoteSingle"><em>', self.attributes["author"], "</em>",
                     " &mdash; <strong>", self.attributes["title"], "</strong></p>"])
     elif self.style != "top":
         if "title" in self.attributes:
-            new.extend(["\n", "<p class='QuoteScource'>", self.attributes["title"], "</p>"])
+            new.extend(["\n", '<p class="QuoteScource">', self.attributes["title"], "</p>"])
         if "author" in self.attributes:
-            new.extend(["\n", "<p class='QuoteAuthor'>", self.attributes["author"], "</p>"])
+            new.extend(["\n", '<p class="QuoteAuthor">', self.attributes["author"], "</p>"])
     new.extend(['\n</div>'])
     return new
 
