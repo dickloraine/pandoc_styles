@@ -1,13 +1,14 @@
 import pytest
 from pandoc_styles.utils import file_read, file_write
-from fixtures import run_script, config_dir  # pylint: disable=W0611
+from fixtures import run_script, copy_from_config  # pylint: disable=W0611
 # pylint: disable=W0621, W0613, W1401
 
 
 @pytest.fixture
-def test_filter(tmpdir, run_script):
+def test_filter(tmpdir, run_script, copy_from_config):
     def _test_filter(filt, args, fmts, base=TF_BASE):
-        test_base = base.format(f"./config_dir/filter/{filt}", f"{{{args}}}")
+        copy_from_config(f"filter/{filt}")
+        test_base = base.format(filt, f"{{{args}}}")
         test_file = file_write("test.md", test_base, tmpdir)
 
         for fmt, fmt_txt, fmt_open, fmt_close in fmts:
@@ -19,14 +20,14 @@ def test_filter(tmpdir, run_script):
     return _test_filter
 
 
-def test_alignment(config_dir, test_filter):
+def test_alignment(test_filter):
     test_filter('alignment.py', '.align .center',
                 [('html', TF_HTML_BASE, '<div class="align_center">', '</div>'),
                  ('latex', TF_LATEX_BASE, '\\begin{center}\n', '\n\end{center}')])
 
 
 
-def test_custom_styles(config_dir, test_filter):
+def test_custom_styles(test_filter):
     test_filter('custom_styles.py', '.custom .teststyle',
                 [('html', TF_HTML_BASE, '<div class="teststyle">', '</div>'),
                  ('latex', TF_LATEX_BASE, '\\begin{teststyle}\n', '\n\end{teststyle}')])
@@ -36,7 +37,7 @@ def test_custom_styles(config_dir, test_filter):
                   '\n\end{pdf_teststyle}')])
 
 
-def test_epigraph(config_dir, test_filter):
+def test_epigraph(test_filter):
     test_filter('epigraph.py', '.epigraph',
                 [('html', TF_HTML_BASE, '<div class="Epigraph">', '</div>'),
                  ('latex', TF_LATEX_BASE, '\\dictum[]{',
@@ -50,7 +51,7 @@ def test_epigraph(config_dir, test_filter):
                   '}\n\\par\n\\vspace{\\baselineskip}\n\\par\n\\noindent')])
 
 
-def test_include(tmpdir, config_dir, test_filter):
+def test_include(tmpdir, test_filter):
     incl_file = file_write("test_incl.md", "Text to Include", tmpdir)
     base = BASE.format("{}", f'~~~{{}}\n{incl_file}\n~~~')
     test_filter('include.py', '.include',
@@ -59,7 +60,7 @@ def test_include(tmpdir, config_dir, test_filter):
                 base)
 
 
-def test_new_page(config_dir, test_filter):
+def test_new_page(test_filter):
     base = BASE.format("{}", '~~~{}\n\n~~~')
     test_filter('new_page.py', '.new_page',
                 [('html', HTML_BASE, '<div class="pagebreak"></div>', ''),
@@ -70,7 +71,7 @@ def test_new_page(config_dir, test_filter):
                 base)
 
 
-def test_noindent(config_dir, test_filter):
+def test_noindent(test_filter):
     test_filter('noindent.py', '.noindent',
                 [('html', TF_HTML_BASE, '<div class="noindent">', '</div>'),
                  ('latex', TF_LATEX_BASE, '\\noindent\n', '')])
