@@ -9,7 +9,8 @@ def latex(self):
 
 
 def html(self):
-    style_epub = self.classes[1] if len(self.classes) == 2 else self.attributes.get("epub", "")
+    style_epub = self.classes[1] if len(self.classes) == 2 \
+                 else self.attributes.get("epub", "") or self.attributes.get("html", "")
     return (f'<div class="{style_epub}">\n'
             f'{self.convert_text()}\n'
             f'</div>')
