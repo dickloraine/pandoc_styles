@@ -5,7 +5,7 @@ import yaml
 from pandoc_styles.main import PandocStyles
 from pandoc_styles.constants import *  # pylint: disable=W0401, W0614
 from pandoc_styles.utils import file_read
-from fixtures import TEST_DIR, TEST_DATA_DIR  # pylint: disable=W0611
+from fixtures import TEST_DATA_DIR
 # pylint: disable=W0621
 
 
