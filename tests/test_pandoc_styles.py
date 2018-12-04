@@ -1,15 +1,12 @@
-from os.path import dirname, abspath, join
+from os.path import join
 from copy import deepcopy
 import pytest
 import yaml
 from pandoc_styles.main import PandocStyles
 from pandoc_styles.constants import *  # pylint: disable=W0401, W0614
 from pandoc_styles.utils import file_read
+from fixtures import TEST_DIR, TEST_DATA_DIR  # pylint: disable=W0611
 # pylint: disable=W0621
-
-
-TEST_DIR = dirname(abspath(__file__))
-TEST_DATA_DIR = join(TEST_DIR, "data")
 
 
 @pytest.fixture
