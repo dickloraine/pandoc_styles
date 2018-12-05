@@ -9,7 +9,7 @@ copyrights: |
     test copyrights  
     in more than  
     one line
-cover-image: ./images/cover.jpg
+cover-image: cover.jpg
 formats:
     - pdf
 style: Novel
