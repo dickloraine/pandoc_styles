@@ -36,7 +36,7 @@ To use this script, you need the following:
 
 ### Install
 
-Now you need to install this script itself. Open the console in the folder and enter:
+Now you need to install this script itself. Open the console and enter:
 
     pip3 install pandoc_styles
     pandoc_styles --init
