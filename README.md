@@ -36,14 +36,10 @@ To use this script, you need the following:
 
 ### Install
 
-Download the latest release and navigate to it. Open the console and enter:
-
-    pip3 install "release_file_name"
-
-<!-- Now you need to install this script itself. Open the console in the folder and enter:
+Now you need to install this script itself. Open the console in the folder and enter:
 
     pip3 install pandoc_styles
-    pandoc_styles --init -->
+    pandoc_styles --init
 
 ### Setup
 
