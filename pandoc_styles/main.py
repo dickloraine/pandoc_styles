@@ -55,6 +55,21 @@ class PandocStyles:
             else:
                 logging.error(f"Failed to build {fmt}!")
 
+    def get_output(self, fmt):
+        """
+        Converts to the given format and returns the output.
+        """
+        self.quiet = True
+        self.target = self.temp_dir
+        self.make_format(fmt)
+        return file_read(self.cfg[OUTPUT_FILE])
+
+    def print_output(self, fmt):
+        """
+        Converts to the given format and prints the output.
+        """
+        print(self.get_output(fmt))
+
     def make_format(self, fmt):
         """
         Converts to the given format.
@@ -231,7 +246,8 @@ class PandocStyles:
                            include_paths=[join(CONFIG_DIR, PATH_SASS)])
 
         css_file_path = self.cfg[MD_SASS].get(MD_SASS_OUTPUT_PATH)
-        if css_file_path == PATH_TEMP:
+        temp = css_file_path == PATH_TEMP
+        if temp:
             css_file_path = self.temp_dir
         elif css_file_path == USER_DIR_PREFIX:
             css_file_path = join(CONFIG_DIR, PATH_CSS)
@@ -242,10 +258,11 @@ class PandocStyles:
         if not isdir(css_file_path):
             mkdir(css_file_path)
         css_file_path = file_write(css_name, css, css_file_path)
-        try:
-            css_file_path = relpath(css_file_path, self.target).replace("\\", "/")
-        except ValueError:
-            pass
+        if not temp:
+            try:
+                css_file_path = relpath(css_file_path, self.target).replace("\\", "/")
+            except ValueError:
+                pass
         self.update_dict(self.cfg, {MD_CMD_LINE: {CSS: [css_file_path]}})
 
     def add_to_template(self):
@@ -369,6 +386,8 @@ def main():
                              'Defaults to the style file in the configuration folder.')
     parser.add_argument('-m', '--metadata',
                         help='Path to the metadata file that should be used.')
+    parser.add_argument('-p', '--print', action='store_true',
+                        help='Print the output to stdout. Accepts only one format.')
     parser.add_argument('-w', '--working-dir', default=getcwd(), type=str,
                         metavar="FOLDER",
                         help='The folder of the source files, for use in macros etc.')
@@ -385,7 +404,8 @@ def main():
 
     # logging
     logging.basicConfig(format='%(levelname)s: %(message)s',
-                        level=getattr(logging, "ERROR" if args.quiet else args.log))
+                        level=getattr(logging, "ERROR" if args.quiet or args.print else
+                                      args.log))
 
     # initialize config directory
     if args.init:
@@ -405,10 +425,16 @@ def main():
         parser.print_help()
         return
 
+    ps = PandocStyles(args.files, args.to, args.from_format, args.styles,
+                      args.add_styles, args.metadata, args.destination,
+                      args.output_name, args.style_file, args.quiet)
+
     with change_dir(args.working_dir):
-        PandocStyles(args.files, args.to, args.from_format, args.styles,
-                     args.add_styles, args.metadata, args.destination,
-                     args.output_name, args.style_file, args.quiet).run()
+        if args.print:
+            ps.print_output(args.to[0])
+            return
+
+        ps.run()
 
 
 if __name__ == '__main__':
