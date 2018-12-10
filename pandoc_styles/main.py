@@ -425,11 +425,11 @@ def main():
         parser.print_help()
         return
 
-    ps = PandocStyles(args.files, args.to, args.from_format, args.styles,
-                      args.add_styles, args.metadata, args.destination,
-                      args.output_name, args.style_file, args.quiet)
-
     with change_dir(args.working_dir):
+        ps = PandocStyles(args.files, args.to, args.from_format, args.styles,
+                          args.add_styles, args.metadata, args.destination,
+                          args.output_name, args.style_file, args.quiet)
+
         if args.print:
             ps.print_output(args.to[0])
             return
