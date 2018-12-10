@@ -27,9 +27,13 @@ def file_write(file_name, string, *path, mode="w", encoding="utf-8"):
     return file_name
 
 
-def run_process(name, args=""):
+def run_process(name, args="", quiet=False):
     """Run a process with the given args and return True if successfull """
     try:
+        if quiet:
+            subprocess.run(f"{name} {args}", check=True, stdout=subprocess.PIPE,
+                           stderr=subprocess.STDOUT)
+            return True
         subprocess.run(f"{name} {args}", check=True)
         return True
     except subprocess.CalledProcessError:

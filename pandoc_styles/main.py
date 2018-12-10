@@ -23,10 +23,11 @@ class PandocStyles:
     """Handles the conversion with styles"""
     def __init__(self, files, formats=None, from_format="", use_styles=None,
                  add_styles=None, metadata="", target="", output_name="",
-                 style_file=None):
+                 style_file=None, quiet=False):
         self.metadata = metadata
         self.files = files
         self.pandoc_metadata = self.get_pandoc_metadata()
+        self.quiet = quiet
         self.from_format = from_format or self.pandoc_metadata.get(MD_FROM_FORMAT)
         self.use_styles = use_styles or make_list(self.pandoc_metadata.get(MD_STYLE, []))
         self.use_styles.extend(add_styles or [])
@@ -67,7 +68,7 @@ class PandocStyles:
         self.replace_in_template()
         pandoc_args = self.get_pandoc_args()
         logging.debug(f"Command-line args: {pandoc_args}")
-        success = run_process(PANDOC_CMD, pandoc_args)
+        success = run_process(PANDOC_CMD, pandoc_args, self.quiet)
         if success:
             self.replace_in_output()
             self.postflight()
@@ -371,8 +372,11 @@ def main():
     parser.add_argument('-w', '--working-dir', default=getcwd(), type=str,
                         metavar="FOLDER",
                         help='The folder of the source files, for use in macros etc.')
+    parser.add_argument('-q', '--quiet', action='store_true',
+                        help='Run quiet. Sets logging to ERROR and shows no warnings '
+                             'from pandoc.')
     parser.add_argument('--init', action='store_true',
-                        help='Create the user configuration folder')
+                        help='Create the user configuration folder.')
     parser.add_argument('--log', default="INFO",
                         choices=["INFO", "DEBUG", "WARNING", "ERROR", "CRITICAL"],
                         help='The logging level. '
@@ -381,7 +385,7 @@ def main():
 
     # logging
     logging.basicConfig(format='%(levelname)s: %(message)s',
-                        level=getattr(logging, args.log))
+                        level=getattr(logging, "ERROR" if args.quiet else args.log))
 
     # initialize config directory
     if args.init:
@@ -404,7 +408,7 @@ def main():
     with change_dir(args.working_dir):
         PandocStyles(args.files, args.to, args.from_format, args.styles,
                      args.add_styles, args.metadata, args.destination,
-                     args.output_name, args.style_file).run()
+                     args.output_name, args.style_file, args.quiet).run()
 
 
 if __name__ == '__main__':
