@@ -2,6 +2,7 @@
 
 import logging
 import subprocess
+import shlex
 from os import chdir, getcwd
 from os.path import join, isfile, normpath
 from contextlib import contextmanager
@@ -31,10 +32,10 @@ def run_process(name, args="", quiet=False):
     """Run a process with the given args and return True if successfull """
     try:
         if quiet:
-            subprocess.run(f"{name} {args}", check=True, stdout=subprocess.PIPE,
-                           stderr=subprocess.STDOUT)
+            subprocess.run(shlex.split(f"{name} {args}"),
+                           check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             return True
-        subprocess.run(f"{name} {args}", check=True)
+        subprocess.run(shlex.split(f"{name} {args}"), check=True)
         return True
     except subprocess.CalledProcessError:
         logging.error(f"{name} failed!")

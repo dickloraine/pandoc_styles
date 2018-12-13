@@ -15,8 +15,8 @@ def run_script(tmpdir):
     copy(join(TEST_DATA_DIR, "styles.yaml"), tmpdir)
     def _run_script(args):
         return subprocess.run(f'poetry run pandoc_styles --style-file=styles.yaml '
-                              f'-w "{tmpdir}" {args}', stdout=subprocess.PIPE,
-                              stderr=subprocess.STDOUT, text=True, shell=True)
+                              f'-w "{tmpdir}" {args}', shell=True, stdout=subprocess.PIPE,
+                              stderr=subprocess.STDOUT, universal_newlines=True)
     return _run_script
 
 
