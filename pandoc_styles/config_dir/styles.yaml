@@ -18,8 +18,19 @@ Letter:
       paper: a4
       letteroption:
         - DIN
+      indent: false
+      subject-titled: false
+      foldmarks: TBMpL
+      no-head: false
+      # left, center, right
+      fromalign: right
+      # false, afteraddress, aftername
+      fromrule: false
+      place: City
+      opening: Dear Sir or Madam,
+      closing: Yours faithfully,
+      fromname: Sherlock Holmes
       fromaddress: |
-        Sherlock Holmes  
         221B Baker Street  
         London
   latex:

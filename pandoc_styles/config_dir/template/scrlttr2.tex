@@ -1,4 +1,4 @@
-\documentclass[$if(fontsize)$$fontsize$,$endif$$if(lang)$$lang$,$endif$$if(papersize)$$papersize$,$endif$$for(classoption)$$classoption$$sep$,$endfor$]{scrlttr2}
+\documentclass[$if(subject-titled)$subject=titled,$endif$$if(fontsize)$$fontsize$,$endif$$if(lang)$$lang$,$endif$$if(papersize)$$papersize$,$endif$$for(classoption)$$classoption$$sep$,$endfor$]{scrlttr2}
 $if(fontfamily)$
 \usepackage{$fontfamily$}
 $else$
@@ -98,9 +98,16 @@ $if(strikeout)$
 % avoid problems with \sout in headers with hyperref:
 \pdfstringdefDisableCommands{\renewcommand{\sout}{}}
 $endif$
+$if(indent)$
+$else$
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{6pt plus 2pt minus 1pt}
 \setlength{\emergencystretch}{3em}  % prevent overfull lines
+}
+$endif$
 $if(numbersections)$
 \setcounter{secnumdepth}{5}
 $else$
@@ -148,6 +155,23 @@ $for(letteroption)$
 \LoadLetterOption{$letteroption$}
 $endfor$
 
+$if(foldmarks)$
+\KOMAoptions{foldmarks=$foldmarks$}
+$endif$
+$if(no-head)$
+\KOMAoptions{firsthead=false}
+$endif$
+$if(fromalign)$
+\KOMAoptions{fromalign=$fromalign$}
+$else$
+\KOMAoptions{fromalign=right}
+$endif$
+$if(fromrule)$
+\KOMAoptions{fromrule=$fromrule$}
+$endif$
+\KOMAoptions{enlargefirstpage=true}
+
+
 $if(addresseeimage)$\setkomavar{addresseeimage}{$addresseeimage$}$endif$
 $if(backaddress)$\setkomavar{backaddress}{$backaddress$}\KOMAoptions{backaddress=true}$endif$
 $if(customer)$\setkomavar{customer}{$customer$}$endif$
@@ -179,11 +203,6 @@ $if(yourmail)$\setkomavar{yourmail}{$yourmail$}$endif$
 $if(yourref)$\setkomavar{yourref}{$yourref$}$endif$
 $if(opening)$\setkomavar{opening}{$opening$}$endif$
 $if(closing)$\setkomavar{closing}{$closing$}$endif$
-
-
-\KOMAoptions{
-fromalign=right
-}
 
 \begin{document}
 
