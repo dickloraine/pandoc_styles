@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pandoc_styles"
-version = "0.8.1"
+version = "0.8.2"
 description = "A script to convert files with pandoc using styles."
 authors = ["dickloraine <dickloraine@gmx.net>"]
 license = "MIT"
