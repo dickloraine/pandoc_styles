@@ -5,7 +5,7 @@ import sys
 from argparse import ArgumentParser
 from copy import deepcopy
 from os import getcwd, listdir, mkdir
-from os.path import (basename, dirname, isdir, join, normpath, relpath)
+from os.path import dirname, isdir, join, normpath, relpath
 from shutil import copy, copytree
 from tempfile import TemporaryDirectory
 from pkg_resources import resource_filename
@@ -229,17 +229,17 @@ class PandocStyles:
         if MD_SASS not in self.cfg:
             return
 
+        cfg = self.cfg[MD_SASS]
+        sass_files = make_list(cfg[MD_SASS_FILES])
+        css_name = f'{cfg.get(MD_SASS_NAME, "stylesheet")}.{CSS}'
         css = [f'${var}: {str(val).lower() if isinstance(val, bool) else str(val)};'
-               for var, val in self.cfg[MD_SASS].get(MD_SASS_VARS, {}).items()]
-        sass_files = make_list(self.cfg[MD_SASS][MD_SASS_FILES])
-        css_name = f"{basename(sass_files[0]).rpartition('.')[0]}.{CSS}"
+               for var, val in cfg.get(MD_SASS_VARS, {}).items()]
         css.extend([file_read(expand_directories(f, MD_SASS)) for f in sass_files])
-        css.extend(make_list(self.cfg[MD_SASS].get(MD_SASS_APPEND, [])))
-        css = "\n".join(css)
-        css = sass.compile(string=css, output_style='expanded',
+        css.extend(make_list(cfg.get(MD_SASS_APPEND, [])))
+        css = sass.compile(string="\n".join(css), output_style='expanded',
                            include_paths=[join(CONFIG_DIR, PATH_SASS)])
 
-        css_file_path = self.cfg[MD_SASS].get(MD_SASS_OUTPUT_PATH)
+        css_file_path = cfg.get(MD_SASS_OUTPUT_PATH)
         temp = css_file_path == PATH_TEMP
         if temp:
             css_file_path = self.temp_dir
