@@ -28,22 +28,28 @@ def file_write(file_name, string, *path, mode="w", encoding="utf-8"):
     return file_name
 
 
-def run_process(name, args="", quiet=False):
-    """Run a process with the given args and return True if successfull """
+def run_process(args, get_output=False, shell=False):
+    """
+    Run a process with the given args and return True if successfull.
+    If get_output is true, return the subprocess.
+    On an error return False
+    """
+    args = shlex.split(args) if not shell else args
+    name = args[1] if args[0] in ["py", "python"] else args[0]
     try:
-        if quiet:
-            subprocess.run(shlex.split(f"{name} {args}"),
-                           check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            return True
-        subprocess.run(shlex.split(f"{name} {args}"), check=True)
+        if get_output:
+            pc = subprocess.run(args, check=True, shell=shell, stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT, universal_newlines=True,
+                                encoding="utf-8")
+            return pc
+        subprocess.run(args, check=True, shell=shell)
         return True
     except subprocess.CalledProcessError:
         logging.error(f"{name} failed!")
         logging.debug(f"{name} command-line:\n{name} {args}!")
-        return False
     except FileNotFoundError:
         logging.error(f'{name} not found!')
-        return False
+    return False
 
 
 def has_extension(ffile, extensions):

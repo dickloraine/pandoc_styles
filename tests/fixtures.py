@@ -1,7 +1,7 @@
 from shutil import copy, copytree
 from os.path import dirname, abspath, join, pardir
-import subprocess
 import pytest
+from pandoc_styles.utils import run_process
 
 
 TEST_DIR = dirname(abspath(__file__))
@@ -14,9 +14,8 @@ TEST_CONFIG_DIR = abspath(join(TEST_DIR, pardir, "pandoc_styles", "config_dir"))
 def run_script(tmpdir):
     copy(join(TEST_DATA_DIR, "styles.yaml"), tmpdir)
     def _run_script(args):
-        return subprocess.run(f'poetry run pandoc_styles --style-file=styles.yaml '
-                              f'-w "{tmpdir}" {args}', shell=True, stdout=subprocess.PIPE,
-                              stderr=subprocess.STDOUT, universal_newlines=True)
+        return run_process(f'poetry run pandoc_styles --style-file=styles.yaml '
+                           f'-w "{tmpdir}" {args}', True, shell=True)
     return _run_script
 
 

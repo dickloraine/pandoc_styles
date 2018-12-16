@@ -13,7 +13,7 @@ def run_app(run_script, copy_from_data):
         cmd = f"{' '.join(files)} {extra_args} -t {' '.join(formats)}"
         output = output or "".join(f"INFO: Build {fmt}\n" for fmt in formats)
         ps = run_script(cmd)
-        assert ps.returncode == 0
+        assert ps
         assert ps.stdout == output
     return _run_app
 

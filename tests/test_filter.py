@@ -14,7 +14,7 @@ def test_filter(tmpdir, run_script, copy_from_config):
         for fmt, fmt_txt, fmt_open, fmt_close in fmts:
             target = fmt_txt.format(fmt_open, fmt_close)
             ps = run_script(f'{test_file} -t {fmt}')
-            assert ps.returncode == 0
+            assert ps
             assert ps.stdout == f"INFO: Build {fmt}\n"
             assert file_read(f"test.{fmt}", tmpdir) == target
     return _test_filter

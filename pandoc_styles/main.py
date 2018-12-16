@@ -1,6 +1,5 @@
 import logging
 import re
-import subprocess
 import sys
 from argparse import ArgumentParser
 from copy import deepcopy
@@ -83,7 +82,7 @@ class PandocStyles:
         self.replace_in_template()
         pandoc_args = self.get_pandoc_args()
         logging.debug(f"Command-line args: {pandoc_args}")
-        success = run_process(PANDOC_CMD, pandoc_args, self.quiet)
+        success = run_process(pandoc_args, self.quiet)
         if success:
             self.replace_in_output()
             self.postflight()
@@ -160,7 +159,7 @@ class PandocStyles:
 
     def get_pandoc_args(self):
         """Build the command line for pandoc out of the given configuration"""
-        pandoc_args = [f'-t {self.cfg[TO_FMT]} -o "{self.cfg[OUTPUT_FILE]}"']
+        pandoc_args = [f'{PANDOC_CMD} -t {self.cfg[TO_FMT]} -o "{self.cfg[OUTPUT_FILE]}"']
 
         if self.from_format:
             pandoc_args.append(f'--from {self.from_format}')
@@ -206,7 +205,7 @@ class PandocStyles:
                 script = expand_directories(script, flight_type)
                 if self.python_path:
                     script = f'{self.python_path} "{script}" '
-                run_process(script, f'--cfg "{cfg}"')
+                run_process(f'{script} --cfg "{cfg}"')
                 self.read_cfg_file()
             else:
                 script = script.replace(repl_txt, repl_val)
@@ -280,13 +279,10 @@ class PandocStyles:
         try:
             template = file_read(self.cfg[MD_CMD_LINE][MD_TEMPLATE])
         except (KeyError, FileNotFoundError):
-            try:
-                template = subprocess.run(f'{PANDOC_CMD} -D {self.cfg[TO_FMT]}',
-                                          stdout=subprocess.PIPE, encoding="utf-8",
-                                          check=True)
-                template = template.stdout
-            except (subprocess.CalledProcessError, FileNotFoundError):
+            pc = run_process(f'{PANDOC_CMD} -D {self.cfg[TO_FMT]}', True)
+            if not pc:
                 return
+            template = pc.stdout
         original_template = template
         template = self.replace_in_text(pattern, repl, template, add, count)
         if original_template != template:
