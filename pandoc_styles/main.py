@@ -196,38 +196,33 @@ class PandocStyles:
             pandoc_args.append(f'"{complex_data}"')
         return " ".join(pandoc_args)
 
+    def _flight(self, flight_type, repl_txt, repl_val):
+        """Run a flight script"""
+        if flight_type not in self.cfg:
+            return
+        for script in make_list(self.cfg[flight_type]):
+            if len(script.split(" ")) == 1 and has_extension(script, "py"):
+                cfg = self.make_cfg_file()
+                script = expand_directories(script, flight_type)
+                if self.python_path:
+                    script = f'{self.python_path} "{script}" '
+                run_process(script, f'--cfg "{cfg}"')
+                self.read_cfg_file()
+            else:
+                script = script.replace(repl_txt, repl_val)
+                run_process(script)
+
     def preflight(self):
         """Run all preflight scripts given in the style definition"""
         if MD_PREFLIGHT not in self.cfg:
             return
         self.cfg[MD_CURRENT_FILES] = [copy(f, self.temp_dir)
                                       for f in self.cfg[MD_CURRENT_FILES]]
-        for script in make_list(self.cfg[MD_PREFLIGHT]):
-            if self.run_pandoc_styles_script(script, MD_PREFLIGHT):
-                continue
-            script = script.replace("<files>", " ".join(self.cfg[MD_CURRENT_FILES]))
-            run_process(script)
+        self._flight(MD_PREFLIGHT, "<files>", " ".join(self.cfg[MD_CURRENT_FILES]))
 
     def postflight(self):
         """Run all postflight scripts given in the style definition"""
-        if MD_POSTFLIGHT not in self.cfg:
-            return
-        for script in make_list(self.cfg[MD_POSTFLIGHT]):
-            if self.run_pandoc_styles_script(script, MD_POSTFLIGHT):
-                continue
-            script = script.replace("<file>", self.cfg[OUTPUT_FILE])
-            run_process(script)
-
-    def run_pandoc_styles_script(self, script, flight_type):
-        if len(script.split(" ")) > 1 or not has_extension(script, "py"):
-            return False
-        cfg = self.make_cfg_file()
-        script = expand_directories(script, flight_type)
-        if self.python_path:
-            script = f'{self.python_path} "{script}" '
-        run_process(script, f'--cfg "{cfg}"')
-        self.read_cfg_file()
-        return True
+        self._flight(MD_POSTFLIGHT, "<file>", self.cfg[OUTPUT_FILE])
 
     def process_sass(self):
         """Build the css out of the sass informations given in the style definition"""
