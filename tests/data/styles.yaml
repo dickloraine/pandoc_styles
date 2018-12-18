@@ -118,7 +118,6 @@ Func_test:
     command-line:
       pdf-engine: xelatex
     metadata:
-      mainfont: Adobe Garamond Pro
       geometry: "a4paper, twoside, top=2cm, bottom=2cm, left=2.5cm"
       header-includes:
         - |
@@ -149,8 +148,6 @@ Novel:
       BCOR: 2mm
       center-headings: true
       fontsize: 10pt
-      mainfont: Adobe Garamond Pro
-      sansfont: Questrial
       pagestyle: plain
       pdf-cover: false
       headsepline: false
