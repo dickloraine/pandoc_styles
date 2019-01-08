@@ -217,11 +217,12 @@ class PandocStyles:
             return
         self.cfg[MD_CURRENT_FILES] = [copy(f, self.temp_dir)
                                       for f in self.cfg[MD_CURRENT_FILES]]
-        self._flight(MD_PREFLIGHT, "<files>", " ".join(self.cfg[MD_CURRENT_FILES]))
+        self._flight(MD_PREFLIGHT, "<files>", " ".join(f'"{x}"' for x in
+                                                       self.cfg[MD_CURRENT_FILES]))
 
     def postflight(self):
         """Run all postflight scripts given in the style definition"""
-        self._flight(MD_POSTFLIGHT, "<file>", self.cfg[OUTPUT_FILE])
+        self._flight(MD_POSTFLIGHT, "<file>", f'"{self.cfg[OUTPUT_FILE]}"')
 
     def process_sass(self):
         """Build the css out of the sass informations given in the style definition"""
