@@ -28,6 +28,9 @@ def latex(self):
     new = []
     if self.style == "top" and "title" in self.attributes:
         new.extend([r"\poemtitle*{", self.attributes["title"], "}\n"])
+    if self.style == "top" and "author" in self.attributes:
+        new.extend([r"\center\textit{",
+                    self.attributes["author"], "}\n"])
 
     if "versewidth" in self.attributes:
         new.extend([r"\settowidth{\versewidth}{", self.attributes["versewidth"],
@@ -59,11 +62,7 @@ def latex(self):
             new.extend([self.convert_text(line).strip("\n"), r"\\", "*", "\n"])
     new.extend([r"\\!", "\n"])
 
-    if self.style == "top" and "author" in self.attributes:
-        new.extend([r"\hspace*{\fill}", r"\rightskip2em \textit{",
-                    self.attributes["author"], "}\n"])
-
-    elif self.style == "one-line" and "author" in self.attributes and\
+    if self.style == "one-line" and "author" in self.attributes and\
             "title" in self.attributes:
         new.extend([r"\hfill \rightskip2em \textit{", self.attributes["author"],
                     "} --- ", r"\textbf{", self.attributes["title"], "}\n"])
