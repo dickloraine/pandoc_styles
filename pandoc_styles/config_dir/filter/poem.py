@@ -29,8 +29,7 @@ def latex(self):
     if self.style == "top" and "title" in self.attributes:
         new.extend([r"\poemtitle*{", self.attributes["title"], "}\n"])
     if self.style == "top" and "author" in self.attributes:
-        new.extend([r"\center\textit{",
-                    self.attributes["author"], "}\n"])
+        new.extend([r"\textit{\centering ", self.attributes["author"], "\\\\}\n"])
 
     if "versewidth" in self.attributes:
         new.extend([r"\settowidth{\versewidth}{", self.attributes["versewidth"],
