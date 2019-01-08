@@ -26,6 +26,9 @@ class PandocStyles:
         self.metadata = metadata
         self.files = files
         self.pandoc_metadata = self.get_pandoc_metadata()
+        self.files = self.pandoc_metadata.get(MD_FILE_LIST) or \
+                     [f for f in files if f not in
+                      self.pandoc_metadata.get(MD_EXCLUDED_FILES, [])]
         self.quiet = quiet
         self.from_format = from_format or self.pandoc_metadata.get(MD_FROM_FORMAT)
         self.use_styles = use_styles or make_list(self.pandoc_metadata.get(MD_STYLE, []))

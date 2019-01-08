@@ -20,6 +20,8 @@ PATH_CSS = "css"
 # Metadata fields constants
 MD_METADATA = "metadata"
 MD_CMD_LINE = "command-line"
+MD_FILE_LIST = "file-list"
+MD_EXCLUDED_FILES = "excluded-files"
 MD_DESTINATION = "destination"
 MD_OUTPUT_NAME = "output-name"
 MD_FORMATS = "formats"

@@ -10,6 +10,7 @@ This script allows you to define styles for pandoc. In styles you can define, wi
   - [Usage](#usage)
   - [Defining Styles](#defining-styles)
     - [Basic Usage](#basic-usage)
+  - [~~~yaml](#yaml)
     - [Inheritance](#inheritance)
   - [Advanced Feature](#advanced-feature)
     - [Adressing files in the configuration folder](#adressing-files-in-the-configuration-folder)
@@ -61,8 +62,16 @@ To use your styles, your source files need to have a metadata block. These comma
 - output-name: The desired name of the outputfile without extension. In none is given, the filename is used.
 - fields that exist in the style. They override the default given in the style.
 
+If you convert all files in a folder as one document, these additional commands are available:
+
+- file-list: Specify exactly which files in the folder should be converted.
+- excluded-files: Exclude the listed files from beeing converted.
+
 Then to convert your file, open the console and enter:
     pandoc_styles "your_file"
+
+Or if you want to convert all files in a folder as one document:
+    pandoc_styles -f
 
 The commandline script has many optional parameters to be useful in macros, batch files etc. Enter
     pandoc_styles -h
