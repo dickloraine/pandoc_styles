@@ -26,7 +26,7 @@ def make_appendices(self):
 
         if appendix.get('sort'):
             key = appendix.get('sort', "name")
-            data = sorted(data, key=lambda x: x[key])  # pylint: disable=W0640
+            data = sorted(data, key=lambda x: x[key])  # pylint: disable=cell-var-from-loop
 
         classes = appendix.get("classes", f".{name}")
         appendix_heading_level = appendix.get("appendix-heading-level", 1)

@@ -12,7 +12,7 @@ from pkg_resources import resource_filename
 import sass
 import yaml
 
-from .constants import *  # pylint: disable=W0401, W0614
+from .constants import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from .format_mappings import FORMAT_TO_EXTENSION
 from .utils import (change_dir, expand_directories, file_read, file_write,
                     has_extension, make_list, run_process)
@@ -426,9 +426,8 @@ def main():
 
         if args.print:
             ps.print_output(args.to[0])
-            return
-
-        ps.run()
+        else:
+            ps.run()
 
 
 if __name__ == '__main__':

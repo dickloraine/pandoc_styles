@@ -1,6 +1,6 @@
 import yaml
 import panflute as pf
-from panflute import (  # pylint: disable=W0611
+from panflute import (  # pylint: disable=unused-import
     Null, HorizontalRule, Space, SoftBreak, LineBreak, Str,
     Code, BlockQuote, Note, Div, Plain, Para, Emph, Strong, Strikeout,
     Superscript, Subscript, SmallCaps, Span, RawBlock, RawInline, Math,
@@ -29,7 +29,7 @@ class PandocStylesFilter():
         self._init_filter(elem, doc)
         if not self.check():
             return
-        self.new_text = self.func()  # pylint: disable=E1128
+        self.new_text = self.func()  # pylint: disable=assignment-from-none
         return self._return_filter()
 
     def _init_filter(self, elem, doc):
@@ -119,7 +119,7 @@ class TransformFilter(PandocStylesFilter):
     run them.
     '''
 
-    # pylint: disable=W0231
+    # pylint: disable=super-init-not-called
     def __init__(self, tags=None, latex=None, html=None, other=None,
                  all_formats=None, filter_type=None, check=None):
         self.tags = tags or []
@@ -139,7 +139,7 @@ class TransformFilter(PandocStylesFilter):
         self._call_filter()
         return self._return_filter()
 
-    # pylint: disable=E1128
+    # pylint: disable=assignment-from-none
     def _call_filter(self):
         if self.fmt == LATEX:
             self.new_text = self.latex()
