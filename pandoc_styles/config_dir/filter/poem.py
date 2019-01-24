@@ -15,8 +15,7 @@ from pandoc_styles import run_transform_filter, strip_html_tag
 
 
 def all_formats(self):
-    self.style = self.get_pandoc_styles_metadata()
-    self.style = self.style.get("metadata", {}).get("poem-style", "bottom")
+    self.style = self.get_cfg_metadata("poem-style", "bottom")
     if "top" in self.classes:
         self.style = "top"
     elif "bottom" in self.classes:

@@ -9,7 +9,7 @@ from panflute import (  # pylint: disable=unused-import
     convert_text, Element, run_filter)
 from .constants import (HTML, PDF, LATEX, EPUB, MD_PANDOC_STYLES_MD,
                         FIL_OTHER, FIL_ALL, FIL_CHECK)
-from .utils import file_read, file_write
+from .utils import file_read, file_write, get_nested
 
 
 class PandocStylesFilter():
@@ -82,6 +82,12 @@ class PandocStylesFilter():
         except FileNotFoundError:
             self.cfg = {}
         return self.cfg
+
+    def get_cfg_metadata(self, key, default=None):
+        '''Return the value of key in the pandoc_styles cfg metadata field.'''
+        if not self.cfg:
+            self.get_pandoc_styles_metadata()
+        return get_nested(self.cfg, default, "metadata", key)
 
     def save_pandoc_styles_metadata(self):
         '''Save the given cfg in the cfg-file'''
