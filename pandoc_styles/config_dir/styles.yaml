@@ -318,6 +318,14 @@ Code:
   latex:
     << : *pdf-code
 
+Code-default-language:
+  all:
+    command-line:
+      filter:
+        - ~/default_code_language.py
+    metadata:
+      default-code-language: bash
+
 Fancy-header:
   pdf: &pdf-fancy-header
     metadata:
