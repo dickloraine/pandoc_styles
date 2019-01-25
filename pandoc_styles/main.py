@@ -121,11 +121,17 @@ class PandocStyles:
             start_style[MD_INHERITS] = self.use_styles
             cfg = self.get_styles(start_style, fmt)
 
+        # ensure metadata and command-line fields
+        if MD_METADATA not in cfg:
+            cfg[MD_METADATA] = {}
+        if MD_CMD_LINE not in cfg:
+            cfg[MD_CMD_LINE] = {}
+
         # update fields in the cfg with fields in the document metadata
         for key, val in self.pandoc_metadata.items():
-            if key in cfg.get(MD_METADATA, {}):
+            if key in cfg[MD_METADATA]:
                 cfg_ = cfg[MD_METADATA]
-            elif key in cfg.get(MD_CMD_LINE, {}):
+            elif key in cfg[MD_CMD_LINE]:
                 cfg_ = cfg[MD_CMD_LINE]
             else:
                 cfg_ = cfg
@@ -172,19 +178,18 @@ class PandocStyles:
 
         complex_data = {}
         for group, prefix in [(MD_CMD_LINE, "--"), (MD_METADATA, "-V ")]:
-            if group in self.cfg:
-                for key, value in self.cfg[group].items():
-                    for item in make_list(value):
-                        if not item:
-                            continue
-                        elif item is True:
-                            pandoc_args.append(f'{prefix}{key}')
-                        elif isinstance(item, dict):
-                            complex_data[key] = value
-                            break
-                        else:
-                            item = expand_directories(item, key)
-                            pandoc_args.append(f'{prefix}{key}="{item}"')
+            for key, value in self.cfg[group].items():
+                for item in make_list(value):
+                    if not item:
+                        continue
+                    elif item is True:
+                        pandoc_args.append(f'{prefix}{key}')
+                    elif isinstance(item, dict):
+                        complex_data[key] = value
+                        break
+                    else:
+                        item = expand_directories(item, key)
+                        pandoc_args.append(f'{prefix}{key}="{item}"')
 
         for ffile in self.cfg[MD_CURRENT_FILES]:
             pandoc_args.append(f'"{ffile}"')
@@ -291,7 +296,7 @@ class PandocStyles:
         template = self.replace_in_text(pattern, repl, template, add, count)
         if original_template != template:
             template = file_write("new.template", template, self.temp_dir)
-            self.update_dict(self.cfg, {MD_CMD_LINE: {MD_TEMPLATE: template}})
+            self.cfg[MD_CMD_LINE][MD_TEMPLATE] = template
 
     def replace_in_output(self):
         """Replace text in the output with text given in the style definition"""
