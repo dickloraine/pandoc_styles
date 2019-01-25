@@ -121,11 +121,10 @@ class PandocStyles:
             start_style[MD_INHERITS] = self.use_styles
             cfg = self.get_styles(start_style, fmt)
 
-        # ensure metadata and command-line fields
-        if MD_METADATA not in cfg:
-            cfg[MD_METADATA] = {}
-        if MD_CMD_LINE not in cfg:
-            cfg[MD_CMD_LINE] = {}
+        # ensure some fields are present
+        for field in [MD_METADATA, MD_CMD_LINE, MD_TEMPLATE_VARIABLES]:
+            if field not in cfg:
+                cfg[field] = {}
 
         # update fields in the cfg with fields in the document metadata
         for key, val in self.pandoc_metadata.items():
@@ -133,6 +132,8 @@ class PandocStyles:
                 cfg_ = cfg[MD_METADATA]
             elif key in cfg[MD_CMD_LINE]:
                 cfg_ = cfg[MD_CMD_LINE]
+            elif key in cfg[MD_TEMPLATE_VARIABLES]:
+                cfg_ = cfg[MD_TEMPLATE_VARIABLES]
             else:
                 cfg_ = cfg
             self.update_dict(cfg_, {key: val})
@@ -177,7 +178,9 @@ class PandocStyles:
         pandoc_args.append(f'-M {MD_PANDOC_STYLES_MD}="{self.make_cfg_file()}"')
 
         complex_data = {}
-        for group, prefix in [(MD_CMD_LINE, "--"), (MD_METADATA, "-V ")]:
+        for group, prefix in [(MD_CMD_LINE, "--"),
+                              (MD_METADATA, "-M "),
+                              (MD_TEMPLATE_VARIABLES, "-V ")]:
             for key, value in self.cfg[group].items():
                 for item in make_list(value):
                     if not item:

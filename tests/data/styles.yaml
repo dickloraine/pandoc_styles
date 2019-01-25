@@ -119,6 +119,7 @@ Func_test:
       pdf-engine: xelatex
     metadata:
       geometry: "a4paper, twoside, top=2cm, bottom=2cm, left=2.5cm"
+    template-variables:
       header-includes:
         - |
           \usepackage{titling}

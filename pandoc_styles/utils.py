@@ -67,15 +67,6 @@ def make_list(item):
     return item
 
 
-def get_nested(dictionary, default, *args):
-    cur = dictionary
-    for arg in args:
-        cur = cur.get(arg)
-        if cur is None:
-            return default
-    return cur
-
-
 @contextmanager
 def change_dir(new_dir):
     """Changes to the given directory, returns to the current one after"""

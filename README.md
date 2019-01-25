@@ -90,9 +90,11 @@ Name:
       pandoc-option: value
     metadata:
       pandoc-variable: value
+    template-variables:
+      template-variable: value
 ~~~
 
-"Name" is how the style is adressed. A style directly defined in the metadata-block has no name. "Format" specifies for which format the following commands should be invoked. There is a special value: "all". Everything under "all" is used in any format. Under "command-line" you use the long version of pandoc parameters followed by the value, to invoke them. If a parameter is a flag, use "true". Parameters given the value "false" are ignored. Under "metadata" you enter the names and values of pandoc variables, this are most commonly used in templates.
+"Name" is how the style is adressed. A style directly defined in the metadata-block has no name. "Format" specifies for which format the following commands should be invoked. There is a special value: "all". Everything under "all" is used in any format. Under "command-line" you use the long version of pandoc parameters followed by the value, to invoke them. If a parameter is a flag, use "true". Parameters given the value "false" are ignored. Under "metadata" you enter the names and values of pandoc variables, these are most commonly used in templates. Finally "template-variables" is for variables that can not be set as metadata, most often, because the content should be used as it is and not be converted to markdown (for example if you want to set custom code in "header-includes").
 
 **A Basic example**
 

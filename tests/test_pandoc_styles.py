@@ -73,6 +73,7 @@ def test_get_cfg(ps, styles, test_file):
         "cover-image": "./cover.jpg",
         "formats": ["pdf", "html"],
         "style": "Func_test",
+        MD_TEMPLATE_VARIABLES: {},
         MD_CURRENT_FILES: [test_file],
         OUTPUT_FILE: join(TEST_DATA_DIR, "test01.pdf"),
         FMT: "pdf",
