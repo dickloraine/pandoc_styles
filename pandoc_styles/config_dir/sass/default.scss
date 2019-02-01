@@ -1,9 +1,7 @@
 $media-breakpoint: 600px !default;
 $body-max-width: 800px !default;
 $base-font-size: 12pt !default;
-$paragraph-line-height: "1.5" !default;
 $media-font-size: 10pt !default;
-$media-paragraph-line-height: "1.2" !default;
 $heading-alignment: left !default;
 
 $title-font: "Oswald", sans-serif !default;
@@ -25,7 +23,6 @@ body {
 	padding-top: 2em;
 	font-family: $body-font;
 	font-size: $media-font-size;
-	line-height: $media-paragraph-line-height;
 	text-align: justify;
 	margin: 3em auto 0 auto;
 }
@@ -38,7 +35,6 @@ body {
 @media only screen and (min-width: $media-breakpoint) {
   body {
     font-size: $base-font-size;
-    line-height: $paragraph-line-height;
     @if $paper-box == true {
       box-shadow: 1px 4px 14px #888;
     }
