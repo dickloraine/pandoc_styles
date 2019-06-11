@@ -35,6 +35,12 @@ def test_custom_styles(test_filter):
                  ('latex', TF_LATEX_BASE, '\\begin{pdf_teststyle}\n',
                   '\n\\end{pdf_teststyle}')])
 
+def test_div(test_filter):
+    test_filter('divs.py', '.teststyle', [
+        ('html', TF_HTML_BASE, '<div class="teststyle">', '</div>'),
+        ('latex', DIV_LATEX_BASE, '\\begin{teststyle}\n', '\n\n\\end{teststyle}')
+        ],
+                DIV_BASE)
 
 def test_epigraph(test_filter):
     test_filter('epigraph.py', '.epigraph',
@@ -181,3 +187,24 @@ the bone and grazed the subclavian artery. I should have fallen into the
 hands of the murderous Ghazis had it not been for the devotion and
 courage shown by Murray, my orderly, who threw me across a pack-horse,
 and succeeded in bringing me safely to the British lines.{}""")
+
+DIV_BASE = BASE.format("{}", """\
+:::{}
+The campaign brought honours and promotion to many, but for me it had
+nothing but misfortune and disaster. I was removed from my brigade and
+attached to the Berkshires, with whom I served at the fatal battle of
+Maiwand.
+
+There I was struck on the shoulder by a Jezail bullet, which shattered
+the bone and grazed the subclavian artery. I should have fallen into the
+hands of the murderous Ghazis had it not been for the devotion and
+courage shown by Murray, my orderly, who threw me across a pack-horse,
+and succeeded in bringing me safely to the British lines.
+:::
+""")
+
+DIV_LATEX_BASE = LATEX_BASE.format("", """\
+{}The campaign brought honours and promotion to many, but for me it had nothing but misfortune and disaster. I was removed from my brigade and attached to the Berkshires, with whom I served at the fatal battle of Maiwand.
+
+There I was struck on the shoulder by a Jezail bullet, which shattered the bone and grazed the subclavian artery. I should have fallen into the hands of the murderous Ghazis had it not been for the devotion and courage shown by Murray, my orderly, who threw me across a pack-horse, and succeeded in bringing me safely to the British lines.{}\
+""")
