@@ -38,7 +38,7 @@ def test_custom_styles(test_filter):
 def test_div(test_filter):
     test_filter('divs.py', '.teststyle', [
         ('html', TF_HTML_BASE, '<div class="teststyle">', '</div>'),
-        ('latex', DIV_LATEX_BASE, '\\begin{teststyle}\n', '\n\n\\end{teststyle}')
+        ('latex', DIV_LATEX_BASE, '\\begin{teststyle}\n', '\\end{teststyle}')
         ],
                 DIV_BASE)
 

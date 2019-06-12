@@ -14,7 +14,7 @@ def latex(self):
 
     style_pdf = self.attributes.get("pdf", "") or self.classes[0]
     return (f'\\begin{{{style_pdf}}}\n'
-            f'{self.stringify()}'
+            f'{self.stringify().strip()}'
             f'\\end{{{style_pdf}}}\n')
 
 if __name__ == "__main__":
