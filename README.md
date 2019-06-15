@@ -68,13 +68,16 @@ If you convert all files in a folder as one document, these additional commands 
 - excluded-files: Exclude the listed files from beeing converted.
 
 Then to convert your file, open the console and enter:
+
     pandoc_styles "your_file"
 
 Or if you want to convert all files in a folder as one document:
     pandoc_styles -f
 
 The commandline script has many optional parameters to be useful in macros, batch files etc. Enter
+
     pandoc_styles -h
+
 to see all the options.
 
 ## Defining Styles
@@ -148,7 +151,7 @@ Would find the file "test-filter.py" in the subfolder "filter" in the configurat
 
 ### Preflight
 
-You can run other command-line apps and scripts before the conversion happens. Just enter the command-line command in the preflight field in the style definition. You can pass the files list to it with "<files>". Explicitly mark the value as a string, to avoid any hassle with special characters. For example:
+You can run other command-line apps and scripts before the conversion happens. Just enter the command-line command in the preflight field in the style definition. You can pass the files list to it with `<files>`. Explicitly mark the value as a string, to avoid any hassle with special characters. For example:
 
 ~~~yaml
 Test-style:
@@ -204,7 +207,7 @@ Test-style:
 
 "files" is a list of sass files to be included.
 
-"output-path" can be "~/" to output to the css folder in the configuration folder, "temp" for use with the "self-contained" parameter or a relative path. If ommited, the css output is in the same folder as the source files output.
+"output-path" can be "~/" to output to the css folder in the configuration folder, a relative path or "temp" to be used with the "self-contained" parameter. If ommited, the css output is in the same folder as the source files output.
 
 "variables" can be any variables in your sass files.
 
@@ -246,7 +249,7 @@ Exactly the same as replace-in-template but for text in the output-file
 
 ### Postflight
 
-These scripts are called after the source is converted. Pretty similar to preflight, but instead of "<files>" it only accepts a single "<file>"
+These scripts are called after the source is converted. Pretty similar to preflight, but instead of `<files>` it only accepts a single `<file>`
 
 **Some app:**
 
@@ -254,7 +257,7 @@ These scripts are called after the source is converted. Pretty similar to prefli
 Test-style:
   html:
     preflight:
-      - 'some_app -d -f <files>'
+      - 'some_app -d -f <file>'
 ~~~
 
 **Custome script:**
