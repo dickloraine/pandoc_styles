@@ -10,7 +10,6 @@ This script allows you to define styles for pandoc. In styles you can define, wi
   - [Usage](#usage)
   - [Defining Styles](#defining-styles)
     - [Basic Usage](#basic-usage)
-  - [~~~yaml](#yaml)
     - [Inheritance](#inheritance)
   - [Advanced Feature](#advanced-feature)
     - [Adressing files in the configuration folder](#adressing-files-in-the-configuration-folder)
@@ -104,26 +103,27 @@ Name:
 This is an example metadata-block in a source file:
 
 ~~~yaml
+
 ---
 title:  Example
 author: John Doe
 formats:
-  - html
-  - pdf
+    - html
+    - pdf
 style-definition:
-  all:
-    command-line:
-      toc: true
-      toc-depth: 3
-      highlight-style: tango
-    metadata:
-      language: en
-  html:
-    command-line:
-      standalone: true
-  pdf:
-    command-line:
-      pdf-engine: xelatex
+    all:
+        command-line:
+        toc: true
+        toc-depth: 3
+        highlight-style: tango
+        metadata:
+        language: en
+    html:
+        command-line:
+        standalone: true
+    pdf:
+        command-line:
+        pdf-engine: xelatex
 ---
 ~~~
 
