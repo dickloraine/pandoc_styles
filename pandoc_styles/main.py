@@ -137,7 +137,7 @@ class PandocStyles:
 
         if MD_STYLE_DEF in self.pandoc_metadata:
             self.update_dict(cfg,
-                             self.style_to_cfg(self.pandoc_metadata[MD_STYLE_DEF], fmt))
+                             self.get_styles(self.pandoc_metadata[MD_STYLE_DEF], fmt))
 
         # add all needed infos to cfg
         cfg[MD_CURRENT_FILES] = self.files.copy()
