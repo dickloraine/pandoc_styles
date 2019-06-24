@@ -128,15 +128,12 @@ class PandocStyles:
 
         # update fields in the cfg with fields in the document metadata
         for key, val in self.pandoc_metadata.items():
-            if key in cfg[MD_METADATA]:
-                cfg_ = cfg[MD_METADATA]
-            elif key in cfg[MD_CMD_LINE]:
-                cfg_ = cfg[MD_CMD_LINE]
-            elif key in cfg[MD_TEMPLATE_VARIABLES]:
-                cfg_ = cfg[MD_TEMPLATE_VARIABLES]
+            for field in [MD_METADATA, MD_CMD_LINE, MD_TEMPLATE_VARIABLES]:
+                if key in cfg[field]:
+                    self.update_dict(cfg[field], {key: val})
+                    break
             else:
-                cfg_ = cfg
-            self.update_dict(cfg_, {key: val})
+                self.update_dict(cfg, {key: val})
 
         if MD_STYLE_DEF in self.pandoc_metadata:
             self.update_dict(cfg,
