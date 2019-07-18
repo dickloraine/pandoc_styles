@@ -62,9 +62,7 @@ def has_extension(ffile, extensions):
 
 def make_list(item):
     """Make a list with item as its member, if item isn't a list already"""
-    if not isinstance(item, list):
-        return [item]
-    return item
+    return item if isinstance(item, list) else [item]
 
 
 @contextmanager

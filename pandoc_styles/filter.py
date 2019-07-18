@@ -9,7 +9,7 @@ from panflute import (  # pylint: disable=unused-import
     convert_text, Element, run_filter)
 from .constants import (HTML, PDF, LATEX, EPUB, MD_PANDOC_STYLES_MD,
                         FIL_OTHER, FIL_ALL, FIL_CHECK)
-from .utils import file_read, file_write
+from .utils import file_read, file_write, make_list
 
 
 class PandocStylesFilter():
@@ -17,10 +17,11 @@ class PandocStylesFilter():
     Base class for filters. Defines methods to help writing filters and to
     run them.
     '''
-    def __init__(self, func, filter_type=None, tags=None):
+    def __init__(self, func, filter_types=None, tags=None):
         self._add_method(func, "func")
-        self.filter_type = filter_type
-        self.tags = tags
+        self.filter_types = filter_types or []
+        self.filter_types = make_list(self.filter_types)
+        self.tags = tags or []
 
     def run(self):
         run_filter(self._pandoc_filter)
@@ -58,8 +59,9 @@ class PandocStylesFilter():
             self.fmt = HTML
 
     def check(self):
-        return (not self.filter_type or isinstance(self.elem, self.filter_type)) \
-               and (not self.tags or any(x in self.tags for x in self.classes))
+        return (not self.filter_types
+                or any(isinstance(self.elem, x) for x in self.filter_types))\
+                and (not self.tags or any(x in self.tags for x in self.classes))
 
     def func(self):
         return
@@ -89,9 +91,7 @@ class PandocStylesFilter():
 
     def stringify(self, elem=None):
         '''Stringify an element'''
-        if elem is None:
-            elem = self.elem
-        return stringify(elem)
+        return stringify(elem or self.elem)
 
     def raw_block(self, *args):
         '''Return a RawBlock pandoc element in self.fmt. Accepts strings, tuples
@@ -121,9 +121,9 @@ class TransformFilter(PandocStylesFilter):
 
     # pylint: disable=super-init-not-called
     def __init__(self, tags=None, latex=None, html=None, other=None,
-                 all_formats=None, filter_type=None, check=None):
+                 all_formats=None, filter_types=None, check=None):
         self.tags = tags or []
-        self.filter_type = filter_type if filter_type is not None else CodeBlock
+        self.filter_types = filter_types if filter_types is not None else [CodeBlock]
         self._add_method(latex, LATEX)
         self._add_method(html, HTML)
         self._add_method(other, FIL_OTHER)
@@ -178,8 +178,7 @@ class TransformFilter(PandocStylesFilter):
 
     def convert_text(self, text=None, input_fmt='markdown', extra_args=None):
         '''Converts text in input_fmt to self.fmt'''
-        if text is None:
-            text = self.text
+        text = text or self.text
         return convert_text(text, input_fmt, self.fmt, False, extra_args)
 
 
