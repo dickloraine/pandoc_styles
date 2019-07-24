@@ -6,7 +6,7 @@ from pandoc_styles.main import PandocStyles
 from pandoc_styles.constants import *  # pylint: disable=W0401, W0614
 from pandoc_styles.utils import file_read
 from fixtures import TEST_DATA_DIR
-# pylint: disable=W0621
+# pylint: disable=W0621, protected-access
 
 
 @pytest.fixture
@@ -27,35 +27,35 @@ def ps(test_file):
 
 def test_update_dict(ps, styles):
     dictionary = deepcopy(styles["Test_01"]["all"])
-    ps.update_dict(dictionary, styles["Test_01"]["pdf"])
+    ps._update_dict(dictionary, styles["Test_01"]["pdf"])
     assert dictionary == DICT_ALL_PDF
     dictionary = deepcopy(styles["Test_01"]["all"])
-    ps.update_dict(dictionary, styles["Test_01"]["html"])
+    ps._update_dict(dictionary, styles["Test_01"]["html"])
     assert dictionary == DICT_ALL_HTML
 
 
 def test_style_to_cfg(ps, styles):
     style = styles["Test_01"]
-    assert ps.style_to_cfg(style, "pdf") == DICT_ALL_PDF
-    assert ps.style_to_cfg(style, "html") == DICT_ALL_HTML
+    assert ps._style_to_cfg(style, "pdf") == DICT_ALL_PDF
+    assert ps._style_to_cfg(style, "html") == DICT_ALL_HTML
 
 
 def test_get_styles(ps, styles):
     ps.styles = styles
-    assert ps.get_styles(styles["Test_01"], "pdf") == CFG_STYLE_01_PDF
+    assert ps._get_styles(styles["Test_01"], "pdf") == CFG_STYLE_01_PDF
 
 
 def test_get_pandoc_metadata(ps, test_file):
     test_against = yaml.safe_load(file_read("test01_only_yaml.yaml", TEST_DATA_DIR))
     ps.metadata = None
     ps.files = [test_file]
-    assert ps.get_pandoc_metadata() == test_against
+    assert ps._get_pandoc_metadata() == test_against
     ps.metadata = join(TEST_DATA_DIR, "test01_only_yaml.yaml")
     ps.files = []
-    assert ps.get_pandoc_metadata() == test_against
+    assert ps._get_pandoc_metadata() == test_against
     ps.metadata = None
     ps.files = [join(TEST_DATA_DIR, "no_metadata.md")]
-    assert ps.get_pandoc_metadata() == {}
+    assert ps._get_pandoc_metadata() == {}
 
 
 def test_get_cfg(ps, styles, test_file):
@@ -81,7 +81,7 @@ def test_get_cfg(ps, styles, test_file):
         MD_TEMP_DIR: temp_dir,
         MD_CFG_DIR: CONFIG_DIR,
     })
-    assert ps.get_cfg("pdf") == test_against
+    assert ps._get_cfg("pdf") == test_against
 
 
 DICT_ALL_PDF = {
