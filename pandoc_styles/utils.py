@@ -4,7 +4,7 @@ import logging
 import subprocess
 import shlex
 from os import chdir, getcwd
-from os.path import join, isfile, normpath
+from os.path import join, isfile, normpath, split, splitext
 from contextlib import contextmanager
 from .constants import CONFIG_DIR, USER_DIR_PREFIX, PATH_MISC
 
@@ -52,10 +52,28 @@ def run_process(args, get_output=False, shell=False):
     return False
 
 
+def get_full_file_name(path):
+    """Return the name and extension of the file in path"""
+    _, fname = split(path)
+    return fname
+
+
+def get_file_name(path):
+    """Return the name without the extension of the file in path"""
+    root, _ = splitext(get_full_file_name(path))
+    return root
+
+
+def get_file_extension(path):
+    """Return the extension of the file in path"""
+    _, ext = splitext(path)
+    return ext
+
+
 def has_extension(ffile, extensions):
     '''Check if ffile has an extension given in extensions. Extensions can be
     a string or a list of strings.'''
-    if ffile.rpartition('.')[-1] in make_list(extensions):
+    if get_file_extension(ffile) in make_list(extensions):
         return True
     return False
 

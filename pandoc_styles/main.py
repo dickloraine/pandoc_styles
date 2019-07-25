@@ -15,7 +15,7 @@ import yaml
 from .constants import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from .format_mappings import FORMAT_TO_EXTENSION
 from .utils import (change_dir, expand_directories, file_read, file_write,
-                    has_extension, make_list, run_process)
+                    has_extension, make_list, run_process, get_file_name)
 
 
 class PandocStyles:
@@ -39,7 +39,7 @@ class PandocStyles:
         self.styles = yaml.load(file_read(style_file))
         self.target = target or self.pandoc_metadata.get(MD_DESTINATION, "")
         self.output_name = output_name or self.pandoc_metadata.get(MD_OUTPUT_NAME) or \
-                           f'{files[0].rpartition(".")[0]}'
+                           f'{get_file_name(files[0])}'
         self.formats = formats or make_list(self.pandoc_metadata.get(MD_FORMATS, [])) or \
                        [HTML, PDF]
         self.actual_temp_dir = TemporaryDirectory()
