@@ -67,7 +67,7 @@ def get_file_name(path):
 def get_file_extension(path):
     """Return the extension of the file in path"""
     _, ext = splitext(path)
-    return ext
+    return ext[1:]
 
 
 def has_extension(ffile, extensions):
