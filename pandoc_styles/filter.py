@@ -106,12 +106,12 @@ class PandocStylesFilter():
         return raw(self.fmt, *args, element_type=RawInline)
 
 
-def run_pandoc_styles_filter(func, filter_type=None, tags=None):
+def run_pandoc_styles_filter(func, filter_types=None, tags=None):
     """
     Run a filter with the given func. The function is now a method to a filter object
     and you can access its contents through self.
     """
-    PandocStylesFilter(func, filter_type, tags).run()
+    PandocStylesFilter(func, filter_types, tags).run()
 
 class TransformFilter(PandocStylesFilter):
     '''
@@ -124,6 +124,7 @@ class TransformFilter(PandocStylesFilter):
                  all_formats=None, filter_types=None, check=None):
         self.tags = tags or []
         self.filter_types = filter_types if filter_types is not None else [CodeBlock]
+        self.filter_types = make_list(self.filter_types)
         self._add_method(latex, LATEX)
         self._add_method(html, HTML)
         self._add_method(other, FIL_OTHER)
@@ -204,7 +205,8 @@ def run_transform_filter(tags=None, latex=None, html=None, other=None,
     all_formats: This method is executed before the format specific methods
     and is used to execute shared code.
 
-    filter_type: If the filter searches for an element other than a CodeBlock
+    filter_type: If the filter searches for an element other than a CodeBlock. Can be
+    a list of types
 
     check: Replace the default check method with your own.
     '''
