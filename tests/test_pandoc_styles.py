@@ -1,7 +1,7 @@
 from os.path import join
 from copy import deepcopy
-import pytest
 import yaml
+import pytest
 from pandoc_styles.main import PandocStyles
 from pandoc_styles.constants import *  # pylint: disable=W0401, W0614
 from pandoc_styles.utils import file_read
@@ -75,7 +75,7 @@ def test_get_cfg(ps, styles, test_file):
         "style": "Func_test",
         MD_TEMPLATE_VARIABLES: {},
         MD_CURRENT_FILES: [test_file],
-        OUTPUT_FILE: join(TEST_DATA_DIR, "test01.pdf"),
+        OUTPUT_FILE: "test01.pdf",
         FMT: "pdf",
         TO_FMT: LATEX,
         MD_TEMP_DIR: temp_dir,
