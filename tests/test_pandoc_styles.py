@@ -27,17 +27,17 @@ def ps(test_file):
 
 def test_update_dict(ps, styles):
     dictionary = deepcopy(styles["Test_01"]["all"])
-    ps._update_dict(dictionary, styles["Test_01"]["pdf"])
+    ps.update_dict(dictionary, styles["Test_01"]["pdf"])
     assert dictionary == DICT_ALL_PDF
     dictionary = deepcopy(styles["Test_01"]["all"])
-    ps._update_dict(dictionary, styles["Test_01"]["html"])
+    ps.update_dict(dictionary, styles["Test_01"]["html"])
     assert dictionary == DICT_ALL_HTML
 
 
 def test_style_to_cfg(ps, styles):
     style = styles["Test_01"]
-    assert ps._style_to_cfg(style, "pdf") == DICT_ALL_PDF
-    assert ps._style_to_cfg(style, "html") == DICT_ALL_HTML
+    assert ps.style_to_cfg(style, "pdf") == DICT_ALL_PDF
+    assert ps.style_to_cfg(style, "html") == DICT_ALL_HTML
 
 
 def test_get_styles(ps, styles):

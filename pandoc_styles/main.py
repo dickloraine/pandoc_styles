@@ -130,14 +130,14 @@ class PandocStyles:
         for key, val in self.pandoc_metadata.items():
             for field in [MD_METADATA, MD_CMD_LINE, MD_TEMPLATE_VARIABLES]:
                 if key in cfg[field]:
-                    self._update_dict(cfg[field], {key: val})
+                    self.update_dict(cfg[field], {key: val})
                     break
             else:
-                self._update_dict(cfg, {key: val})
+                self.update_dict(cfg, {key: val})
 
         if MD_STYLE_DEF in self.pandoc_metadata:
-            self._update_dict(cfg,
-                              self._get_styles(self.pandoc_metadata[MD_STYLE_DEF], fmt))
+            self.update_dict(cfg,
+                             self._get_styles(self.pandoc_metadata[MD_STYLE_DEF], fmt))
 
         # add all needed infos to cfg
         cfg[MD_CURRENT_FILES] = self.files.copy()
@@ -155,13 +155,13 @@ class PandocStyles:
         Gets the data for all inherited styles
         """
         if not style.get(MD_INHERITS):
-            return self._style_to_cfg(style, fmt)
+            return self.style_to_cfg(style, fmt)
 
         cfg = dict()
         for extra_style in make_list(style[MD_INHERITS]):
             extra_style = self._get_styles(self.styles[extra_style], fmt)
-            self._update_dict(cfg, extra_style)
-        self._update_dict(cfg, self._style_to_cfg(style, fmt))
+            self.update_dict(cfg, extra_style)
+        self.update_dict(cfg, self.style_to_cfg(style, fmt))
         return cfg
 
     def _get_pandoc_args(self):
@@ -265,7 +265,7 @@ class PandocStyles:
                 css_file_path = relpath(css_file_path, self.target).replace("\\", "/")
             except ValueError:
                 pass
-        self._update_dict(self.cfg, {MD_CMD_LINE: {CSS: [css_file_path]}})
+        self.update_dict(self.cfg, {MD_CMD_LINE: {CSS: [css_file_path]}})
 
     def _add_to_template(self):
         """Add code to the template given in the style definition"""
@@ -309,7 +309,8 @@ class PandocStyles:
         if original_text != text:
             file_write(self.cfg[OUTPUT_FILE], text)
 
-    def _replace_in_text(self, pattern, repl, text, add=False, count=0):
+    @staticmethod
+    def _replace_in_text(pattern, repl, text, add=False, count=0):
         """Helper method to replace text"""
         repl = "\n".join(item for item in make_list(repl))
         repl = repl.replace("\\", '\\\\')
@@ -317,15 +318,17 @@ class PandocStyles:
         text = re.sub(pattern, repl, text, count, re.DOTALL)
         return text
 
-    def _style_to_cfg(self, style, fmt):
+    @classmethod
+    def style_to_cfg(cls, style, fmt):
         """Transform a style to the configuration for the current format"""
         cfg = dict()
         for group in [ALL_FMTS, fmt]:
             if group in style:
-                self._update_dict(cfg, style[group])
+                cls.update_dict(cfg, style[group])
         return cfg
 
-    def _update_dict(self, dictionary, new):
+    @classmethod
+    def update_dict(cls, dictionary, new):
         """
         Merge dictionary with new. Single keys are replaces, but nested dictionaries
         and list are appended
@@ -336,7 +339,7 @@ class PandocStyles:
             if not dictionary.get(key):
                 dictionary[key] = value
             elif isinstance(value, dict):
-                self._update_dict(dictionary[key], value)
+                cls.update_dict(dictionary[key], value)
             elif isinstance(value, list) and isinstance(dictionary[key], list):
                 dictionary[key].extend(value)
             else:
