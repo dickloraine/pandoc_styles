@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
-import yaml
+from os.path import join
 from .constants import CFG_TEMP_FILE, MD_TEMP_DIR, MD_CURRENT_FILES, FMT, OUTPUT_FILE
-from .utils import file_read, file_write
+from .utils import yaml_load, yaml_dump
 
 
 class FlightScript:
@@ -13,7 +13,7 @@ class FlightScript:
                             help='The cfg from pandoc_styles')
         args = parser.parse_args()
 
-        self.cfg = yaml.safe_load(file_read(args.cfg))
+        self.cfg = yaml_load(args.cfg)
         self.fmt = self.cfg[FMT]
         if flight_type == "preflight":
             self.files = self.cfg[MD_CURRENT_FILES]
@@ -24,7 +24,7 @@ class FlightScript:
         pass
 
     def save_cfg(self):
-        file_write(CFG_TEMP_FILE, yaml.dump(self.cfg), self.cfg.get(MD_TEMP_DIR))
+        yaml_dump(self.cfg, join(self.cfg.get(MD_TEMP_DIR), CFG_TEMP_FILE))
 
 
 def run_preflight_script(func):

@@ -10,12 +10,12 @@ from tempfile import TemporaryDirectory
 from pkg_resources import resource_filename
 
 import sass
-import yaml
 
 from .constants import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from .format_mappings import FORMAT_TO_EXTENSION
 from .utils import (change_dir, expand_directories, file_read, file_write,
-                    has_extension, make_list, run_process, get_file_name)
+                    has_extension, make_list, run_process, get_file_name, yaml_dump,
+                    yaml_load, yaml_dump_pandoc_md)
 
 
 class PandocStyles:
@@ -24,8 +24,7 @@ class PandocStyles:
                  add_styles=None, metadata="", target="", output_name="",
                  style_file=None, quiet=False):
         self.metadata = metadata
-        self.files = files
-        self.pandoc_metadata = self._get_pandoc_metadata()
+        self.pandoc_metadata = self.get_pandoc_metadata(metadata or files[0])
         self.files = self.pandoc_metadata.get(MD_FILE_LIST) or \
                      [f for f in files if f not in
                       self.pandoc_metadata.get(MD_EXCLUDED_FILES, [])]
@@ -36,10 +35,10 @@ class PandocStyles:
         style_file = style_file or \
                      expand_directories(self.pandoc_metadata.get(MD_STYLE_FILE)) or \
                      STYLE_FILE
-        self.styles = yaml.load(file_read(style_file))
+        self.styles = yaml_load(style_file)
         self.target = target or self.pandoc_metadata.get(MD_DESTINATION, "")
         self.output_name = output_name or self.pandoc_metadata.get(MD_OUTPUT_NAME) or \
-                           f'{get_file_name(files[0])}'
+                           get_file_name(files[0])
         self.formats = formats or make_list(self.pandoc_metadata.get(MD_FORMATS, [])) or \
                        [HTML, PDF]
         self.actual_temp_dir = TemporaryDirectory()
@@ -52,10 +51,7 @@ class PandocStyles:
         if self.target and not isdir(self.target):
             mkdir(self.target)
         for fmt in self.formats:
-            if self.make_format(fmt):
-                logging.info(f"Build {fmt}")
-            else:
-                logging.error(f"Failed to build {fmt}!")
+            self.make_format(fmt)
 
     def get_output(self, fmt):
         """
@@ -85,24 +81,34 @@ class PandocStyles:
         self._replace_in_template()
         pandoc_args = self._get_pandoc_args()
         logging.debug(f"Command-line args: {pandoc_args}")
-        success = run_process(pandoc_args, self.quiet)
-        if success:
+        try:
+            run_process(pandoc_args, self.quiet)
             self._replace_in_output()
             self._postflight()
-        return success
+            logging.info(f"Build {fmt}")
+        except:    # pylint: disable=bare-except
+            logging.error(f"Failed to build {fmt}!")
 
-    def _get_pandoc_metadata(self):
-        """Get the metadata yaml block in the first source file or given metadata file"""
-        md = file_read(self.metadata or self.files[0])
-        if not self.metadata:
-            md = re.match(r'.?-{3}(.*?)(\n\.{3}\n|\n-{3}\n)', md, flags=re.DOTALL)
-            md = md.group(1) if md else False
-        return yaml.safe_load(md) if md else {}
+    @staticmethod
+    def get_pandoc_metadata(md_file):
+        """Get the metadata yaml block in the file given"""
+        if not md_file:
+            return {}
+
+        if has_extension(md_file, ["yaml", "yml"]):
+            return yaml_load(md_file)
+
+        md = file_read(md_file)
+        md = re.match(r'.?-{3}(.*?)(\n\.{3}\n|\n-{3}\n)', md, flags=re.DOTALL)
+        if not md:
+            return {}
+        md = md.group(1)
+        return yaml_load(md, True)
 
     def _do_user_config(self):
         """Read the config file and set the options"""
         try:
-            config = yaml.safe_load(file_read(CFG_FILE, CONFIG_DIR))
+            config = yaml_load(join(CONFIG_DIR, CFG_FILE))
         except FileNotFoundError:
             logging.warning("No configuration file found! Please initialize "\
                             "pandoc_styles with: pandoc_styles --init")
@@ -198,8 +204,8 @@ class PandocStyles:
             pandoc_args.append(f'"{self.metadata}"')
 
         if complex_data:
-            complex_data = f'---\n{yaml.dump(complex_data)}\n...\n'
-            complex_data = file_write("cur_metadata.yaml", complex_data, self.temp_dir)
+            complex_data = yaml_dump_pandoc_md(complex_data,
+                                               join(self.temp_dir, "cur_metadata.yaml"))
             pandoc_args.append(f'"{complex_data}"')
         return " ".join(pandoc_args)
 
@@ -350,11 +356,12 @@ class PandocStyles:
         Dump the configuration for a format into a file. This way filter and flight
         scripts can read the configuration.
         """
-        return file_write(CFG_TEMP_FILE, yaml.dump(self.cfg), self.temp_dir)
+        # return file_write(CFG_TEMP_FILE, yaml_dump(self.cfg), self.temp_dir)
+        return yaml_dump(self.cfg, join(self.temp_dir, CFG_TEMP_FILE))
 
     def _read_cfg_file(self):
         """Read the cfg file"""
-        self.cfg = yaml.safe_load(file_read(CFG_TEMP_FILE, self.temp_dir))
+        self.cfg = yaml_load(join(self.temp_dir, CFG_TEMP_FILE))
 
 
 def main():

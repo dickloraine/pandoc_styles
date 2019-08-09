@@ -33,8 +33,7 @@ Letter:
       fromaddress: |
         221B Baker Street  
         London
-  latex:
-    << : *pdf-letter
+  latex: *pdf-letter
 
 Assignment:
   inherits:
@@ -57,8 +56,7 @@ Assignment:
           \postauthor{\end{tabular}\par\end{center}}
           \predate{\begin{center}\large}
           \postdate{\par\end{center}}
-  latex:
-    << : *pdf-assignment
+  latex: *pdf-assignment
 
 Report:
   inherits:
@@ -90,8 +88,7 @@ Report:
         \hfill $titletop-right$\\}
         $titlehead$}
         \publishers{\small $titlebottom$}  
-  latex:
-    << : *pdf-report
+  latex: *pdf-report
 
 Novel:
   inherits:
@@ -113,8 +110,7 @@ Novel:
       mainfont: Adobe Garamond Pro
       sansfont: Questrial
       pagestyle: plain
-  latex:
-    << : *pdf-novel
+  latex: *pdf-novel
   epub:
     preflight:
       - ~/dedication.py
@@ -262,8 +258,7 @@ Italic-quotes:
           \makeatletter
           \g@addto@macro{\quote}{\itshape}
           \makeatother
-  latex:
-    << : *pdf-italic-quotes
+  latex: *pdf-italic-quotes
 
 Bibliography:
   all:
@@ -293,8 +288,7 @@ Math:
         - |
           \usepackage{newunicodechar}
           \newunicodechar{√}{\sqrt}
-  latex:
-    << : *pdf-math
+  latex: *pdf-math
 
 Code:
   all:
@@ -315,8 +309,7 @@ Code:
         \makeatletter
         \def\verbatim@nolig@list{}
         \makeatother
-  latex:
-    << : *pdf-code
+  latex: *pdf-code
 
 Code-default-language:
   all:
@@ -377,8 +370,7 @@ Fancy-header:
         \renewcommand{\footrulewidth}{0pt}
         $endif$
         $endif$
-  latex:
-    << : *pdf-fancy-header
+  latex: *pdf-fancy-header
 
 # report, book etc. classes for better header/footers
 Renew-chaptermark:
@@ -438,8 +430,7 @@ Pdf-title:
           \end{flushleft}
           \end{titlepage}
           \restoregeometry
-  latex:
-    << : *pdf-title
+  latex: *pdf-title
 
 Listings:
   pdf: &pdf-listings
@@ -528,6 +519,5 @@ Listings:
           {”}{{''}}1
         }
         $endif$
-  latex:
-    << : *pdf-listings
+  latex: *pdf-listings
 ...

@@ -1,4 +1,3 @@
-import yaml
 import panflute as pf
 from panflute import (  # pylint: disable=unused-import
     Null, HorizontalRule, Space, SoftBreak, LineBreak, Str,
@@ -9,7 +8,7 @@ from panflute import (  # pylint: disable=unused-import
     convert_text, Element, run_filter)
 from .constants import (HTML, PDF, LATEX, EPUB, MD_PANDOC_STYLES_MD,
                         FIL_OTHER, FIL_ALL, FIL_CHECK)
-from .utils import file_read, file_write, make_list
+from .utils import make_list, yaml_load, yaml_dump
 
 
 class PandocStylesFilter():
@@ -80,14 +79,14 @@ class PandocStylesFilter():
     def get_pandoc_styles_metadata(self):
         '''Return the pandoc_styles cfg as a dictionary'''
         try:
-            self.cfg = yaml.safe_load(file_read(self.get_metadata(MD_PANDOC_STYLES_MD)))
+            self.cfg = yaml_load(self.get_metadata(MD_PANDOC_STYLES_MD))
         except FileNotFoundError:
             self.cfg = {}
         return self.cfg
 
     def save_pandoc_styles_metadata(self):
         '''Save the given cfg in the cfg-file'''
-        file_write(self.get_metadata(MD_PANDOC_STYLES_MD), yaml.dump(self.cfg))
+        yaml_dump(self.cfg, self.get_metadata(MD_PANDOC_STYLES_MD))
 
     def stringify(self, elem=None):
         '''Stringify an element'''

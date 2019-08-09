@@ -6,6 +6,8 @@ import shlex
 from os import chdir, getcwd
 from os.path import join, isfile, normpath, split, splitext
 from contextlib import contextmanager
+from ruamel.yaml import YAML
+from ruamel.yaml.compat import StringIO
 from .constants import CONFIG_DIR, USER_DIR_PREFIX, PATH_MISC
 
 
@@ -28,11 +30,47 @@ def file_write(file_name, string, *path, mode="w", encoding="utf-8"):
     return file_name
 
 
+class _StringYAML(YAML):
+    def dump(self, data, stream=None, **kw):  # pylint: disable=arguments-differ
+        as_string = False
+        if stream is None:
+            as_string = True
+            stream = StringIO()
+        YAML.dump(self, data, stream, **kw)
+        if as_string:
+            return stream.getvalue()
+
+def yaml_load(source, is_string=False):
+    """Return a dictionary with the content of the yaml in the source file.
+    If a string should be loaded, set is_string to True"""
+    yaml = YAML()
+    if is_string:
+        return yaml.load(source)
+    with open(source, encoding="utf-8") as s:
+        return yaml.load(s)
+
+
+def yaml_dump(doc, target=None, transform=None):
+    """Dump to the target file. If target is None, return the
+    dumped yaml as a String. Otherwise return the path to the file."""
+    yaml = _StringYAML()
+    yaml.indent(mapping=2, sequence=4, offset=2)
+    if target is None:
+        return yaml.dump(doc, transform=transform)
+    with open(target, "w", encoding="utf-8") as f:
+        yaml.dump(doc, f, transform=transform)
+    return target
+
+
+def yaml_dump_pandoc_md(doc, target=None):
+    """Return the yaml as a pandoc metadata block"""
+    return yaml_dump(doc, target, lambda s: f'---\n{s}---\n')
+
+
 def run_process(args, get_output=False, shell=False):
     """
-    Run a process with the given args and return True if successfull.
+    Run a process with the given args.
     If get_output is true, return the subprocess.
-    On an error return False
     """
     args = shlex.split(args) if not shell else args
     name = args[1] if args[0] in ["py", "python"] else args[0]
@@ -43,13 +81,13 @@ def run_process(args, get_output=False, shell=False):
                                 encoding="utf-8")
             return pc
         subprocess.run(args, check=True, shell=shell)
-        return True
     except subprocess.CalledProcessError:
         logging.error(f"{name} failed!")
         logging.debug(f"{name} command-line:\n{name} {args}!")
+        raise
     except FileNotFoundError:
         logging.error(f'{name} not found!')
-    return False
+        raise
 
 
 def get_full_file_name(path):

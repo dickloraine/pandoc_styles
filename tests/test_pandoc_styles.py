@@ -1,10 +1,9 @@
 from os.path import join
 from copy import deepcopy
-import yaml
 import pytest
 from pandoc_styles.main import PandocStyles
 from pandoc_styles.constants import *  # pylint: disable=W0401, W0614
-from pandoc_styles.utils import file_read
+from pandoc_styles.utils import yaml_load
 from fixtures import TEST_DATA_DIR
 # pylint: disable=W0621, protected-access
 
@@ -16,7 +15,7 @@ def test_file():
 
 @pytest.fixture
 def styles():
-    return yaml.safe_load(file_read(join(TEST_DATA_DIR, "styles.yaml")))
+    return yaml_load(join(TEST_DATA_DIR, "styles.yaml"))
 
 
 @pytest.fixture
@@ -46,16 +45,13 @@ def test_get_styles(ps, styles):
 
 
 def test_get_pandoc_metadata(ps, test_file):
-    test_against = yaml.safe_load(file_read("test01_only_yaml.yaml", TEST_DATA_DIR))
-    ps.metadata = None
-    ps.files = [test_file]
-    assert ps._get_pandoc_metadata() == test_against
-    ps.metadata = join(TEST_DATA_DIR, "test01_only_yaml.yaml")
-    ps.files = []
-    assert ps._get_pandoc_metadata() == test_against
-    ps.metadata = None
-    ps.files = [join(TEST_DATA_DIR, "no_metadata.md")]
-    assert ps._get_pandoc_metadata() == {}
+    test_against = yaml_load(join(TEST_DATA_DIR, "test01_only_yaml.yaml"))
+    metadata_file = None
+    assert ps.get_pandoc_metadata(metadata_file or test_file) == test_against
+    metadata_file = join(TEST_DATA_DIR, "test01_only_yaml.yaml")
+    assert ps.get_pandoc_metadata(metadata_file or None) == test_against
+    test_file = join(TEST_DATA_DIR, "no_metadata.md")
+    assert ps.get_pandoc_metadata(test_file) == {}
 
 
 def test_get_cfg(ps, styles, test_file):
