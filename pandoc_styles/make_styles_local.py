@@ -12,8 +12,7 @@ from .utils import (make_list, file_read, file_write, has_extension, yaml_load,
 
 def make_styles_local(args):
     styles = args.styles
-    md_file = args.metadata_file
-    metadata = PandocStyles.get_pandoc_metadata(md_file)
+    metadata = PandocStyles.get_pandoc_metadata(args.metadata_file)
     styles_from_file, style_definition, style_file = get_styles(metadata, args.style_file)
     styles.extend(styles_from_file)
     if not styles:
@@ -25,10 +24,11 @@ def make_styles_local(args):
         PandocStyles.update_dict(style, style_definition)
     if not args.only_merge:
         copy_files(style, args.destination)
-    path = "style.yaml" if args.save_style_in_current else join(args.destination, "style.yaml")
-    yaml_dump({args.style_name: style}, path)
-    if args.change_metadata_in_file and md_file:
-        change_metadata(md_file, metadata, args.style_name, path)
+    output_file = args.output_file if args.save_style_in_current \
+             else join(args.destination, args.output_file)
+    yaml_dump({args.style_name: style}, output_file)
+    if args.change_metadata_in_file and args.metadata_file:
+        change_metadata(args.metadata_file, metadata, args.style_name, output_file)
 
 
 def get_styles(md, style_file):
@@ -111,9 +111,9 @@ def _copy_expanded_file(f, key, destination):
     return path
 
 
-def change_metadata(md_file, md, style_name, path):
+def change_metadata(md_file, md, style_name, output_file):
     md[MD_STYLE] = style_name
-    md[MD_STYLE_FILE] = "./" + path.replace("\\", "/")
+    md[MD_STYLE_FILE] = "./" + output_file.replace("\\", "/")
     del md[MD_STYLE_DEF]
 
     if has_extension(md_file, ["yaml", "yml"]):
