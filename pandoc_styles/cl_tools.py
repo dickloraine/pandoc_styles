@@ -17,9 +17,9 @@ def main():
                                    formatter_class=ArgumentDefaultsHelpFormatter,
                                    help='Merge styles')
     pmerge.add_argument('styles', nargs='*', default=[],
-                        help='The styles to be merged')
+                        help='The styles to merge')
     pmerge.add_argument('--style-file', '-f', default=STYLE_FILE,
-                        help='Reads the styles from the given file')
+                        help='Read the styles from the given file')
     pmerge.add_argument('--style-name', '-n', default=MD_STYLE_DEF,
                         help='The name of the new style')
     pmerge.add_argument('--output-file', '-t', default="style.yaml",
@@ -38,11 +38,11 @@ def main():
                                    help='''Merge styles and make them local to the
                                         current directory''')
     plocal.add_argument('styles', nargs='*', default=[],
-                        help='The styles to be made local')
+                        help='The styles to make local')
     plocal.add_argument('--only-merge', '-o', action='store_true',
                         help='Only merge the styles, no resource files are copied')
     plocal.add_argument('--style-file', '-f', default=STYLE_FILE,
-                        help='Reads the styles from the given file')
+                        help='Read the styles from the given file')
     plocal.add_argument('--metadata-file', '-m', default=None,
                         help='Reads the style names from the given file')
     plocal.add_argument('--change-metadata-in-file', '-c', action='store_true',
