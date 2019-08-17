@@ -18,9 +18,8 @@ class PandocStylesFilter():
     '''
     def __init__(self, func, filter_types=None, tags=None):
         self._add_method(func, "func")
-        self.filter_types = filter_types or []
-        self.filter_types = make_list(self.filter_types)
-        self.tags = tags or []
+        self.filter_types = make_list(filter_types or [])
+        self.tags = make_list(tags or [])
 
     def run(self):
         run_filter(self._pandoc_filter)
@@ -121,7 +120,7 @@ class TransformFilter(PandocStylesFilter):
     # pylint: disable=super-init-not-called
     def __init__(self, tags=None, latex=None, html=None, other=None,
                  all_formats=None, filter_types=None, check=None):
-        self.tags = tags or []
+        self.tags = make_list(tags or [])
         self.filter_types = filter_types if filter_types is not None else [CodeBlock]
         self.filter_types = make_list(self.filter_types)
         self._add_method(latex, LATEX)
