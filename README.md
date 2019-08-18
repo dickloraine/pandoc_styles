@@ -21,6 +21,7 @@ This script allows you to define styles for pandoc. In styles you can define, wi
     - [Postflight](#postflight)
     - [Filter](#filter)
     - [Advanced Example](#advanced-example)
+  - [Commandline tools](#commandline-tools)
 
 ## Installation
 
@@ -360,3 +361,14 @@ Code:
         \def\verbatim@nolig@list{}
         \makeatother
 ~~~
+
+## Commandline tools
+
+Some additional tools are available on the commandline with the command:
+```bash
+pandoc_styles_tools
+```
+
+One tool merges styles and outputs the new style in a file.
+
+The localize tool copies all used assets into the local directory, to have a self-contingemt project folder.
