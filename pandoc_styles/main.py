@@ -292,7 +292,8 @@ class PandocStyles:
     def _modify_template(self, pattern, repl, add=False, count=0):
         """Helper method to do the actual replacement"""
         try:
-            template = file_read(self.cfg[MD_CMD_LINE][MD_TEMPLATE])
+            template = file_read(
+                expand_directories(self.cfg[MD_CMD_LINE][MD_TEMPLATE], MD_TEMPLATE))
         except (KeyError, FileNotFoundError):
             pc = run_process(f'{PANDOC_CMD} -D {self.cfg[TO_FMT]}', True)
             if not pc:
