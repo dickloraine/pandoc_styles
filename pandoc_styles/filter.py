@@ -253,7 +253,7 @@ def stringify(elem, newlines=True):
     :param newlines: add a new line after a paragraph (default True)
     """
     if isinstance(elem, ListContainer):
-        elem = Para(*elem)
+        elem = Plain(*elem)
     return pf.stringify(elem, newlines)
 
 
