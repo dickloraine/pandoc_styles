@@ -44,8 +44,23 @@ class PandocStylesFilter():
     def _return_filter(self):
         if self.new_text is None:
             return
-        elif self.new_text == [] or is_pandoc_element(self.new_text):
-            return self.new_text
+        elif self.new_text == []:
+            return []
+        elif isinstance(self.new_text, list):
+            new = []
+            for x in self.new_text:  # pylint: disable=not-an-iterable
+                if isinstance(x, str):
+                    x = convert_text(x)
+                if isinstance(x, ListContainer):
+                    if len(x) > 1:
+                        new.extend(*x)
+                    else:
+                        new.extend(x)
+                elif isinstance(x, list):
+                    new.extend(x)
+                else:
+                    new.append(x)
+            return new
         return convert_text(self.new_text)
 
     def _get_format(self):
@@ -69,7 +84,7 @@ class PandocStylesFilter():
             if callable(var):
                 setattr(self, name, var.__get__(self))
             else:
-                raise TypeError("Only strings and functions are allowed in filter generation!")
+                raise TypeError("Only functions are allowed in filter generation!")
 
     def get_metadata(self, key, default=None):
         '''Gets metadata'''
@@ -91,23 +106,41 @@ class PandocStylesFilter():
         '''Stringify an element'''
         return stringify(elem or self.elem)
 
-    def raw_block(self, *args):
+    def transform(self, elem_type):
+        '''Transforms content of this element to elem_type. Return the new Element'''
+        if isinstance(self.content, ListContainer):
+            return elem_type(*self.content)
+        return elem_type(self.content)
+
+    def raw_block(self, text):
         '''Return a RawBlock pandoc element in self.fmt. Accepts strings, tuples
         and lists as arguments.
         '''
-        return raw(self.fmt, *args)
+        return raw(self.fmt, text)
 
-    def raw_inline(self, *args):
+    def raw_inline(self, text):
         '''Return a RawInline pandoc element in self.fmt. Accepts strings, tuples
         and lists as arguments.
         '''
-        return raw(self.fmt, *args, element_type=RawInline)
+        return raw(self.fmt, text, element_type=RawInline)
+
+    def convert_text(self, text=None, input_fmt='markdown', output_fmt='panflute',
+                     extra_args=None):
+        '''Wrapper for panflutes convert_text'''
+        text = text or self.text
+        return convert_text(text, input_fmt, output_fmt, False, extra_args)
 
 
 def run_pandoc_styles_filter(func, filter_types=None, tags=None):
     """
     Run a filter with the given func. The function is now a method to a filter object
     and you can access its contents through self.
+
+    Your filter can return:
+    > None:   do nothing
+    > string: convert the string from markdown to panflute elements
+    > list:   The list can contain Panflute Elements or strings. Strings are converted
+              like above.
     """
     PandocStylesFilter(func, filter_types, tags).run()
 
@@ -121,7 +154,7 @@ class TransformFilter(PandocStylesFilter):
     def __init__(self, tags=None, latex=None, html=None, other=None,
                  all_formats=None, filter_types=None, check=None):
         self.tags = make_list(tags or [])
-        self.filter_types = filter_types if filter_types is not None else [CodeBlock]
+        self.filter_types = filter_types if filter_types is not None else [Div]
         self.filter_types = make_list(self.filter_types)
         self._add_method(latex, LATEX)
         self._add_method(html, HTML)
@@ -150,8 +183,23 @@ class TransformFilter(PandocStylesFilter):
     def _return_filter(self):
         if self.new_text is None:
             return
-        elif self.new_text == [] or is_pandoc_element(self.new_text):
-            return self.new_text
+        elif self.new_text == []:
+            return []
+        elif isinstance(self.new_text, list):
+            new = []
+            for x in self.new_text:
+                if isinstance(x, str):
+                    x = raw(self.fmt, x)
+                if isinstance(x, ListContainer):
+                    if len(x) > 1:
+                        new.extend(*x)
+                    else:
+                        new.extend(x)
+                elif isinstance(x, list):
+                    new.extend(x)
+                else:
+                    new.append(x)
+            return new
         return self.raw_block(self.new_text)
 
     def all_formats(self):
@@ -169,13 +217,16 @@ class TransformFilter(PandocStylesFilter):
     def _add_method(self, var, name):
         if var is not None:
             if isinstance(var, str):
-                setattr(self, name, lambda: var.format(text=self.convert_text()))
+                setattr(self, name, lambda: var.format(text=self.convert_to_fmt()))
+            elif isinstance(var, list):
+                setattr(self, name, lambda: [self.content if x == "text" else x
+                                             for x in var])
             elif callable(var):
                 setattr(self, name, var.__get__(self))
             else:
                 raise TypeError("Only strings and functions are allowed in filter generation!")
 
-    def convert_text(self, text=None, input_fmt='markdown', extra_args=None):
+    def convert_to_fmt(self, text=None, input_fmt='markdown', extra_args=None):
         '''Converts text in input_fmt to self.fmt'''
         text = text or self.text
         return convert_text(text, input_fmt, self.fmt, False, extra_args)
@@ -190,7 +241,7 @@ def run_transform_filter(tags=None, latex=None, html=None, other=None,
     the element the filter searches for. If it is [], check only checks for
     the element type
 
-    latex, html, other: Accepts either a function or a string.
+    latex, html, other: Accepts either a function, string or a list.
 
     > Function: These functions are registered as a method and are executed,
     if the format of the output matches the name. These methods have to
@@ -200,6 +251,9 @@ def run_transform_filter(tags=None, latex=None, html=None, other=None,
     the formating {text], which gets replaced by the converted text
     of the element.
 
+    > List: The list is returned as below. You can insert the string "text" inside the
+            list. It is replaced with the content of the element.
+
     all_formats: This method is executed before the format specific methods
     and is used to execute shared code.
 
@@ -207,6 +261,13 @@ def run_transform_filter(tags=None, latex=None, html=None, other=None,
     a list of types
 
     check: Replace the default check method with your own.
+
+    Your filter can return:
+    > None:   do nothing
+    > string: convert the string to a rawblock in the current format or
+              from markdown to panflute elements if the format doesn't support rawblocks
+    > list:   The list can contain Panflute Elements or strings. Strings are converted
+              like above.
     '''
     pandoc_filter = TransformFilter(tags, latex, html, other, all_formats, filter_type,
                                     check)
@@ -221,24 +282,11 @@ def is_pandoc_element(ele):
     return False
 
 
-def raw(fmt, *args, element_type=RawBlock):
-    '''Return a Raw pandoc element in the given format. Accepts strings,
-    lists and tuples as arguments.
-    '''
-    text = []
-    for s in args:
-        if isinstance(s, str):
-            text.append(s)
-        elif isinstance(s, list):
-            text.extend(s)
-        elif isinstance(s, tuple):
-            text.extend(list(s))
-        else:
-            raise TypeError('Only strings and lists/tuples of strings are allowed in raw')
-
+def raw(fmt, text, element_type=RawBlock):
+    '''Return a Raw pandoc element in the given format.'''
     if fmt not in ['tex', 'latex', 'html', 'context']:
-        return convert_text(''.join(text))
-    return element_type(''.join(text), fmt)
+        return convert_text(text)
+    return element_type(text, fmt)
 
 
 def stringify(elem, newlines=True):
