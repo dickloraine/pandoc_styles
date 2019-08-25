@@ -11,7 +11,7 @@ the metadata style definition or by setting the style as a class in the code blo
 The three styles are: "bottom", "top" and "one-line".
 """
 import re
-from pandoc_styles import run_transform_filter, strip_html_tag
+from pandoc_styles import run_transform_filter, strip_html_tag, CodeBlock
 
 
 def all_formats(self):
@@ -58,7 +58,7 @@ def latex(self):
             else:
                 new.extend([r"\\!", "\n"])
         else:
-            new.extend([self.convert_text(line).strip("\n"), r"\\", "*", "\n"])
+            new.extend([self.convert_to_fmt(line).strip("\n"), r"\\", "*", "\n"])
     new.extend([r"\\!", "\n"])
 
     if self.style == "one-line" and "author" in self.attributes and\
@@ -106,12 +106,12 @@ def html(self):
             new.extend(['\n</div>\n<p>&nbsp;</p>\n<div class="Stanza">'])
         elif "altverse" in self.classes:
             if i % 2 == 0:
-                new.extend(["\n", self.convert_text(line)])
+                new.extend(["\n", self.convert_to_fmt(line)])
             else:
                 new.extend(["\n<p class='PoemAltverse'>",
-                            strip_html_tag(self.convert_text(line)), "</p>"])
+                            strip_html_tag(self.convert_to_fmt(line)), "</p>"])
         else:
-            new.extend(["\n", self.convert_text(line)])
+            new.extend(["\n", self.convert_to_fmt(line)])
         i += 1
     new.extend(['\n</div>'])
     if self.style == "one-line" and "author" in self.attributes and\
@@ -124,7 +124,7 @@ def html(self):
         if "author" in self.attributes:
             new.extend(["\n<p class='PoemAuthor'>", self.attributes["author"], "</p>"])
     new.extend(['\n</div>'])
-    return new
+    return ''.join(new)
 
 
 def other(self):
@@ -165,4 +165,5 @@ def other(self):
 
 
 if __name__ == "__main__":
-    run_transform_filter(["poem"], latex, html, other, all_formats)
+    run_transform_filter(["poem"], all_formats, latex=latex, html=html, markdown=other,
+                         filter_type=CodeBlock)

@@ -1,20 +1,14 @@
 from pandoc_styles import run_transform_filter
 
 
+def all_formats(self):
+    self.classes.remove("custom")
+
+
 def latex(self):
-    style_pdf = self.classes[1] if len(self.classes) == 2 else self.attributes.get("pdf", "")
-    return (f'\\begin{{{style_pdf}}}\n'
-            f'{self.convert_text()}\n'
-            f'\\end{{{style_pdf}}}\n')
-
-
-def html(self):
-    style_epub = self.classes[1] if len(self.classes) == 2 \
-                 else self.attributes.get("epub", "") or self.attributes.get("html", "")
-    return (f'<div class="{style_epub}">\n'
-            f'{self.convert_text()}\n'
-            f'</div>')
-
+    return [f'\\begin{{{self.classes[0]}}}',
+            self.content,
+            f'\\end{{{self.classes[0]}}}']
 
 if __name__ == "__main__":
-    run_transform_filter(["custom"], latex, html, '{text}')
+    run_transform_filter(["custom"], all_formats, latex=latex)

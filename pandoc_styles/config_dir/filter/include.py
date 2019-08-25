@@ -1,5 +1,5 @@
 """
-Includes other markdown files given in a Code block with the class "include. One
+Includes other markdown files given in a Code block with the class "include". One
 file path per line.
 """
 from os.path import isfile

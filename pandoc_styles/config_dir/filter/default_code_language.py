@@ -1,4 +1,4 @@
-from pandoc_styles import run_pandoc_styles_filter, CodeBlock
+from pandoc_styles import run_pandoc_styles_filter, CodeBlock, Code
 
 
 def default_lang(self):
@@ -9,4 +9,5 @@ def default_lang(self):
 
 
 if __name__ == "__main__":
-    run_pandoc_styles_filter(default_lang, CodeBlock)
+    # run_pandoc_styles_filter(default_lang, CodeBlock)
+    run_pandoc_styles_filter(default_lang, [Code, CodeBlock])

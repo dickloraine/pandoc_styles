@@ -10,7 +10,7 @@ the metadata style definition or by setting the style as a class in the code blo
 The three styles are: "bottom", "top" and "one-line".
 """
 
-from pandoc_styles import run_transform_filter
+from pandoc_styles import run_transform_filter, BlockQuote
 
 
 def all_formats(self):
@@ -24,82 +24,77 @@ def all_formats(self):
 
 
 def latex(self):
-    new = [r"\begin{quote}", "\n"]
+    new = [r"\begin{quote}"]
 
     if self.style == "top" and ("title" in self.attributes or "author" in self.attributes):
-        new.extend([r"\begin{center}", '\n'])
+        new.append(r'\begin{center}')
         if "title" in self.attributes:
-            new.extend([r"\large\textbf{", self.attributes["title"], "}\n"])
+            new.append(f'\\large\\textbf{{{self.attributes["title"]}}}')
         if "author" in self.attributes:
-            new.extend(["\n", r"\normalsize\textit{", self.attributes["author"], "}\n"])
-        new.extend([r"\end{center}", '\n'])
+            new.append(f'\\normalsize\\textit{{{self.attributes["author"]}}}')
+        new.append(r"\end{center}")
 
-    new.extend([self.convert_text(), "\n"])
+    new.extend(self.content)
 
     if self.style == "one-line" and "author" in self.attributes \
                      and "title" in self.attributes:
-        new.extend([r"\hfill \textit{", self.attributes["author"], "} --- ",
-                    r"\textbf{", self.attributes["title"], "}\n"])
+        new.append(f'\\hfill \\textit{{{self.attributes["author"]}}} --- '
+                   f'\\textbf{{{self.attributes["title"]}}}')
     elif self.style != "top":
         if "title" in self.attributes and "author" in self.attributes:
-            new.extend(["\n", r"\hspace*{\fill}", r"\textbf{",
-                        self.attributes["title"], "}", r"\linebreak"])
-            new.extend([r"\hspace*{\fill}", r"\textit{",
-                        self.attributes["author"], "}\n"])
+            new.append(f'\\hspace*{{\\fill}}\\textbf{{{self.attributes["title"]}}}')
+            new.append(f'\\hspace*{{\\fill}}\\textit{{{self.attributes["author"]}}}')
         elif "author" in self.attributes:
-            new.extend(["\n", r"\hspace*{\fill}", r"\textit{",
-                        self.attributes["author"], "}\n"])
+            new.append(f'\\hspace*{{\\fill}}\\textit{{{self.attributes["author"]}}}')
         elif "title" in self.attributes:
-            new.extend(["\n", r"\hspace*{\fill}", r"\textbf{",
-                        self.attributes["title"], "}\n"])
+            new.append(f'\\hspace*{{\\fill}}\\textbf{{{self.attributes["title"]}}}')
 
-    new.extend([r"\end{quote}", "\n"])
+    new.append(r"\end{quote}")
     return new
 
 
 def html(self):
     new = ['<div class="QuoteBlock">']
     if self.style == "top" and "title" in self.attributes:
-        new.extend(['\n<p class="QuoteScourceTop">',
-                    self.attributes["title"], "</p>"])
+        new.append(f'<p class="QuoteScourceTop">{self.attributes["title"]}</p>')
     if self.style == "top" and "author" in self.attributes:
-        new.extend(['\n<p class="QuoteAuthorTop">',
-                    self.attributes["author"], "</p>"])
-    new.extend(["\n", self.convert_text()])
+        new.append(f'<p class="QuoteAuthorTop">{self.attributes["author"]}</p>')
+    new.extend(self.content)
     if self.style == "one-line" and "author" in self.attributes and\
             "title" in self.attributes:
-        new.extend(['\n<p class="QuoteSingle"><em>', self.attributes["author"], "</em>",
-                    " &mdash; <strong>", self.attributes["title"], "</strong></p>"])
+        new.append(f'<p class="QuoteSingle"><em>{self.attributes["author"]}</em>&mdash;'
+                   f'<strong>{self.attributes["title"]}</strong></p>')
     elif self.style != "top":
         if "title" in self.attributes:
-            new.extend(["\n", '<p class="QuoteScource">', self.attributes["title"], "</p>"])
+            new.append(f'<p class="QuoteScource">{self.attributes["title"]}</p>')
         if "author" in self.attributes:
-            new.extend(["\n", '<p class="QuoteAuthor">', self.attributes["author"], "</p>"])
-    new.extend(['\n</div>'])
+            new.append(f'<p class="QuoteAuthor">{self.attributes["author"]}</p>')
+    new.append('</div>')
     return new
 
 
 def other(self):
     new = []
     if self.style == "top" and "title" in self.attributes:
-        new.extend(["> __", self.attributes["title"], "__\n"])
+        new.append(f'> __{self.attributes["title"]}__')
     if self.style == "top" and "author" in self.attributes:
-        new.extend(["> _", self.elem.attributes["author"], "_\n"])
+        new.append(f'> _{self.elem.attributes["author"]}_')
     if self.style == "top" and ("author" in self.attributes or "title" in self.attributes):
-        new.extend(["> \n"])
-    for line in self.text.split("\n"):
-        new.extend(["> ", line, "\n"])
+        new.append("> ")
+
+    new.append(self.transform(BlockQuote))
+
     if self.style == "one-line" and "author" in self.attributes and\
             "title" in self.attributes:
-        new.extend(['>\n>_', self.attributes["author"], '_ --- __',
-                    self.attributes["title"], '__', "\n"])
+        new.append(f'>\n>_{self.attributes["author"]}_ --- '
+                   f'__{self.attributes["title"]}__')
     elif self.style != "top":
         if "title" in self.attributes:
-            new.extend(['>\n >__', self.attributes["title"], '__', "\n"])
+            new.append(f'>__{self.attributes["title"]}__')
         if "author" in self.attributes:
-            new.extend(['>\n >_', self.attributes["author"], '_', "\n"])
+            new.append(f'>_{self.attributes["author"]}_')
     return new
 
 
 if __name__ == "__main__":
-    run_transform_filter(["quote"], latex, html, other, all_formats)
+    run_transform_filter(["quote"], all_formats, latex=latex, html=html, markdown=other)
