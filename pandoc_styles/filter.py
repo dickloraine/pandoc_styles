@@ -52,10 +52,7 @@ class PandocStylesFilter():
                 if isinstance(x, str):
                     x = convert_text(x)
                 if isinstance(x, ListContainer):
-                    if len(x) > 1:
-                        new.extend(*x)
-                    else:
-                        new.extend(x)
+                    new.extend(x)
                 elif isinstance(x, list):
                     new.extend(x)
                 else:
@@ -191,10 +188,7 @@ class TransformFilter(PandocStylesFilter):
                 if isinstance(x, str):
                     x = raw(self.fmt, x)
                 if isinstance(x, ListContainer):
-                    if len(x) > 1:
-                        new.extend(*x)
-                    else:
-                        new.extend(x)
+                    new.extend(x)
                 elif isinstance(x, list):
                     new.extend(x)
                 else:
