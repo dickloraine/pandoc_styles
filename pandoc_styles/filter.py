@@ -7,7 +7,7 @@ from panflute import (  # pylint: disable=unused-import
     LineBlock, Header, Quoted, Cite, Table, ListContainer,
     convert_text, Element, run_filter)
 from .constants import (HTML, PDF, LATEX, EPUB, MD_PANDOC_STYLES_MD,
-                        FIL_OTHER, FIL_ALL, FIL_CHECK)
+                        FIL_ALL, FIL_CHECK)
 from .utils import make_list, yaml_load, yaml_dump
 
 
@@ -148,34 +148,31 @@ class TransformFilter(PandocStylesFilter):
     '''
 
     # pylint: disable=super-init-not-called
-    def __init__(self, tags=None, latex=None, html=None, other=None,
-                 all_formats=None, filter_types=None, check=None):
+    def __init__(self, tags=None, all_formats=None, filter_types=None, check=None,
+                 **kwargs):
         self.tags = make_list(tags or [])
         self.filter_types = filter_types if filter_types is not None else [Div]
         self.filter_types = make_list(self.filter_types)
-        self._add_method(latex, LATEX)
-        self._add_method(html, HTML)
-        self._add_method(other, FIL_OTHER)
         self._add_method(all_formats, FIL_ALL)
         self._add_method(check, FIL_CHECK)
+        self.funcs = kwargs
 
     def _pandoc_filter(self, elem, doc):
         self._init_filter(elem, doc)
         if not self.check():
             return
+        for key, func in self.funcs.items():
+            self._add_method(func, key)
 
         self.all_formats()
         self._call_filter()
         return self._return_filter()
 
-    # pylint: disable=assignment-from-none
     def _call_filter(self):
-        if self.fmt == LATEX:
-            self.new_text = self.latex()
-        elif self.fmt == HTML:
-            self.new_text = self.html()
-        else:
-            self.new_text = self.other()
+        try:
+            self.new_text = getattr(self, self.fmt)()
+        except AttributeError:
+            self.new_text = None
 
     def _return_filter(self):
         if self.new_text is None:
@@ -199,15 +196,6 @@ class TransformFilter(PandocStylesFilter):
     def all_formats(self):
         return
 
-    def latex(self):
-        return None
-
-    def html(self):
-        return None
-
-    def other(self):
-        return None
-
     def _add_method(self, var, name):
         if var is not None:
             if isinstance(var, str):
@@ -226,8 +214,8 @@ class TransformFilter(PandocStylesFilter):
         return convert_text(text, input_fmt, self.fmt, False, extra_args)
 
 
-def run_transform_filter(tags=None, latex=None, html=None, other=None,
-                         all_formats=None, filter_type=None, check=None):
+def run_transform_filter(tags=None, all_formats=None, filter_type=None, check=None,
+                         **kwargs):
     '''
     Creates and runs a pandoc filter.
 
@@ -235,7 +223,9 @@ def run_transform_filter(tags=None, latex=None, html=None, other=None,
     the element the filter searches for. If it is [], check only checks for
     the element type
 
-    latex, html, other: Accepts either a function, string or a list.
+    kwargs: The name of the format and a value of: a function, string or a list.
+    Frequently used formats: latex (for latex and pdf), html (for html and epubs),
+                             markdown.
 
     > Function: These functions are registered as a method and are executed,
     if the format of the output matches the name. These methods have to
@@ -263,8 +253,7 @@ def run_transform_filter(tags=None, latex=None, html=None, other=None,
     > list:   The list can contain Panflute Elements or strings. Strings are converted
               like above.
     '''
-    pandoc_filter = TransformFilter(tags, latex, html, other, all_formats, filter_type,
-                                    check)
+    pandoc_filter = TransformFilter(tags, all_formats, filter_type, check, **kwargs)
     pandoc_filter.run()
 
 
