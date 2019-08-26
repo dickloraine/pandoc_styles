@@ -4,7 +4,7 @@ from panflute import (  # pylint: disable=unused-import
     Code, BlockQuote, Note, Div, Plain, Para, Emph, Strong, Strikeout,
     Superscript, Subscript, SmallCaps, Span, RawBlock, RawInline, Math,
     CodeBlock, Link, Image, BulletList, OrderedList, DefinitionList,
-    LineBlock, Header, Quoted, Cite, Table, ListContainer,
+    LineBlock, Header, Quoted, Cite, Table, ListContainer, TableCell, Block,
     convert_text, Element, run_filter)
 from .constants import (HTML, PDF, LATEX, EPUB, MD_PANDOC_STYLES_MD,
                         FIL_ALL, FIL_CHECK)
@@ -212,6 +212,18 @@ class TransformFilter(PandocStylesFilter):
         '''Converts text in input_fmt to self.fmt'''
         text = text or self.text
         return convert_text(text, input_fmt, self.fmt, False, extra_args)
+
+    def get_text(self, elem=None):
+        """
+        Converts the content of the given Element to the format. Use instead
+        of stringify to retain inline formatting.
+        """
+        elem = self if elem is None else elem
+        if isinstance(elem, ListContainer):
+            elem = Plain(*elem)
+        else:
+            elem = getattr(elem, 'content')
+        return convert_text(elem, 'panflute', self.fmt)
 
 
 def run_transform_filter(tags=None, all_formats=None, filter_type=None, check=None,
