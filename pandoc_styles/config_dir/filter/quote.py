@@ -97,4 +97,4 @@ def other(self):
 
 
 if __name__ == "__main__":
-    run_transform_filter(["quote"], all_formats, latex=latex, html=html, markdown=other)
+    run_transform_filter(["quote"], all_formats, other, latex=latex, html=html)
