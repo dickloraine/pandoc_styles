@@ -20,6 +20,7 @@ class PandocStylesFilter():
         self._add_method(func, "func")
         self.filter_types = make_list(filter_types or [])
         self.tags = make_list(tags or [])
+        self._text = None
 
     def run(self):
         run_filter(self._pandoc_filter)
@@ -31,6 +32,16 @@ class PandocStylesFilter():
         self.new_text = self.func()  # pylint: disable=assignment-from-none
         return self._return_filter()
 
+    @property
+    def text(self):
+        if self._text:
+            return self._text
+        return self.get_text()
+
+    @text.setter
+    def text(self, value):
+        self._text = value
+
     def _init_filter(self, elem, doc):
         self.elem = elem
         self.doc = doc
@@ -38,7 +49,7 @@ class PandocStylesFilter():
         self._get_format()
         self.classes = elem.classes if hasattr(elem, "classes") else None
         self.attributes = elem.attributes if hasattr(elem, "attributes") else None
-        self.text = elem.text if hasattr(elem, "text") else None
+        self._text = elem.text if hasattr(elem, "text") else None
         self.content = elem.content if hasattr(elem, "content") else None
 
     def _return_filter(self):
@@ -126,6 +137,18 @@ class PandocStylesFilter():
         '''Wrapper for panflutes convert_text'''
         text = text or self.text
         return convert_text(text, input_fmt, output_fmt, False, extra_args)
+
+    def get_text(self, elem=None, output_fmt='markdown', extra_args=None):
+        """
+        Converts the content of the given Element to the output format. Use instead
+        of stringify to retain inline formatting.
+        """
+        elem = self if elem is None else elem
+        if isinstance(elem, ListContainer):
+            elem = Plain(*elem)
+        else:
+            elem = getattr(elem, 'content')
+        return convert_text(elem, 'panflute', output_fmt, False, extra_args)
 
 
 def run_pandoc_styles_filter(func, filter_types=None, tags=None):
@@ -217,7 +240,7 @@ class TransformFilter(PandocStylesFilter):
         text = text or self.text
         return convert_text(text, input_fmt, self.fmt, False, extra_args)
 
-    def get_text(self, elem=None, extra_args=None):
+    def get_text(self, elem=None, output_fmt=None, extra_args=None):
         """
         Converts the content of the given Element to the format. Use instead
         of stringify to retain inline formatting.
@@ -227,7 +250,7 @@ class TransformFilter(PandocStylesFilter):
             elem = Plain(*elem)
         else:
             elem = getattr(elem, 'content')
-        return convert_text(elem, 'panflute', self.fmt, False, extra_args)
+        return convert_text(elem, 'panflute', output_fmt or self.fmt, False, extra_args)
 
 
 def run_transform_filter(tags=None, all_formats=None, other=None, filter_type=None,
