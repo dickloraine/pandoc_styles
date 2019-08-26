@@ -7,7 +7,7 @@ from panflute import (  # pylint: disable=unused-import
     LineBlock, Header, Quoted, Cite, Table, ListContainer, TableCell, Block,
     convert_text, Element, run_filter)
 from .constants import (HTML, PDF, LATEX, EPUB, MD_PANDOC_STYLES_MD,
-                        FIL_ALL, FIL_CHECK)
+                        FIL_ALL, FIL_OTHER, FIL_CHECK)
 from .utils import make_list, yaml_load, yaml_dump
 
 
@@ -148,12 +148,13 @@ class TransformFilter(PandocStylesFilter):
     '''
 
     # pylint: disable=super-init-not-called
-    def __init__(self, tags=None, all_formats=None, filter_types=None, check=None,
-                 **kwargs):
+    def __init__(self, tags=None, all_formats=None, other=None, filter_types=None,
+                 check=None, **kwargs):
         self.tags = make_list(tags or [])
         self.filter_types = filter_types if filter_types is not None else [Div]
         self.filter_types = make_list(self.filter_types)
         self._add_method(all_formats, FIL_ALL)
+        self._add_method(other, FIL_OTHER)
         self._add_method(check, FIL_CHECK)
         self.funcs = kwargs
 
@@ -196,6 +197,9 @@ class TransformFilter(PandocStylesFilter):
     def all_formats(self):
         return
 
+    def other(self):
+        return
+
     def _add_method(self, var, name):
         if var is not None:
             if isinstance(var, str):
@@ -226,8 +230,8 @@ class TransformFilter(PandocStylesFilter):
         return convert_text(elem, 'panflute', self.fmt)
 
 
-def run_transform_filter(tags=None, all_formats=None, filter_type=None, check=None,
-                         **kwargs):
+def run_transform_filter(tags=None, all_formats=None, other=None, filter_type=None,
+                         check=None, **kwargs):
     '''
     Creates and runs a pandoc filter.
 
@@ -265,7 +269,8 @@ def run_transform_filter(tags=None, all_formats=None, filter_type=None, check=No
     > list:   The list can contain Panflute Elements or strings. Strings are converted
               like above.
     '''
-    pandoc_filter = TransformFilter(tags, all_formats, filter_type, check, **kwargs)
+    pandoc_filter = TransformFilter(tags, all_formats, other, filter_type, check,
+                                    **kwargs)
     pandoc_filter.run()
 
 
