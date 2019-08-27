@@ -70,6 +70,7 @@ def test_get_cfg(ps, styles, test_file):
         "formats": ["pdf", "html"],
         "style": "Func_test",
         MD_TEMPLATE_VARIABLES: {},
+        MD_STYLE_PACK: None,
         MD_CURRENT_FILES: [test_file],
         OUTPUT_FILE: "test01.pdf",
         FMT: "pdf",

@@ -112,7 +112,10 @@ def _copy_expanded_file(f, key, destination):
 
 
 def change_metadata(md_file, md, style_name, output_file):
-    md[MD_STYLE] = style_name
+    if style_name == DEFAULT_STYLE:
+        del md[MD_STYLE]
+    else:
+        md[MD_STYLE] = style_name
     md[MD_STYLE_FILE] = "./" + output_file.replace("\\", "/")
     del md[MD_STYLE_DEF]
 

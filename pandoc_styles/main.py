@@ -35,6 +35,10 @@ class PandocStyles:
         style_file = style_file or \
                      expand_directories(self.pandoc_metadata.get(MD_STYLE_FILE)) or \
                      STYLE_FILE
+        self.style_pack = None if get_file_name(style_file) == "styles" \
+                          else get_file_name(style_file)
+        if self.style_pack and not self.use_styles:
+            self.use_styles = ["Default"]
         self.styles = yaml_load(style_file)
         self.target = target or self.pandoc_metadata.get(MD_DESTINATION, "")
         self.output_name = output_name or self.pandoc_metadata.get(MD_OUTPUT_NAME) or \
@@ -147,6 +151,7 @@ class PandocStyles:
 
         # add all needed infos to cfg
         cfg[MD_CURRENT_FILES] = self.files.copy()
+        cfg[MD_STYLE_PACK] = self.style_pack
         cfg[OUTPUT_FILE] = f"{self.output_name}.{FORMAT_TO_EXTENSION.get(fmt, fmt)}"
         if self.target:
             cfg[OUTPUT_FILE] = join(self.target, cfg[OUTPUT_FILE])
@@ -194,7 +199,7 @@ class PandocStyles:
                         complex_data[key] = value
                         break
                     else:
-                        item = expand_directories(item, key)
+                        item = self.expand_dirs(item, key)
                         pandoc_args.append(f'{prefix}{key}="{item}"')
 
         for ffile in self.cfg[MD_CURRENT_FILES]:
@@ -216,7 +221,7 @@ class PandocStyles:
         for script in make_list(self.cfg[flight_type]):
             if len(script.split(" ")) == 1 and has_extension(script, "py"):
                 cfg = self._make_cfg_file()
-                script = expand_directories(script, flight_type)
+                script = self.expand_dirs(script, flight_type)
                 if self.python_path:
                     script = f'{self.python_path} "{script}" '
                 run_process(f'{script} --cfg "{cfg}"')
@@ -248,7 +253,7 @@ class PandocStyles:
         css_name = f'{cfg.get(MD_SASS_NAME, "stylesheet")}.{CSS}'
         css = [f'${var}: {str(val).lower() if isinstance(val, bool) else str(val)};'
                for var, val in cfg.get(MD_SASS_VARS, {}).items()]
-        css.extend([file_read(expand_directories(f, MD_SASS)) for f in sass_files])
+        css.extend([file_read(self.expand_dirs(f, MD_SASS)) for f in sass_files])
         css.extend(make_list(cfg.get(MD_SASS_APPEND, [])))
         css = sass.compile(string="\n".join(css), output_style='expanded',
                            include_paths=[join(CONFIG_DIR, PATH_SASS)])
@@ -293,7 +298,7 @@ class PandocStyles:
         """Helper method to do the actual replacement"""
         try:
             template = file_read(
-                expand_directories(self.cfg[MD_CMD_LINE][MD_TEMPLATE], MD_TEMPLATE))
+                self.expand_dirs(self.cfg[MD_CMD_LINE][MD_TEMPLATE], MD_TEMPLATE))
         except (KeyError, FileNotFoundError):
             pc = run_process(f'{PANDOC_CMD} -D {self.cfg[TO_FMT]}', True)
             if not pc:
@@ -363,6 +368,9 @@ class PandocStyles:
     def _read_cfg_file(self):
         """Read the cfg file"""
         self.cfg = yaml_load(join(self.temp_dir, CFG_TEMP_FILE))
+
+    def expand_dirs(self, item, key=""):
+        return expand_directories(item, key, self.style_pack)
 
 
 def main():
