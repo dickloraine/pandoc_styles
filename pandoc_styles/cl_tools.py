@@ -19,13 +19,19 @@ def main():
                                     help='Import the given style-pack')
     pimport.add_argument('stylepack',
                          help='The style-pack to import')
+    pimport.add_argument('--url', '-u', default=None,
+                         help='Download the stylepack from the given url.')
+    pimport.add_argument('--global', '-g', action='store_true', dest='is_global',
+                         help='Add the style pack content to the user folders and '
+                              'integrate the style into the global styles.yaml')
     pimport.set_defaults(func=import_style_pack)
 
     # Remove style-pack
     # ----------------------------------------------------------------------------------
     premove = subparsers.add_parser('remove', aliases=['r'],
                                     formatter_class=ArgumentDefaultsHelpFormatter,
-                                    help='Remove the given style-pack')
+                                    help='Remove the given style-pack. Does not work '
+                                         'for globaly installed packs.')
     premove.add_argument('packname',
                          help='The style-pack to remove')
     premove.set_defaults(func=remove_style_pack)

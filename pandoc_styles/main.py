@@ -38,7 +38,7 @@ class PandocStyles:
         self.style_pack = None if get_file_name(style_file) == "styles" \
                           else get_file_name(style_file)
         if self.style_pack and not self.use_styles:
-            self.use_styles = ["Default"]
+            self.use_styles = [DEFAULT_STYLE]
         self.styles = yaml_load(style_file)
         self.target = target or self.pandoc_metadata.get(MD_DESTINATION, "")
         self.output_name = output_name or self.pandoc_metadata.get(MD_OUTPUT_NAME) or \

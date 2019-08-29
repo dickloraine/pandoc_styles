@@ -7,13 +7,17 @@ from functools import partial
 from .main import PandocStyles
 from .constants import *  # pylint: disable=unused-wildcard-import, wildcard-import
 from .utils import (make_list, file_read, file_write, has_extension, yaml_load,
-                    yaml_dump, yaml_dump_pandoc_md, expand_directories)
+                    yaml_dump, yaml_dump_pandoc_md, expand_directories, get_file_name)
 
 
 def make_styles_local(args):
     styles = args.styles
     metadata = PandocStyles.get_pandoc_metadata(args.metadata_file)
     styles_from_file, style_definition, style_file = get_styles(metadata, args.style_file)
+    style_pack = None if get_file_name(style_file) == "styles" \
+                 else get_file_name(style_file)
+    if style_pack and not styles_from_file:
+        styles_from_file = [DEFAULT_STYLE]
     styles.extend(styles_from_file)
     if not styles:
         print("No styles found!")
@@ -23,9 +27,9 @@ def make_styles_local(args):
     if style_definition:
         PandocStyles.update_dict(style, style_definition)
     if not args.only_merge:
-        copy_files(style, args.destination)
+        copy_files(style, args.destination, style_pack)
     output_file = args.output_file if args.save_style_in_current \
-             else join(args.destination, args.output_file)
+                  else join(args.destination, args.output_file)
     yaml_dump({args.style_name: style}, output_file)
     if args.change_metadata_in_file and args.metadata_file:
         change_metadata(args.metadata_file, metadata, args.style_name, output_file)
@@ -36,7 +40,7 @@ def get_styles(md, style_file):
         return [], None, style_file
     styles = make_list(md.get(MD_STYLE, []))
     style_definition = md.get(MD_STYLE_DEF)
-    style_file = md.get(MD_STYLE_FILE, style_file)
+    style_file = expand_directories(md.get(MD_STYLE_FILE, style_file))
     return styles, style_definition, style_file
 
 
@@ -65,8 +69,8 @@ def _get_styles(style, source_styles):
     return cfg
 
 
-def copy_files(style, destination):
-    copy_in_group = partial(_copy_files_in_group, destination)
+def copy_files(style, destination, style_pack):
+    copy_in_group = partial(_copy_files_in_group, destination, style_pack)
     for group in style.values():
         copy_in_group(group, MD_CMD_LINE, "filter")
         copy_in_group(group, MD_PREFLIGHT)
@@ -75,7 +79,7 @@ def copy_files(style, destination):
         copy_in_group(group, MD_CMD_LINE, "template")
 
 
-def _copy_files_in_group(destination, group, section, field=None, key=None):
+def _copy_files_in_group(destination, style_pack, group, section, field=None, key=None):
     if field is None:
         old = group.get(section)
         key = key or section
@@ -88,9 +92,9 @@ def _copy_files_in_group(destination, group, section, field=None, key=None):
     if isinstance(old, list):
         new = []
         for f in old:
-            new.append(_copy_expanded_file(f, key, destination))
+            new.append(_copy_expanded_file(f, key, destination, style_pack))
     else:
-        new = _copy_expanded_file(old, key, destination)
+        new = _copy_expanded_file(old, key, destination, style_pack)
 
     if old != new:
         if field is None:
@@ -99,8 +103,8 @@ def _copy_files_in_group(destination, group, section, field=None, key=None):
             group[section][field] = new
 
 
-def _copy_expanded_file(f, key, destination):
-    path = expand_directories(f, key)
+def _copy_expanded_file(f, key, destination, style_pack):
+    path = expand_directories(f, key, style_pack)
     if isfile(path):
         new_path = f"./{destination}/{key}/"
         makedirs(new_path, exist_ok=True)
@@ -112,10 +116,10 @@ def _copy_expanded_file(f, key, destination):
 
 
 def change_metadata(md_file, md, style_name, output_file):
-    if style_name == DEFAULT_STYLE:
-        del md[MD_STYLE]
-    else:
+    if style_name != DEFAULT_STYLE:
         md[MD_STYLE] = style_name
+    elif md.get(MD_STYLE):
+        del md[MD_STYLE]
     md[MD_STYLE_FILE] = "./" + output_file.replace("\\", "/")
     del md[MD_STYLE_DEF]
 
