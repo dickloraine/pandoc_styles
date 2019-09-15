@@ -92,6 +92,7 @@ class PandocStyles:
             logging.info(f"Build {fmt}")
         except:    # pylint: disable=bare-except
             logging.error(f"Failed to build {fmt}!")
+            sys.exit(1)
 
     @staticmethod
     def get_pandoc_metadata(md_file):
