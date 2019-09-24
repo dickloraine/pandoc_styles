@@ -381,6 +381,8 @@ def main():
                         help='The source files to be converted')
     parser.add_argument('-f', '--folder', nargs='?', const=True,
                         help='All files in the folder are converted together.')
+    parser.add_argument('-i', '--individual', action='store_true',
+                        help='Convert every file given as an individual file .')
     parser.add_argument('--extensions', nargs='+', default=["md", "markdown"],
                         metavar="EXT",
                         help='If the folder option is used, only convert files '
@@ -444,15 +446,18 @@ def main():
         parser.print_help()
         return
 
-    with change_dir(args.working_dir):
-        ps = PandocStyles(args.files, args.to, args.from_format, args.styles,
-                          args.add_styles, args.metadata, args.destination,
-                          args.output_name, args.style_file, args.quiet)
+    convert_list = [args.files] if not args.individual else [[f] for f in args.files]
 
-        if args.print:
-            ps.print_output(args.to[0])
-        else:
-            ps.run()
+    with change_dir(args.working_dir):
+        for files in convert_list:
+            ps = PandocStyles(files, args.to, args.from_format, args.styles,
+                              args.add_styles, args.metadata, args.destination,
+                              args.output_name, args.style_file, args.quiet)
+
+            if args.print:
+                ps.print_output(args.to[0])
+            else:
+                ps.run()
 
 
 if __name__ == '__main__':

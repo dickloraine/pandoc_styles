@@ -365,6 +365,7 @@ Code:
 ## Commandline tools
 
 Some additional tools are available on the commandline with the command:
+
 ```bash
 pandoc_styles_tools
 ```
