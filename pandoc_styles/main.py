@@ -4,7 +4,7 @@ import sys
 from argparse import ArgumentParser
 from copy import deepcopy
 from os import getcwd, listdir, mkdir
-from os.path import dirname, isdir, join, normpath, relpath
+from os.path import dirname, isdir, join, normpath, relpath, isfile
 from shutil import copy, copytree
 from tempfile import TemporaryDirectory
 from pkg_resources import resource_filename
@@ -283,9 +283,10 @@ class PandocStyles:
         """Add code to the template given in the style definition"""
         if MD_ADD_TO_TEMPLATE not in self.cfg:
             return
-        self._modify_template(
-            r'(\$for\(header-includes\)\$\n\$header-includes\$\n\$endfor\$)',
-            self.cfg[MD_ADD_TO_TEMPLATE], True)
+        for item in make_list(self.cfg[MD_ADD_TO_TEMPLATE]):
+            self._modify_template(
+                r'(\$for\(header-includes\)\$\n\$header-includes\$\n\$endfor\$)',
+                item, True)
 
     def _replace_in_template(self):
         """Replace code in the template with other code given in the style definition"""
@@ -306,6 +307,8 @@ class PandocStyles:
                 return
             template = pc.stdout
         original_template = template
+        if isfile(self.expand_dirs(repl, MD_TEMPLATE)):
+            repl = file_read(self.expand_dirs(repl, MD_TEMPLATE))
         template = self._replace_in_text(pattern, repl, template, add, count)
         if original_template != template:
             template = file_write("new.template", template, self.temp_dir)

@@ -218,6 +218,8 @@ Sometimes you want to include some code directly into the template, instead of j
 
 This option just injects the given code directly into the head of the template.
 
+It accepts a path to a file and will add the contents of the file to the template.
+
 ~~~yaml
 Test-style:
   pdf:
