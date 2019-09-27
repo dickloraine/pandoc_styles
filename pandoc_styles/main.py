@@ -22,7 +22,7 @@ class PandocStyles:
     """Handles the conversion with styles"""
     def __init__(self, files, formats=None, from_format="", use_styles=None,
                  add_styles=None, metadata="", target="", output_name="",
-                 style_file=None, quiet=False):
+                 style_file=None, quiet=False, to_file_type=None):
         self.metadata = metadata
         self.pandoc_metadata = self.get_pandoc_metadata(metadata or files[0])
         self.files = self.pandoc_metadata.get(MD_FILE_LIST) or \
@@ -43,6 +43,7 @@ class PandocStyles:
         self.target = target or self.pandoc_metadata.get(MD_DESTINATION, "")
         self.output_name = output_name or self.pandoc_metadata.get(MD_OUTPUT_NAME) or \
                            get_file_name(files[0])
+        self.output_ext = to_file_type
         self.formats = formats or make_list(self.pandoc_metadata.get(MD_FORMATS, [])) or \
                        [HTML, PDF]
         self.actual_temp_dir = TemporaryDirectory()
@@ -153,7 +154,8 @@ class PandocStyles:
         # add all needed infos to cfg
         cfg[MD_CURRENT_FILES] = self.files.copy()
         cfg[MD_STYLE_PACK] = self.style_pack
-        cfg[OUTPUT_FILE] = f"{self.output_name}.{FORMAT_TO_EXTENSION.get(fmt, fmt)}"
+        ext = self.output_ext if self.output_ext else FORMAT_TO_EXTENSION.get(fmt, fmt)
+        cfg[OUTPUT_FILE] = f"{self.output_name}.{ext}"
         if self.target:
             cfg[OUTPUT_FILE] = join(self.target, cfg[OUTPUT_FILE])
         cfg[FMT] = fmt
@@ -394,6 +396,9 @@ def main():
                         help='The formats that should be produced.')
     parser.add_argument('--from-format', metavar="FMT",
                         help='The format of the source files.')
+    parser.add_argument('--to-file-type', metavar="EXT",
+                        help='The extension of the output file. Only needed in some'
+                             'special cases.')
     parser.add_argument('-d', '--destination', metavar="FOLDER",
                         help='The target folder')
     parser.add_argument('-o', '--output-name',
@@ -455,7 +460,8 @@ def main():
         for files in convert_list:
             ps = PandocStyles(files, args.to, args.from_format, args.styles,
                               args.add_styles, args.metadata, args.destination,
-                              args.output_name, args.style_file, args.quiet)
+                              args.output_name, args.style_file, args.quiet,
+                              args.to_file_type)
 
             if args.print:
                 ps.print_output(args.to[0])

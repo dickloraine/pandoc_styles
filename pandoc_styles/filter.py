@@ -6,8 +6,8 @@ from panflute import (  # pylint: disable=unused-import
     CodeBlock, Link, Image, BulletList, OrderedList, DefinitionList,
     LineBlock, Header, Quoted, Cite, Table, ListContainer, TableCell, Block,
     convert_text, Element, run_filter)
-from .constants import (HTML, PDF, LATEX, EPUB, MD_PANDOC_STYLES_MD,
-                        FIL_ALL, FIL_OTHER, FIL_CHECK)
+from .constants import (HTML, LATEX, EPUB, MD_PANDOC_STYLES_MD,
+                        FIL_ALL, FIL_OTHER, FIL_CHECK, LATEX_FORMATS)
 from .utils import make_list, yaml_load, yaml_dump
 
 
@@ -74,7 +74,7 @@ class PandocStylesFilter():
     def _get_format(self):
         self.fmt = self.doc.format
         self.real_fmt = self.fmt
-        if self.fmt == PDF:
+        if self.fmt in LATEX_FORMATS:
             self.fmt = LATEX
         elif self.fmt == EPUB:
             self.fmt = HTML

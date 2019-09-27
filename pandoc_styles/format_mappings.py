@@ -1,7 +1,7 @@
 FORMAT_TO_EXTENSION = {
     "asciidoc": "adoc",
     "adoc": "adoc",
-    "beamer": "beamer",
+    "beamer": "pdf",
     "commonmark": "md",
     "context": "ctx",
     "ctx": "ctx",

@@ -72,3 +72,6 @@ CSS = "css"
 FIL_OTHER = "other"
 FIL_ALL = "all_formats"
 FIL_CHECK = "check"
+
+# Latex formats
+LATEX_FORMATS = [LATEX, PDF, 'beamer']
