@@ -90,9 +90,9 @@ class PandocStyles:
             run_process(pandoc_args, self.quiet)
             self._replace_in_output()
             self._postflight()
-            logging.info(f"Build {fmt}")
+            logging.info(f"Build {self.cfg[OUTPUT_FILE]}")
         except:    # pylint: disable=bare-except
-            logging.error(f"Failed to build {fmt}!")
+            logging.error(f"Failed to build {self.cfg[OUTPUT_FILE]}!")
             sys.exit(1)
 
     @staticmethod
