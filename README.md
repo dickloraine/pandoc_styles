@@ -11,6 +11,7 @@ This script allows you to define styles for pandoc. In styles you can define, wi
   - [Defining Styles](#defining-styles)
     - [Basic Usage](#basic-usage)
     - [Inheritance](#inheritance)
+  - [Stylepacks](#stylepacks)
   - [Advanced Feature](#advanced-feature)
     - [Adressing files in the configuration folder](#adressing-files-in-the-configuration-folder)
     - [Preflight](#preflight)
@@ -22,6 +23,7 @@ This script allows you to define styles for pandoc. In styles you can define, wi
     - [Filter](#filter)
     - [Advanced Example](#advanced-example)
   - [Commandline tools](#commandline-tools)
+  - [Creating stylepacks](#creating-stylepacks)
 
 ## Installation
 
@@ -135,6 +137,20 @@ A style can have a field named "inherit". This is a list of other styles it inhe
 - Single values are replaced
 - If a value is another dictionary, new values are appended to it, if a value exists, these rules are used again on it
 - If a value is a list, new values are appended to it.
+
+## Stylepacks
+
+It is possible, to bundle all files necessary for a particular style and share this as a stylepack. You can install a stylepack either through extracting its contents into the styles folder inside the config folder or through the pandoc_styles_tools command line interface with the option `--import`.
+
+To use a stylepack, just use its name as a style-file. Stylepacks often define a default style to use, if no specific style is given. If the stylepack contains many styles, you can specify the style as usual through the `style` option.
+
+**Example**
+
+[pandoc_styles: novel](https://github.com/dickloraine/pandoc_styles_novel) is a stylepack to create novels out of your source files. A documentation for using this stylepack is found on the github page and inside the style folder of the pack once installed. You can install it with this command line:
+
+~~~
+pandoc_styles_tools import novel -u https://github.com/dickloraine/pandoc_styles_novel/releases/latest/download/novel.zip
+~~~
 
 ## Advanced Feature
 
@@ -372,6 +388,12 @@ Some additional tools are available on the commandline with the command:
 pandoc_styles_tools
 ```
 
+The import option is used to import stylepacks.
+
 One tool merges styles and outputs the new style in a file.
 
-The localize tool copies all used assets into the local directory, to have a self-contingemt project folder.
+The localize tool copies all used assets into the local directory, to have a self-contingent project folder.
+
+## Creating stylepacks
+
+To create a stylepack, just create a folder with the name of the stylepack. Inside the folder put a yaml file containing the style definitions with the name of the stylepack. Then mimick the config folder for organizing the files provided. Create a zip of your folder (with the folder inside the zip) and name it after your stylepack.
