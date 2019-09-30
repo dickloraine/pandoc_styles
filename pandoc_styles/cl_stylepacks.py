@@ -4,7 +4,6 @@ stylepackname.zip or
 stylepackname_v1.1.zip
 """
 
-import os
 from os import path
 from  urllib.request import urlretrieve, urlcleanup
 import re
@@ -38,14 +37,16 @@ def import_style_pack(args):
         args.packname = stylepack_name
         remove_style_pack(args)
         with zf.ZipFile(stylepack_file) as f:
-            f.extractall(CONFIG_DIR)
+            f.extractall(path.join(CONFIG_DIR, PATH_STYLE))
     else:
         with TemporaryDirectory() as tmpdir:
             with zf.ZipFile(stylepack_file) as f:
                 f.extractall(tmpdir)
-            copy_tree(path.join(tmpdir, PATH_STYLE, stylepack_name), CONFIG_DIR)
+            copy_tree(path.join(tmpdir, stylepack_name), CONFIG_DIR)
 
-            styles = yaml_load(path.join(tmpdir, f"{stylepack_name}.yaml"))
+            styles = yaml_load(
+                path.join(tmpdir, stylepack_name, f"{stylepack_name}.yaml")
+            )
             del styles[DEFAULT_STYLE]
             global_styles = yaml_load(STYLE_FILE)
             for k, v in styles.items():
@@ -57,10 +58,6 @@ def import_style_pack(args):
 
 
 def remove_style_pack(args):
-    style_file = path.join(CONFIG_DIR, f"{args.packname}.yaml")
-    if path.isfile(style_file):
-        os.remove(style_file)
-
     style_folder = path.join(CONFIG_DIR, PATH_STYLE, args.packname)
     if path.isdir(style_folder):
         shutil.rmtree(style_folder)

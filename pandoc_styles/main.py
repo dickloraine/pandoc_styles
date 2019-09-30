@@ -33,10 +33,15 @@ class PandocStyles:
         self.use_styles = use_styles or make_list(self.pandoc_metadata.get(MD_STYLE, []))
         self.use_styles.extend(add_styles or [])
         style_file = style_file or \
-                     expand_directories(self.pandoc_metadata.get(MD_STYLE_FILE)) or \
+                     self.pandoc_metadata.get(MD_STYLE_FILE) or \
                      STYLE_FILE
-        self.style_pack = None if get_file_name(style_file) == "styles" \
-                          else get_file_name(style_file)
+        if get_file_name(style_file) == "styles":
+            self.style_pack = None
+        else:
+            style_name = get_file_name(style_file)
+            style_file = expand_directories(style_file, "", style_name) or \
+                         expand_directories(style_file)
+            self.style_pack = style_name
         if self.style_pack and not self.use_styles:
             self.use_styles = [DEFAULT_STYLE]
         self.styles = yaml_load(style_file)
