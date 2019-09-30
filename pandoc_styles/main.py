@@ -15,7 +15,7 @@ from .constants import *  # pylint: disable=wildcard-import, unused-wildcard-imp
 from .format_mappings import FORMAT_TO_EXTENSION
 from .utils import (change_dir, expand_directories, file_read, file_write,
                     has_extension, make_list, run_process, get_file_name, yaml_dump,
-                    yaml_load, yaml_dump_pandoc_md)
+                    yaml_load, yaml_dump_pandoc_md, get_file_extension)
 
 
 class PandocStyles:
@@ -38,9 +38,15 @@ class PandocStyles:
         if get_file_name(style_file) == "styles":
             self.style_pack = None
         else:
+            if not get_file_extension(style_file):
+                style_file = f"{style_file}.yaml"
             style_name = get_file_name(style_file)
             style_file = expand_directories(style_file, "", style_name) or \
                          expand_directories(style_file)
+            if not isfile(style_file):
+                style_file = f"~/{style_file}"
+                style_file = expand_directories(style_file, "", style_name) or \
+                             expand_directories(style_file)
             self.style_pack = style_name
         if self.style_pack and not self.use_styles:
             self.use_styles = [DEFAULT_STYLE]
