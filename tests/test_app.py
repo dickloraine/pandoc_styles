@@ -1,6 +1,7 @@
 import pytest
 from fixtures import run_script, config_dir, copy_from_data  # pylint: disable=W0611
 # pylint: disable=W0621, W0613
+from pandoc_styles.utils import get_file_name
 
 
 @pytest.fixture
@@ -11,7 +12,7 @@ def run_app(run_script, copy_from_data):
             copy_from_data(*data_files)
         formats = formats or ["html", "epub", "pdf"]
         cmd = f"{' '.join(files)} {extra_args} -t {' '.join(formats)}"
-        output = output or "".join(f"INFO: Build {fmt}\n" for fmt in formats)
+        output = output or "".join(f"INFO: Build {get_file_name(files[0])}.{fmt}\n" for fmt in formats)
         ps = run_script(cmd)
         assert ps
         assert ps.stdout == output

@@ -1,5 +1,5 @@
 import pytest
-from pandoc_styles.utils import file_read, file_write
+from pandoc_styles.utils import file_read, file_write, get_file_name
 from fixtures import run_script, copy_from_config  # pylint: disable=W0611
 # pylint: disable=W0621, W0613, W1401
 
@@ -15,7 +15,7 @@ def test_filter(tmpdir, run_script, copy_from_config):
             target = fmt_txt.format(fmt_open, fmt_close)
             ps = run_script(f'{test_file} -t {fmt}')
             assert ps
-            assert ps.stdout == f"INFO: Build {fmt}\n"
+            assert ps.stdout == f"INFO: Build {get_file_name(test_file)}.{fmt}\n"
             print(target)
             print("-----------------------------------")
             print(file_read(f"test.{fmt}", tmpdir))
