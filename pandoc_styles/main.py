@@ -31,7 +31,6 @@ class PandocStyles:
         self.quiet = quiet
         self.from_format = from_format or self.pandoc_metadata.get(MD_FROM_FORMAT)
         self.use_styles = use_styles or make_list(self.pandoc_metadata.get(MD_STYLE, []))
-        self.use_styles.extend(add_styles or [])
         style_file = style_file or \
                      self.pandoc_metadata.get(MD_STYLE_FILE) or \
                      STYLE_FILE
@@ -48,6 +47,7 @@ class PandocStyles:
             self.style_pack = style_name
         if self.style_pack and not self.use_styles:
             self.use_styles = [DEFAULT_STYLE]
+        self.use_styles.extend(add_styles or [])
         self.styles = yaml_load(style_file)
         self.target = target or self.pandoc_metadata.get(MD_DESTINATION, "")
         self.output_name = output_name or self.pandoc_metadata.get(MD_OUTPUT_NAME) or \
