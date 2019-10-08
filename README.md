@@ -42,7 +42,7 @@ To use this script, you need the following:
 Now you need to install this script itself. Open the console and enter:
 
     pip3 install pandoc_styles
-    pandoc_styles --init
+    pandoc-styles --init
 
 ### Setup
 
@@ -71,14 +71,14 @@ If you convert all files in a folder as one document, these additional commands 
 
 Then to convert your file, open the console and enter:
 
-    pandoc_styles "your_file"
+    pandoc-styles "your_file"
 
 Or if you want to convert all files in a folder as one document:
-    pandoc_styles -f
+    pandoc-styles -f
 
 The commandline script has many optional parameters to be useful in macros, batch files etc. Enter
 
-    pandoc_styles -h
+    pandoc-styles -h
 
 to see all the options.
 
@@ -149,7 +149,7 @@ To use a stylepack, just use its name as a style-file. Stylepacks often define a
 [pandoc_styles: novel](https://github.com/dickloraine/pandoc_styles_novel) is a stylepack to create novels out of your source files. A documentation for using this stylepack is found on the github page and inside the style folder of the pack once installed. You can install it with this command line:
 
 ~~~
-pandoc_styles_tools import novel -u https://github.com/dickloraine/pandoc_styles_novel/releases/latest/download/novel.zip
+pandoc-styles-tools import novel -u https://github.com/dickloraine/pandoc_styles_novel/releases/latest/download/novel.zip
 ~~~
 
 ## Advanced Feature
@@ -385,7 +385,7 @@ Code:
 Some additional tools are available on the commandline with the command:
 
 ```bash
-pandoc_styles_tools
+pandoc-styles-tools
 ```
 
 The import option is used to import stylepacks.
