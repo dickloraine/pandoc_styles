@@ -41,12 +41,10 @@ class PandocStyles:
             if not get_file_extension(style_file):
                 style_file = f"{style_file}.yaml"
             style_name = get_file_name(style_file)
-            style_file = expand_directories(style_file, "", style_name) or \
-                         expand_directories(style_file)
+            style_file = expand_directories(style_file, "", style_name)
             if not isfile(style_file):
                 style_file = f"~/{style_file}"
-                style_file = expand_directories(style_file, "", style_name) or \
-                             expand_directories(style_file)
+                style_file = expand_directories(style_file, "", style_name)
             self.style_pack = style_name
         if self.style_pack and not self.use_styles:
             self.use_styles = [DEFAULT_STYLE]
