@@ -73,7 +73,7 @@ def run_process(args, get_output=False, shell=False):
     If get_output is true, return the subprocess.
     """
     args = shlex.split(args) if not shell else args
-    name = args[1] if args[0] in ["py", "python"] else args[0]
+    name = args[1] if args[0] in ["py", "python", "python3"] else args[0]
     try:
         if get_output:
             pc = subprocess.run(args, check=True, shell=shell, stdout=subprocess.PIPE,
