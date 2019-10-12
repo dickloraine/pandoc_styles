@@ -1,8 +1,8 @@
-# pandoc_styles
+# pandoc-styles
 
 This script allows you to define styles for pandoc. In styles you can define, with which arguments pandoc should be invoked for different formats. In addition it allows to run scripts before and after a conversion and gives much power to these scripts and to filters.
 
-- [pandoc_styles](#pandocstyles)
+- [pandoc-styles](#pandoc-styles)
   - [Installation](#installation)
     - [Requirements](#requirements)
     - [Install](#install)

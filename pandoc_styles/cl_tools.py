@@ -16,9 +16,9 @@ def main():
     # ----------------------------------------------------------------------------------
     pimport = subparsers.add_parser('import', aliases=['i'],
                                     formatter_class=ArgumentDefaultsHelpFormatter,
-                                    help='Import the given style-pack')
+                                    help='Import the given stylepack')
     pimport.add_argument('stylepack',
-                         help='The style-pack to import')
+                         help='The stylepack to import')
     pimport.add_argument('--url', '-u', default=None,
                          help='Download the stylepack from the given url.')
     pimport.add_argument('--global', '-g', action='store_true', dest='is_global',
@@ -30,10 +30,10 @@ def main():
     # ----------------------------------------------------------------------------------
     premove = subparsers.add_parser('remove', aliases=['r'],
                                     formatter_class=ArgumentDefaultsHelpFormatter,
-                                    help='Remove the given style-pack. Does not work '
+                                    help='Remove the given stylepack. Does not work '
                                          'for globaly installed packs.')
     premove.add_argument('packname',
-                         help='The style-pack to remove')
+                         help='The stylepack to remove')
     premove.set_defaults(func=remove_style_pack)
 
     # Merge styles
