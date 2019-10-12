@@ -4,7 +4,7 @@ import logging
 import subprocess
 import shlex
 from os import chdir, getcwd
-from os.path import join, isfile, normpath, split, splitext
+from os.path import join, isfile, isdir, normpath, split, splitext
 from contextlib import contextmanager
 from ruamel.yaml import YAML
 from ruamel.yaml.compat import StringIO
@@ -129,17 +129,33 @@ def change_dir(new_dir):
     yield
     chdir(current_dir)
 
-def expand_directories(item, key="", theme=None):
+def get_pack_path(pack):
+    for local_path in ["", "./assets", "/styles", "./assets/styles"]:
+        pack_path = join(local_path, pack)
+        if isdir(pack_path):
+            return pack_path
+    return join(CONFIG_DIR, PATH_STYLE, pack)
+
+def expand_directories(item, key=""):
     """
     Look if item is a file in the configuration directory and return the path if
     it is. Searches first for the given path, then looks into a subfolder given by
     key and finally in the "misc" subfolder. If no file is found, just return item.
     """
-    if isinstance(item, str) and USER_DIR_PREFIX in item:
-        theme_folder = [join(PATH_STYLE, theme), ""] if theme else [""]
-        for tf in theme_folder:
+    if isinstance(item, str) and '@' in item:
+        try:
+            pack, path = item.split('@')
+            pack_path = get_pack_path(pack)
             for folder in ["", key, PATH_MISC]:
-                test_file = normpath(item.replace("~", join(CONFIG_DIR, tf, folder)))
+                test_file = normpath(join(pack_path, folder, path))
                 if isfile(test_file):
                     return test_file.replace("\\", "/")
+        except:  # pylint: disable=bare-except
+            pass
+
+    if isinstance(item, str) and USER_DIR_PREFIX in item:
+        for folder in ["", key, PATH_MISC]:
+            test_file = normpath(item.replace("~", join(CONFIG_DIR, folder)))
+            if isfile(test_file):
+                return test_file.replace("\\", "/")
     return item

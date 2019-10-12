@@ -15,14 +15,14 @@ from .constants import *  # pylint: disable=wildcard-import, unused-wildcard-imp
 from .format_mappings import FORMAT_TO_EXTENSION
 from .utils import (change_dir, expand_directories, file_read, file_write,
                     has_extension, make_list, run_process, get_file_name, yaml_dump,
-                    yaml_load, yaml_dump_pandoc_md, get_file_extension)
+                    yaml_load, yaml_dump_pandoc_md, get_pack_path)
 
 
 class PandocStyles:
     """Handles the conversion with styles"""
     def __init__(self, files, formats=None, from_format="", use_styles=None,
                  add_styles=None, metadata="", target="", output_name="",
-                 style_file=None, quiet=False, to_file_type=None):
+                 stylepacks=None, style_file=None, quiet=False, to_file_type=None):
         self.metadata = metadata
         self.pandoc_metadata = self.get_pandoc_metadata(metadata or files[0])
         self.files = self.pandoc_metadata.get(MD_FILE_LIST) or \
@@ -30,31 +30,21 @@ class PandocStyles:
                       self.pandoc_metadata.get(MD_EXCLUDED_FILES, [])]
         self.quiet = quiet
         self.from_format = from_format or self.pandoc_metadata.get(MD_FROM_FORMAT)
+        self.formats = formats or make_list(self.pandoc_metadata.get(MD_FORMATS, [])) or \
+                       [HTML, PDF]
         self.use_styles = use_styles or make_list(self.pandoc_metadata.get(MD_STYLE, []))
         style_file = style_file or \
                      self.pandoc_metadata.get(MD_STYLE_FILE) or \
                      STYLE_FILE
-        if get_file_name(style_file) == "styles":
-            self.style_pack = None
-        else:
-            if not get_file_extension(style_file):
-                style_file = f"{style_file}.yaml"
-            style_name = get_file_name(style_file)
-            style_file = expand_directories(style_file, "", style_name)
-            if not isfile(style_file):
-                style_file = f"~/{style_file}"
-                style_file = expand_directories(style_file, "", style_name)
-            self.style_pack = style_name
-        if self.style_pack and not self.use_styles:
-            self.use_styles = [DEFAULT_STYLE]
+        self.stylepacks = stylepacks or \
+                          make_list(self.pandoc_metadata.get(MD_STYLE_PACKS, []))
         self.use_styles.extend(add_styles or [])
         self.styles = yaml_load(style_file)
+        self.style = self.build_style()
         self.target = target or self.pandoc_metadata.get(MD_DESTINATION, "")
         self.output_name = output_name or self.pandoc_metadata.get(MD_OUTPUT_NAME) or \
                            get_file_name(files[0])
         self.output_ext = to_file_type
-        self.formats = formats or make_list(self.pandoc_metadata.get(MD_FORMATS, [])) or \
-                       [HTML, PDF]
         self.actual_temp_dir = TemporaryDirectory()
         self.temp_dir = self.actual_temp_dir.name
         self.python_path = ""
@@ -81,6 +71,61 @@ class PandocStyles:
         Converts to the given format and prints the output.
         """
         print(self.get_output(fmt))
+
+    def build_style(self):
+        style = dict()
+        style = self._get_stylepack_style(style, self.stylepacks)
+
+        if self.use_styles:
+            start_style = self.styles.get(ALL_STYLE, {})
+            start_style[MD_INHERITS] = self.use_styles
+            self.update_dict(style, self._get_style(start_style, self.styles))
+
+        if MD_STYLE_DEF in self.pandoc_metadata:
+            self.update_dict(
+                style, self._get_style(self.pandoc_metadata[MD_STYLE_DEF], self.styles))
+        return style
+
+    def _get_stylepack_style(self, style, stylepacks):
+        if not stylepacks:
+            return style
+
+        for stylepack in make_list(stylepacks):
+            if isinstance(stylepack, str):
+                used_styles = [DEFAULT_STYLE]
+                pack = stylepack
+            else:
+                for k, v in stylepack.items():
+                    pack = k
+                    used_styles = make_list(v)
+
+            pack_path = get_pack_path(pack)
+            stylepack_styles = yaml_load(join(pack_path, f'{pack}.yaml'))
+
+            for s in used_styles:
+                self.update_dict(style, self._get_style(stylepack_styles[s],
+                                                        stylepack_styles))
+        return style
+
+    def _get_style(self, style, all_styles):
+        """
+        Gets the data for all inherited styles
+        """
+        stylepacks = style.get(MD_STYLE_PACKS)
+        inherited = deepcopy(make_list(style.get(MD_INHERITS, [])))
+        if not inherited and not stylepacks:
+            return style
+
+        if stylepacks:
+            style = self._get_stylepack_style(style, stylepacks)
+        new_style = dict()
+        if inherited:
+            del style[MD_INHERITS]
+            for extra_style in inherited:
+                extra_style = self._get_style(all_styles[extra_style], all_styles)
+                self.update_dict(new_style, extra_style)
+        self.update_dict(new_style, style)
+        return new_style
 
     def make_format(self, fmt):
         """
@@ -135,12 +180,7 @@ class PandocStyles:
 
     def _get_cfg(self, fmt):
         """Get the style configuration for the current format"""
-        cfg = dict()
-
-        if self.use_styles:
-            start_style = self.styles.get(ALL_STYLE, {})
-            start_style[MD_INHERITS] = self.use_styles
-            cfg = self._get_styles(start_style, fmt)
+        cfg = self.style_to_cfg(self.style, fmt)
 
         # ensure some fields are present
         for field in [MD_METADATA, MD_CMD_LINE, MD_TEMPLATE_VARIABLES]:
@@ -156,13 +196,9 @@ class PandocStyles:
             else:
                 self.update_dict(cfg, {key: val})
 
-        if MD_STYLE_DEF in self.pandoc_metadata:
-            self.update_dict(cfg,
-                             self._get_styles(self.pandoc_metadata[MD_STYLE_DEF], fmt))
-
         # add all needed infos to cfg
         cfg[MD_CURRENT_FILES] = self.files.copy()
-        cfg[MD_STYLE_PACK] = self.style_pack
+        cfg[MD_STYLE_PACKS] = self.stylepacks
         ext = self.output_ext if self.output_ext else FORMAT_TO_EXTENSION.get(fmt, fmt)
         cfg[OUTPUT_FILE] = f"{self.output_name}.{ext}"
         if self.target:
@@ -368,7 +404,9 @@ class PandocStyles:
             elif isinstance(value, dict):
                 cls.update_dict(dictionary[key], value)
             elif isinstance(value, list) and isinstance(dictionary[key], list):
-                dictionary[key].extend(value)
+                for item in value:
+                    if item not in dictionary[key]:
+                        dictionary[key].append(item)
             else:
                 dictionary[key] = value
 
@@ -385,7 +423,7 @@ class PandocStyles:
         self.cfg = yaml_load(join(self.temp_dir, CFG_TEMP_FILE))
 
     def expand_dirs(self, item, key=""):
-        return expand_directories(item, key, self.style_pack)
+        return expand_directories(item, key)
 
 
 def main():
@@ -419,6 +457,11 @@ def main():
     parser.add_argument('-a', '--add-styles', nargs='+', default=[], metavar="STYLE",
                         help='Styles to use for the conversion. Add the styles given '
                              'to the styles given in the file.')
+    parser.add_argument('--stylepack', action='append', default=[],
+                        help='Add a stylepack. Can be invoked multiple times. Format:\n'
+                             '--stylepack name=style1,style2,...\n'
+                             'You can ommit specifying styles, then the default style is'
+                             'used')
     parser.add_argument('--style-file',
                         help='Path to the style file that should be used. '
                              'Defaults to the style file in the configuration folder.')
@@ -445,6 +488,17 @@ def main():
                         level=getattr(logging, "ERROR" if args.quiet or args.print else
                                       args.log))
 
+    # stylepack unfolding
+    args.stylepacks = []
+    if args.stylepack:
+        for kv in args.stylepack:
+            if '=' not in kv:
+                args.stylepacks.append(kv)
+            else:
+                kv = kv.split('=')
+                values = make_list(kv[1].split(','))
+                args.stylepacks.append({kv[0]: values})
+
     # initialize config directory
     if args.init:
         if not isdir(CONFIG_DIR):
@@ -469,7 +523,7 @@ def main():
         for files in convert_list:
             ps = PandocStyles(files, args.to, args.from_format, args.styles,
                               args.add_styles, args.metadata, args.destination,
-                              args.output_name, args.style_file, args.quiet,
+                              args.output_name, args.stylepacks, args.style_file, args.quiet,
                               args.to_file_type)
 
             if args.print:

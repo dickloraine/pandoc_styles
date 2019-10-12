@@ -6,9 +6,6 @@ optional = false
 python-versions = "*"
 version = "1.1.1"
 
-[package.dependencies]
-pyyaml = "*"
-
 [[package]]
 category = "dev"
 description = "An abstract syntax tree for Python with inference support."

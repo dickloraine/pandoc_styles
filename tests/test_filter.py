@@ -29,27 +29,6 @@ def test_alignment(test_filter):
                  ('latex', DIV_LATEX_BASE, '\\begin{center}\n', '\n\n\\end{center}')])
 
 
-def test_custom_styles(test_filter):
-    test_filter('custom_styles.py', '.custom .teststyle',
-                [('html', TF_HTML_BASE, '<div class="teststyle">', '</div>'),
-                 ('latex', DIV_LATEX_BASE, '\\begin{teststyle}\n',
-                  '\n\n\\end{teststyle}')])
-
-
-def test_epigraph(test_filter):
-    test_filter('epigraph.py', '.epigraph',
-                [('html', TF_HTML_BASE, '<div class="Epigraph">', '</div>'),
-                 ('latex', DIV_LATEX_BASE, '\\dictum[]{\n',
-                  '\n\n}\n\n\\par\n\\vspace{\\baselineskip}\n\\par\n\\noindent')])
-    test_filter('epigraph.py', '.epigraph author="Sherlock Holmes"',
-                [('html', TF_HTML_BASE,
-                  '<div class="Epigraph">',
-                  '<p class="EpigraphAuthor">Sherlock Holmes</p>\n</div>'),
-                 ('latex', DIV_LATEX_BASE,
-                  '\\dictum[Sherlock Holmes]{\n',
-                  '\n\n}\n\n\\par\n\\vspace{\\baselineskip}\n\\par\n\\noindent')])
-
-
 def test_include(tmpdir, test_filter):
     incl_file = file_write("test_incl.md", "Text to Include", tmpdir)
     base = BASE.format("{}", f'~~~{{}}\n{incl_file}\n~~~')
@@ -72,36 +51,6 @@ def test_noindent(test_filter):
     test_filter('noindent.py', '.noindent',
                 [('html', TF_HTML_BASE, '<div class="noindent">', '</div>'),
                  ('latex', DIV_LATEX_BASE, '\\noindent\n', '')])
-
-
-def test_quote(test_filter):
-    test_filter('quote.py', '.quote author="Sher Holm" title=Test',
-                [('html', TF_HTML_BASE,
-                  '<div class="QuoteBlock">',
-                  '<p class="QuoteScource">Test</p>\n'
-                  '<p class="QuoteAuthor">Sher Holm</p>\n</div>'),
-                 ('latex', DIV_LATEX_BASE,
-                  "\\begin{quote}\n",
-                  "\n\n\\hspace*{\\fill}\\textbf{Test}\n\n"
-                  "\\hspace*{\\fill}\\textit{Sher Holm}\n\n\\end{quote}")])
-    test_filter('quote.py', '.quote .one-line author="Sher Holm" title=Test',
-                [('html', TF_HTML_BASE,
-                  '<div class="QuoteBlock">',
-                  '<p class="QuoteSingle"><em>Sher Holm</em>&mdash;'
-                  "<strong>Test</strong></p>\n</div>"),
-                 ('latex', DIV_LATEX_BASE,
-                  "\\begin{quote}\n",
-                  "\n\n\\hfill \\textit{Sher Holm} --- \\textbf{Test}\n\n\\end{quote}")])
-    test_filter('quote.py', '.quote .top author="Sher Holm" title=Test',
-                [('html', TF_HTML_BASE,
-                  '<div class="QuoteBlock">\n'
-                  '<p class="QuoteScourceTop">Test</p>\n'
-                  '<p class="QuoteAuthorTop">Sher Holm</p>',
-                  "</div>"),
-                 ('latex', DIV_LATEX_BASE,
-                  "\\begin{quote}\n\n\\begin{center}\n\n\\large\\textbf{Test}\n"
-                  "\n\\normalsize\\textit{Sher Holm}\n\n\\end{center}\n",
-                  "\n\n\\end{quote}")])
 
 
 BASE = """\

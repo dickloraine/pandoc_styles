@@ -21,7 +21,7 @@ def styles():
 @pytest.fixture
 def ps(test_file):
     """Gives a PandocStyles instance"""
-    return PandocStyles([test_file])
+    return PandocStyles([test_file], style_file=join(TEST_DATA_DIR, "styles.yaml"))
 
 
 def test_update_dict(ps, styles):
@@ -39,11 +39,6 @@ def test_style_to_cfg(ps, styles):
     assert ps.style_to_cfg(style, "html") == DICT_ALL_HTML
 
 
-def test_get_styles(ps, styles):
-    ps.styles = styles
-    assert ps._get_styles(styles["Test_01"], "pdf") == CFG_STYLE_01_PDF
-
-
 def test_get_pandoc_metadata(ps, test_file):
     test_against = yaml_load(join(TEST_DATA_DIR, "test01_only_yaml.yaml"))
     metadata_file = None
@@ -54,9 +49,9 @@ def test_get_pandoc_metadata(ps, test_file):
     assert ps.get_pandoc_metadata(test_file) == {}
 
 
-def test_get_cfg(ps, styles, test_file):
-    ps.styles = styles
-    ps.use_styles = ["Test_01"]
+def test_get_cfg(test_file):
+    ps = PandocStyles([test_file], style_file=join(TEST_DATA_DIR, "styles.yaml"),
+                      use_styles=["Test_01"])
     temp_dir = ps.temp_dir
     test_against = deepcopy(CFG_STYLE_01_PDF)
     test_against.update({
@@ -68,9 +63,8 @@ def test_get_cfg(ps, styles, test_file):
         "copyrights": "test copyrights  \nin more than  \none line\n",
         "cover-image": "./cover.jpg",
         "formats": ["pdf", "html"],
-        "style": "Func_test",
         MD_TEMPLATE_VARIABLES: {},
-        MD_STYLE_PACK: None,
+        MD_STYLE_PACKS: [],
         MD_CURRENT_FILES: [test_file],
         OUTPUT_FILE: "test01.pdf",
         FMT: "pdf",
@@ -236,4 +230,5 @@ CFG_STYLE_01_PDF = {
             "pdf_md_3"
         ],
     },
+    "style": "Func_test"
 }

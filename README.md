@@ -140,9 +140,19 @@ A style can have a field named "inherit". This is a list of other styles it inhe
 
 ## Stylepacks
 
-It is possible, to bundle all files necessary for a particular style and share this as a stylepack. You can install a stylepack either through extracting its contents into the styles folder inside the config folder or through the pandoc_styles_tools command line interface with the option `--import`.
+It is possible, to bundle all files necessary for a particular style and share this as a stylepack. You can install a stylepack either through extracting its contents into the styles folder inside the config folder or through the pandoc_styles_tools command line interface with the option `import` command.
 
-To use a stylepack, just use its name as a style-file. Stylepacks often define a default style to use, if no specific style is given. If the stylepack contains many styles, you can specify the style as usual through the `style` option.
+To use a stylepack, include a field "stylepacks" in the matadata. It looks like this:
+
+~~~
+stylepacks:
+  - stylepack_1_name:
+    - style_1
+    - style2
+  - stylepack_2_name
+~~~
+
+If you do not specify styles from the stylepack, it uses its default style.
 
 **Example**
 
@@ -396,4 +406,8 @@ The localize tool copies all used assets into the local directory, to have a sel
 
 ## Creating stylepacks
 
-To create a stylepack, just create a folder with the name of the stylepack. Inside the folder put a yaml file containing the style definitions with the name of the stylepack. Then mimick the config folder for organizing the files provided. Create a zip of your folder (with the folder inside the zip) and name it after your stylepack.
+To create a stylepack, just create a folder with the name of the stylepack. Inside the folder put a yaml file containing the style definitions with the name of the stylepack. Then mimick the config folder for organizing the files provided.
+
+In the yaml file reference links to files inside the stylepack with "stylepack_name@path".
+
+Create a zip of your folder (with the folder inside the zip) and name it after your stylepack.
