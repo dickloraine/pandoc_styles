@@ -12,7 +12,7 @@ copyrights: |
 cover-image: cover.jpg
 formats:
     - pdf
-style: Novel
+stylepacks: Novel
 ...
 
 # Mr. Sherlock Holmes
