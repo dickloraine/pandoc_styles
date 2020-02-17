@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 from os.path import join
-from .constants import CFG_TEMP_FILE, MD_TEMP_DIR, MD_CURRENT_FILES, FMT, OUTPUT_FILE
+from .constants import (CFG_TEMP_FILE, MD_TEMP_DIR, MD_CURRENT_FILES, FMT,
+                        LATEX_FORMATS, LATEX, EPUB, HTML, OUTPUT_FILE)
 from .utils import yaml_load, yaml_dump
 
 
@@ -15,6 +16,12 @@ class FlightScript:
 
         self.cfg = yaml_load(args.cfg)
         self.fmt = self.cfg[FMT]
+        self.real_fmt = self.fmt
+        if self.fmt in LATEX_FORMATS:
+            self.fmt = LATEX
+        elif self.fmt == EPUB:
+            self.fmt = HTML
+        
         if flight_type == "preflight":
             self.files = self.cfg[MD_CURRENT_FILES]
         else:
