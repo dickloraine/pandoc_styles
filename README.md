@@ -91,15 +91,13 @@ Styles are written in yaml, just like pandoc metadata-blocks. A style is defined
 ~~~yaml
 Name:
   format:
-    command-line:
       pandoc-option: value
-    metadata:
       pandoc-variable: value
-    template-variables:
-      template-variable: value
 ~~~
 
-"Name" is how the style is adressed. A style directly defined in the metadata-block has no name. "Format" specifies for which format the following commands should be invoked. There is a special value: "all". Everything under "all" is used in any format. Under "command-line" you use the long version of pandoc parameters followed by the value, to invoke them. If a parameter is a flag, use "true". Parameters given the value "false" are ignored. Under "metadata" you enter the names and values of pandoc variables, these are most commonly used in templates. Finally "template-variables" is for variables that can not be set as metadata, most often, because the content should be used as it is and not be converted to markdown (for example if you want to set custom code in "header-includes").
+"Name" is how the style is adressed. A style directly defined in the metadata-block has no name. "Format" specifies for which format the following commands should be invoked. There is a special value: "all". Everything under "all" is used in any format. Examples for formats are html, pdf, latex, epub etc.
+
+Under the format you just enter pandoc options and variables. If a parameter is a flag, use "true". Parameters given the value "false" are ignored.
 
 **A Basic example**
 
@@ -115,17 +113,13 @@ formats:
     - pdf
 style-definition:
     all:
-        command-line:
         toc: true
         toc-depth: 3
         highlight-style: tango
-        metadata:
         language: en
     html:
-        command-line:
         standalone: true
     pdf:
-        command-line:
         pdf-engine: xelatex
 ---
 ~~~
@@ -156,7 +150,7 @@ If you do not specify styles from the stylepack, it uses its default style.
 
 **Example**
 
-[pandoc_styles: novel](https://github.com/dickloraine/pandoc_styles_novel) is a stylepack to create novels out of your source files. A documentation for using this stylepack is found on the github page and inside the style folder of the pack once installed. You can install it with this command line:
+[pandoc_styles: novel](https://github.com/dickloraine/pandoc_styles_novel) is a stylepack to create novels out of your source files. A documentation for using this stylepack is found on the github page and inside the style folder of the pack once installed. You can install it with this command:
 
 ~~~
 pandoc-styles-tools import novel -u https://github.com/dickloraine/pandoc_styles_novel/releases/latest/download/novel.zip
@@ -169,9 +163,8 @@ pandoc-styles-tools import novel -u https://github.com/dickloraine/pandoc_styles
 You can point to a file in the configuration directory, if you prepend the path with "~/". The script searches first for the given path and then looks in appropiatly named subfolders and finally in the "misc" subfolder. For example:
 
 ~~~yaml
-command-line:
-  filter:
-    - ~/test-filter.py
+filter:
+  - ~/test-filter.py
 ~~~
 
 Would find the file "test-filter.py" in the subfolder "filter" in the configuration directory.
@@ -316,7 +309,7 @@ Test-style:
 
 ### Filter
 
-Filter are called in the command-line section. This script includes some functionality to make writing filters a little bit more easy. If possible, store data that filters should use in the metadata section, because loading the cfg file is resource intensive.
+This script includes some functionality to make writing filters a little bit more easy.
 
 ### Advanced Example
 
@@ -329,19 +322,16 @@ In addition, inheritance is shown.
 ~~~yaml
 All:
   all:
-    metadata:
-      lang: en
+    lang: en
   pdf:
-    command-line:
-      pdf-engine: "xelatex"
+    pdf-engine: "xelatex"
 
 Math-document:
   inherits:
     - Code
   html:
-    command-line:
-      self-contained: true
-      mathjax: true
+    self-contained: true
+    mathjax: true
     sass:
       files: ~/default.scss
       output-path: temp
@@ -371,11 +361,9 @@ Math-document:
 
 Code:
   all:
-    command-line:
-      highlight-style: tango
+    highlight-style: tango
   pdf:
-    metadata:
-      monofont: Fira Code
+    monofont: Fira Code
     # allow code line break
     add-to-template:
       - |

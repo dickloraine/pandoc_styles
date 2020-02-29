@@ -20,10 +20,7 @@ PATH_CSS = "css"
 PATH_STYLE = "styles"
 
 # Metadata fields constants
-MD_METADATA = "metadata"
 MD_STYLE_PACKS = "stylepacks"
-MD_TEMPLATE_VARIABLES = "template-variables"
-MD_CMD_LINE = "command-line"
 MD_FILE_LIST = "file-list"
 MD_EXCLUDED_FILES = "excluded-files"
 MD_DESTINATION = "destination"

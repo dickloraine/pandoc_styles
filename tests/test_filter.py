@@ -57,11 +57,9 @@ BASE = """\
 ---
 style-definition:
   all:
-    command-line:
-      filter: {}
+    filter: {}
   latex:
-    command-line:
-      wrap: none
+    wrap: none
 ---
 
 The campaign brought honours and promotion to many, but for me it had nothing but misfortune and disaster. I was removed from my brigade and attached to the Berkshires, with whom I served at the fatal battle of Maiwand.

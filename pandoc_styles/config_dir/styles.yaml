@@ -1,12 +1,10 @@
 ---
 All:
   all:
-    metadata:
-      lang: en
+    lang: en
 
   pdf:
-    command-line:
-      pdf-engine: xelatex
+    pdf-engine: xelatex
 
 # Styles
 # ----------------------------------------------------------------------------
@@ -24,8 +22,7 @@ Mobi:
 Default-html:
   inherits: Navbar
   html:
-    command-line:
-      toc: true
+    toc: true
     sass:
       files:
         - ~/default.scss
@@ -51,8 +48,7 @@ Default-html:
 Html-self-contained:
   inherits: Default-html
   html:
-    command-line:
-      self-contained: true
+    self-contained: true
     sass:
       output-path: temp
     replace-in-template:
@@ -105,14 +101,12 @@ Extra-styles:
   all:
     preflight:
       - ~/scenes.py
-    command-line:
-      filter:
-        - ~/new_page.py
-        - ~/noindent.py
-        - ~/alignment.py
-    metadata:
-      poem-style: bottom
-      quote-style: bottom
+    filter:
+      - ~/new_page.py
+      - ~/noindent.py
+      - ~/alignment.py
+    poem-style: bottom
+    quote-style: bottom
     scenes:
       new-scene-style: default
       new-scene-text: "* * *"
@@ -128,19 +122,17 @@ Extra-styles:
 
 Widows:
   pdf:
-    metadata:
-      header-includes:
-        - |
-          \widowpenalties=3 10000 10000 150
+    add-to-template:
+      - |
+        \widowpenalties=3 10000 10000 150
 
 Italic-quotes:
   pdf: &pdf-italic-quotes
-    metadata:
-      header-includes:
-        - |
-          \makeatletter
-          \g@addto@macro{\quote}{\itshape}
-          \makeatother
+    add-to-template:
+      - |
+        \makeatletter
+        \g@addto@macro{\quote}{\itshape}
+        \makeatother
   latex: *pdf-italic-quotes
 
 Bibliography:
@@ -150,9 +142,8 @@ Bibliography:
     append-to-file:
       - |
         # References{.unnumbered}
-    command-line:
-      filter:
-        - pandoc-citeproc
+    filter:
+      - pandoc-citeproc
   pdf:
     append-to-file:
       - |
@@ -163,19 +154,18 @@ Bibliography:
 
 Fancy-header:
   pdf: &pdf-fancy-header
-    metadata:
-      disable-header: false
-      disable-footer: false
-      # example options: \headertitle: title, \headerauthor: author, \headerdate: date,
-      # \thepage: page number, \leftmark: chapter, \rightmark: section
-      header-left: \headertitle
-      header-center: false
-      header-right: \nouppercase\leftmark
-      footer-left: \headerauthor
-      footer-center: false
-      footer-right: \thepage
-      headrule: true
-      footrule: true
+    disable-header: false
+    disable-footer: false
+    # example options: \headertitle: title, \headerauthor: author, \headerdate: date,
+    # \thepage: page number, \leftmark: chapter, \rightmark: section
+    header-left: \headertitle
+    header-center: false
+    header-right: \nouppercase\leftmark
+    footer-left: \headerauthor
+    footer-center: false
+    footer-right: \thepage
+    headrule: true
+    footrule: true
     add-to-template:
       - |
         \newcommand{\headertitle}{$title$}
@@ -224,13 +214,12 @@ Renew-chaptermark:
 
 Pdf-title:
   pdf: &pdf-title
-    metadata:
-      header-includes:
-        - |
-          \usepackage{pagecolor}
-          \usepackage{afterpage}
-          \usepackage{xcolor}
-          \usepackage{setspace}
+    add-to-template:
+      - |
+        \usepackage{pagecolor}
+        \usepackage{afterpage}
+        \usepackage{xcolor}
+        \usepackage{setspace}
     replace-in-template:
       - pattern: \\maketitle
         replacement-text: |

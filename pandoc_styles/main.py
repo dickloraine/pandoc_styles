@@ -13,6 +13,7 @@ import sass
 
 from .constants import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from .format_mappings import FORMAT_TO_EXTENSION
+from .pandoc_cmd_line_options import COMMAND_LINE_OPTIONS
 from .utils import (change_dir, expand_directories, file_read, file_write,
                     has_extension, make_list, run_process, get_file_name, yaml_dump,
                     yaml_load, yaml_dump_pandoc_md, get_pack_path)
@@ -182,19 +183,8 @@ class PandocStyles:
         """Get the style configuration for the current format"""
         cfg = self.style_to_cfg(self.style, fmt)
 
-        # ensure some fields are present
-        for field in [MD_METADATA, MD_CMD_LINE, MD_TEMPLATE_VARIABLES]:
-            if field not in cfg:
-                cfg[field] = {}
-
         # update fields in the cfg with fields in the document metadata
-        for key, val in self.pandoc_metadata.items():
-            for field in [MD_METADATA, MD_CMD_LINE, MD_TEMPLATE_VARIABLES]:
-                if key in cfg[field]:
-                    self.update_dict(cfg[field], {key: val})
-                    break
-            else:
-                self.update_dict(cfg, {key: val})
+        self.update_dict(cfg, self.pandoc_metadata)
 
         # add all needed infos to cfg
         cfg[MD_CURRENT_FILES] = self.files.copy()
@@ -204,23 +194,9 @@ class PandocStyles:
         if self.target:
             cfg[OUTPUT_FILE] = join(self.target, cfg[OUTPUT_FILE])
         cfg[FMT] = fmt
-        cfg[TO_FMT] = LATEX if fmt == PDF else fmt
+        cfg[TO_FMT] = LATEX if fmt in LATEX_FORMATS else fmt
         cfg[MD_TEMP_DIR] = self.temp_dir
         cfg[MD_CFG_DIR] = CONFIG_DIR
-        return cfg
-
-    def _get_styles(self, style, fmt):
-        """
-        Gets the data for all inherited styles
-        """
-        if not style.get(MD_INHERITS):
-            return self.style_to_cfg(style, fmt)
-
-        cfg = dict()
-        for extra_style in make_list(style[MD_INHERITS]):
-            extra_style = self._get_styles(self.styles[extra_style], fmt)
-            self.update_dict(cfg, extra_style)
-        self.update_dict(cfg, self.style_to_cfg(style, fmt))
         return cfg
 
     def _get_pandoc_args(self):
@@ -228,15 +204,35 @@ class PandocStyles:
         pandoc_args = [f'{PANDOC_CMD} -t {self.cfg[TO_FMT]} -o "{self.cfg[OUTPUT_FILE]}"']
 
         if self.from_format:
-            pandoc_args.append(f'--from {self.from_format}')
+            pandoc_args.append(f'--read {self.from_format}')
 
         # add pandoc_styles cfg, so that filters can use it
         pandoc_args.append(f'-M {MD_PANDOC_STYLES_MD}="{self._make_cfg_file()}"')
 
+        # filter out command-line options
+        keys_to_delete = []
+        for key, value in self.cfg.items():
+            if key not in COMMAND_LINE_OPTIONS:
+                continue
+            keys_to_delete.append(key)
+            for item in make_list(value):
+                if not item:
+                    continue
+                elif item is True:
+                    pandoc_args.append(f'--{key}')
+                else:
+                    item = self.expand_dirs(item, key)
+                    pandoc_args.append(f'--{key}="{item}"')
+        for key in keys_to_delete:
+            del self.cfg[key]
+
+        # compatibility with older versions
         complex_data = {}
-        for group, prefix in [(MD_CMD_LINE, "--"),
-                              (MD_METADATA, "-M "),
-                              (MD_TEMPLATE_VARIABLES, "-V ")]:
+        for group, prefix in [("command-line", "--"),
+                              ("metadata", "-M "),
+                              ("template-variables", "-V ")]:
+            if group not in self.cfg:
+                continue
             for key, value in self.cfg[group].items():
                 for item in make_list(value):
                     if not item:
@@ -249,17 +245,20 @@ class PandocStyles:
                     else:
                         item = self.expand_dirs(item, key)
                         pandoc_args.append(f'{prefix}{key}="{item}"')
+            del self.cfg[group]
+        if complex_data:
+            complex_data = yaml_dump_pandoc_md(complex_data,
+                                               join(self.temp_dir, "cmplx_metadata.yaml"))
+            pandoc_args.append(f'"{complex_data}"')
+        # -----------------------------------------------
 
         for ffile in self.cfg[MD_CURRENT_FILES]:
             pandoc_args.append(f'"{ffile}"')
 
         if self.metadata:
             pandoc_args.append(f'"{self.metadata}"')
-
-        if complex_data:
-            complex_data = yaml_dump_pandoc_md(complex_data,
-                                               join(self.temp_dir, "cur_metadata.yaml"))
-            pandoc_args.append(f'"{complex_data}"')
+        meta = yaml_dump_pandoc_md(self.cfg, join(self.temp_dir, "cur_metadata.yaml"))
+        pandoc_args.append(f'"{meta}"')
         return " ".join(pandoc_args)
 
     def _flight(self, flight_type, repl_txt, repl_val):
@@ -324,7 +323,7 @@ class PandocStyles:
                 css_file_path = relpath(css_file_path, self.target).replace("\\", "/")
             except ValueError:
                 pass
-        self.update_dict(self.cfg, {MD_CMD_LINE: {CSS: [css_file_path]}})
+        self.update_dict(self.cfg, {CSS: [css_file_path]})
 
     def _add_to_template(self):
         """Add code to the template given in the style definition"""
@@ -347,7 +346,7 @@ class PandocStyles:
         """Helper method to do the actual replacement"""
         try:
             template = file_read(
-                self.expand_dirs(self.cfg[MD_CMD_LINE][MD_TEMPLATE], MD_TEMPLATE))
+                self.expand_dirs(self.cfg[MD_TEMPLATE], MD_TEMPLATE))
         except (KeyError, FileNotFoundError):
             pc = run_process(f'{PANDOC_CMD} -D {self.cfg[TO_FMT]}', True)
             if not pc:
@@ -359,7 +358,7 @@ class PandocStyles:
         template = self._replace_in_text(pattern, repl, template, add, count)
         if original_template != template:
             template = file_write("new.template", template, self.temp_dir)
-            self.cfg[MD_CMD_LINE][MD_TEMPLATE] = template
+            self.cfg[MD_TEMPLATE] = template
 
     def _replace_in_output(self):
         """Replace text in the output with text given in the style definition"""
@@ -393,7 +392,7 @@ class PandocStyles:
     @classmethod
     def update_dict(cls, dictionary, new):
         """
-        Merge dictionary with new. Single keys are replaces, but nested dictionaries
+        Merge dictionary with new. Single keys are replaced, but nested dictionaries
         and list are appended
         """
         # we deepcopy new, so that it stays independent from the source
