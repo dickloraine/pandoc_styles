@@ -194,7 +194,7 @@ class PandocStyles:
         if self.target:
             cfg[OUTPUT_FILE] = join(self.target, cfg[OUTPUT_FILE])
         cfg[FMT] = fmt
-        cfg[TO_FMT] = LATEX if fmt in LATEX_FORMATS else fmt
+        cfg[TO_FMT] = LATEX if fmt == PDF else fmt
         cfg[MD_TEMP_DIR] = self.temp_dir
         cfg[MD_CFG_DIR] = CONFIG_DIR
         return cfg
