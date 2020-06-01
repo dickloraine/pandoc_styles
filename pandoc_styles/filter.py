@@ -253,7 +253,7 @@ class TransformFilter(PandocStylesFilter):
         return convert_text(elem, 'panflute', output_fmt or self.fmt, False, extra_args)
 
 
-def run_transform_filter(tags=None, all_formats=None, other=None, filter_type=None,
+def run_transform_filter(tags=None, all_formats=None, other=None, filter_types=None,
                          check=None, **kwargs):
     '''
     Creates and runs a pandoc filter.
@@ -280,7 +280,7 @@ def run_transform_filter(tags=None, all_formats=None, other=None, filter_type=No
     all_formats: This method is executed before the format specific methods
     and is used to execute shared code.
 
-    filter_type: If the filter searches for an element other than a CodeBlock. Can be
+    filter_types: If the filter searches for an element other than a div. Can be
     a list of types
 
     check: Replace the default check method with your own.
@@ -292,7 +292,7 @@ def run_transform_filter(tags=None, all_formats=None, other=None, filter_type=No
     > list:   The list can contain Panflute Elements or strings. Strings are converted
               like above.
     '''
-    pandoc_filter = TransformFilter(tags, all_formats, other, filter_type, check,
+    pandoc_filter = TransformFilter(tags, all_formats, other, filter_types, check,
                                     **kwargs)
     pandoc_filter.run()
 
