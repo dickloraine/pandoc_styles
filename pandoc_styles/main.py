@@ -16,7 +16,7 @@ from .format_mappings import FORMAT_TO_EXTENSION
 from .pandoc_cmd_line_options import COMMAND_LINE_OPTIONS
 from .utils import (change_dir, expand_directories, file_read, file_write,
                     has_extension, make_list, run_process, get_file_name, yaml_dump,
-                    yaml_load, yaml_dump_pandoc_md, get_pack_path)
+                    yaml_load, yaml_dump_pandoc_md, get_pack_path, get_full_file_name)
 
 
 class PandocStyles:
@@ -24,8 +24,10 @@ class PandocStyles:
     def __init__(self, files, formats=None, from_format="", use_styles=None,
                  add_styles=None, metadata="", target="", output_name="",
                  stylepacks=None, style_file=None, quiet=False, to_file_type=None):
+        self.actual_temp_dir = TemporaryDirectory()
+        self.temp_dir = self.actual_temp_dir.name
         self.metadata = metadata
-        self.pandoc_metadata = self.get_pandoc_metadata(metadata or files[0])
+        self.pandoc_metadata, files = self.get_pandoc_metadata(metadata or files[0], files)
         self.files = self.pandoc_metadata.get(MD_FILE_LIST) or \
                      [f for f in files if f not in
                       self.pandoc_metadata.get(MD_EXCLUDED_FILES, [])]
@@ -46,8 +48,6 @@ class PandocStyles:
         self.output_name = output_name or self.pandoc_metadata.get(MD_OUTPUT_NAME) or \
                            get_file_name(files[0])
         self.output_ext = to_file_type
-        self.actual_temp_dir = TemporaryDirectory()
-        self.temp_dir = self.actual_temp_dir.name
         self.python_path = ""
         self._do_user_config()
 
@@ -125,8 +125,8 @@ class PandocStyles:
             for extra_style in inherited:
                 extra_style = self._get_style(all_styles[extra_style], all_styles)
                 self.update_dict(new_style, extra_style)
-        self.update_dict(new_style, style)
-        return new_style
+        self.update_dict(style, new_style)
+        return style
 
     def make_format(self, fmt):
         """
@@ -134,7 +134,6 @@ class PandocStyles:
         All attributes defined here change with each format
         """
         self.cfg = self._get_cfg(fmt)
-
         self._preflight()
         self._process_sass()
         self._add_to_template()
@@ -150,8 +149,7 @@ class PandocStyles:
             logging.error(f"Failed to build {self.cfg[OUTPUT_FILE]}!")
             sys.exit(1)
 
-    @staticmethod
-    def get_pandoc_metadata(md_file):
+    def get_pandoc_metadata(self, md_file, files):
         """Get the metadata yaml block in the file given"""
         if not md_file:
             return {}
@@ -159,12 +157,16 @@ class PandocStyles:
         if has_extension(md_file, ["yaml", "yml"]):
             return yaml_load(md_file)
 
-        md = file_read(md_file)
-        md = re.match(r'.?-{3}(.*?)(\n\.{3}\n|\n-{3}\n)', md, flags=re.DOTALL)
+        text = file_read(md_file)
+        md = re.match(r'.?-{3}(.*?)(\n\.{3}\n|\n-{3}\n)', text, flags=re.DOTALL)
         if not md:
-            return {}
+            return {}, files
         md = md.group(1)
-        return yaml_load(md, True)
+        # remove md from the file, since it is no longer needed and would overwrite
+        # metadata fields in the wrong way
+        text = re.sub(r'.?-{3}(.*?)(\n\.{3}\n|\n-{3}\n)', "", text, flags=re.DOTALL)
+        files[0] = file_write(get_full_file_name(md_file), text, self.temp_dir)
+        return yaml_load(md, True), files
 
     def _do_user_config(self):
         """Read the config file and set the options"""
@@ -182,7 +184,6 @@ class PandocStyles:
     def _get_cfg(self, fmt):
         """Get the style configuration for the current format"""
         cfg = self.style_to_cfg(self.style, fmt)
-
         # update fields in the cfg with fields in the document metadata
         self.update_dict(cfg, self.pandoc_metadata)
 
@@ -281,8 +282,12 @@ class PandocStyles:
         """Run all _preflight scripts given in the style definition"""
         if MD_PREFLIGHT not in self.cfg:
             return
-        self.cfg[MD_CURRENT_FILES] = [copy(f, self.temp_dir)
-                                      for f in self.cfg[MD_CURRENT_FILES]]
+        new = []
+        for f in self.cfg[MD_CURRENT_FILES]:
+            if not isfile(join(self.temp_dir, f)):
+                new.append(copy(f, self.temp_dir))
+            new.append(f)
+        self.cfg[MD_CURRENT_FILES] = new
         self._flight(MD_PREFLIGHT, "<files>", " ".join(f'"{x}"' for x in
                                                        self.cfg[MD_CURRENT_FILES]))
 
