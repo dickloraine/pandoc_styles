@@ -130,7 +130,7 @@ def change_dir(new_dir):
     chdir(current_dir)
 
 def get_pack_path(pack):
-    for local_path in ["", "./assets", "/styles", "./assets/styles"]:
+    for local_path in ["", "./assets", "./styles", "./assets/styles"]:
         pack_path = join(local_path, pack)
         if isdir(pack_path):
             return pack_path
