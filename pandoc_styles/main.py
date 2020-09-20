@@ -286,7 +286,8 @@ class PandocStyles:
         for f in self.cfg[MD_CURRENT_FILES]:
             if not isfile(join(self.temp_dir, f)):
                 new.append(copy(f, self.temp_dir))
-            new.append(f)
+            else:
+                new.append(f)
         self.cfg[MD_CURRENT_FILES] = new
         self._flight(MD_PREFLIGHT, "<files>", " ".join(f'"{x}"' for x in
                                                        self.cfg[MD_CURRENT_FILES]))
