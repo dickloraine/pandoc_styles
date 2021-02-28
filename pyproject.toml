@@ -35,5 +35,5 @@ pandoc-styles = "pandoc_styles.main:main"
 pandoc-styles-tools = "pandoc_styles.cl_tools:main"
 
 [build-system]
-requires = ["poetry>=0.12"]
+requires = ["poetry>=0.12", "setuptools!=50.0"]
 build-backend = "poetry.masonry.api"
