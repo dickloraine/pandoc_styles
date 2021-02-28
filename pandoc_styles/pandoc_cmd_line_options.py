@@ -73,6 +73,7 @@ COMMAND_LINE_OPTIONS = [
     "pdf-engine",
     "pdf-engine-opt",
     # Citation rendering
+    "citeproc",
     "bibliography",
     "csl",
     "citation-abbreviations",
