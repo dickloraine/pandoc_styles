@@ -38,4 +38,7 @@ def main():
     # Run tool
     # ----------------------------------------------------------------------------------
     args = parser.parse_args()
+    if not "func" in args:
+        parser.print_help()
+        return
     args.func(args)
