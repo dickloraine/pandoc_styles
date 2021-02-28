@@ -133,8 +133,8 @@ def get_pack_path(pack):
     for local_path in ["", "./assets", "./styles", "./assets/styles"]:
         pack_path = join(local_path, pack)
         if isdir(pack_path):
-            return pack_path
-    return join(CONFIG_DIR, PATH_STYLE, pack)
+            return pack_path.replace("\\", "/")
+    return join(CONFIG_DIR, PATH_STYLE, pack).replace("\\", "/")
 
 def expand_directories(item, key=""):
     """

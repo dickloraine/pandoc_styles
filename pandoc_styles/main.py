@@ -188,9 +188,10 @@ class PandocStyles:
         # update fields in the cfg with fields in the document metadata
         self.update_dict(cfg, self.pandoc_metadata)
 
+        if MD_VERBATIM_VARIABLES not in cfg:
+            cfg[MD_VERBATIM_VARIABLES] = {}
         # add all needed infos to cfg
         cfg[MD_CURRENT_FILES] = self.files.copy()
-        cfg[MD_STYLE_PACKS] = self.stylepacks
         ext = self.output_ext if self.output_ext else FORMAT_TO_EXTENSION.get(fmt, fmt)
         cfg[OUTPUT_FILE] = f"{self.output_name}.{ext}"
         if self.target:
@@ -199,6 +200,17 @@ class PandocStyles:
         cfg[TO_FMT] = LATEX if fmt == PDF else fmt
         cfg[MD_TEMP_DIR] = self.temp_dir
         cfg[MD_CFG_DIR] = CONFIG_DIR
+        cfg[MD_STYLE_PACKS] = [
+            pack if isinstance(pack, str) else list(pack.keys())[0] for pack in self.stylepacks
+        ]
+        for stylepack in cfg[MD_STYLE_PACKS]:
+            cfg[f"{stylepack}-dir"] = get_pack_path(stylepack)
+            cfg[MD_VERBATIM_VARIABLES][f"{stylepack}-dir"] = get_pack_path(stylepack)
+
+        # add some infos to the verbatim variables
+        cfg[MD_VERBATIM_VARIABLES][MD_CFG_DIR] = cfg[MD_CFG_DIR]
+        cfg[MD_VERBATIM_VARIABLES][MD_TEMP_DIR] = cfg[MD_TEMP_DIR]
+        cfg[MD_VERBATIM_VARIABLES][OUTPUT_FILE] = cfg[OUTPUT_FILE]
         return cfg
 
     def _get_pandoc_args(self):
@@ -225,6 +237,11 @@ class PandocStyles:
                 else:
                     item = self.expand_dirs(item, key)
                     pandoc_args.append(f'--{key}="{item}"')
+
+        # add verbatim variables
+        for key, value in self.cfg[MD_VERBATIM_VARIABLES].items():
+            pandoc_args.append(f'-V {key}="{value}"')
+
         for key in keys_to_delete:
             del self.cfg[key]
 

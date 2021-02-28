@@ -14,6 +14,7 @@ This script allows you to define styles for pandoc. In styles you can define, wi
   - [Stylepacks](#stylepacks)
   - [Advanced Feature](#advanced-feature)
     - [Adressing files in the configuration folder](#adressing-files-in-the-configuration-folder)
+    - [Verbatim Variables](#verbatim-variables)
     - [Preflight](#preflight)
     - [Process Sass](#process-sass)
     - [Add to template](#add-to-template)
@@ -168,6 +169,21 @@ filter:
 ~~~
 
 Would find the file "test-filter.py" in the subfolder "filter" in the configuration directory.
+
+### Verbatim Variables
+
+If you need template variables that should not be rendered in the output format (for example file paths), you can add these under the "verbatim-variables" field:
+
+~~~yaml
+verbatim-variables:
+  my-path: "my/path"
+~~~
+
+Some variables are predefiened and always usable in templates:
+
+- config-dir: The path to the config dir
+- stylepackName-dir: The path to the directory of the given stylepack
+- temp-dir: The path to the currently used temporary directory
 
 ### Preflight
 
