@@ -35,7 +35,7 @@ To use this script, you need the following:
 1. Python 3.6 or higher:
     You can get [python here](https://www.python.org/).
 
-2. Pandoc:
+2. Pandoc 2.11 or higher:
     You can download [pandoc here](http://pandoc.org/index.html).
 
 ### Install
