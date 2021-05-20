@@ -383,6 +383,12 @@ class PandocStyles:
         if original_template != template:
             template = file_write("new.template", template, self.temp_dir)
             self.cfg[MD_TEMPLATE] = template
+        # for html we need the styles.html file in addition
+        if self.cfg[TO_FMT] == HTML:
+            pc = run_process(
+                f'{PANDOC_CMD} --print-default-data-file=templates/styles.html', True)
+            if pc:
+                file_write("styles.html", pc.stdout, self.temp_dir)
 
     def _replace_in_output(self):
         """Replace text in the output with text given in the style definition"""
