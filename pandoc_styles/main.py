@@ -3,7 +3,7 @@ import re
 import sys
 from argparse import ArgumentParser
 from copy import deepcopy
-from os import getcwd, listdir, mkdir
+from os import getcwd, listdir, mkdir, remove
 from os.path import dirname, isdir, join, normpath, relpath, isfile
 from shutil import copy, copytree
 from tempfile import TemporaryDirectory
@@ -301,11 +301,13 @@ class PandocStyles:
         if MD_PREFLIGHT not in self.cfg:
             return
         new = []
+        if not isdir(join(self.temp_dir, MODIFIED_FILES)):
+            mkdir(join(self.temp_dir, MODIFIED_FILES))
         for f in self.cfg[MD_CURRENT_FILES]:
-            if not isfile(join(self.temp_dir, f)):
-                new.append(copy(f, self.temp_dir))
-            else:
-                new.append(f)
+            modified_file = join(self.temp_dir, MODIFIED_FILES, get_full_file_name(f))
+            if isfile(modified_file):
+                remove(modified_file)
+            new.append(copy(f, modified_file))
         self.cfg[MD_CURRENT_FILES] = new
         self._flight(MD_PREFLIGHT, "<files>", " ".join(f'"{x}"' for x in
                                                        self.cfg[MD_CURRENT_FILES]))

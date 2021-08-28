@@ -18,6 +18,7 @@ PATH_TEMP = "temp"
 PATH_SASS = "sass"
 PATH_CSS = "css"
 PATH_STYLE = "styles"
+MODIFIED_FILES = 'modified_files'
 
 # Metadata fields constants
 MD_VERBATIM_VARIABLES = "verbatim-variables"
