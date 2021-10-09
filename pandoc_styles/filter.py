@@ -49,6 +49,7 @@ class PandocStylesFilter():
         self._get_format()
         self.classes = elem.classes if hasattr(elem, "classes") else None
         self.attributes = elem.attributes if hasattr(elem, "attributes") else None
+        self.identifier = elem.identifier if hasattr(elem, "identifier") else None
         self._text = elem.text if hasattr(elem, "text") else None
         self.content = elem.content if hasattr(elem, "content") else None
 
