@@ -126,8 +126,8 @@ class PandocStyles:
             for extra_style in inherited:
                 extra_style = self._get_style(all_styles[extra_style], all_styles)
                 self.update_dict(new_style, extra_style)
-        self.update_dict(style, new_style)
-        return style
+        self.update_dict(new_style, style)
+        return new_style
 
     def make_format(self, fmt):
         """
