@@ -244,7 +244,7 @@ class PandocStyles:
         keys_to_delete.append(MD_VERBATIM_VARIABLES)
 
         # add expandable metadata that can be overridden in the document
-        if self.cfg[MD_EXPANDABLE_VARIABLES]:
+        if MD_EXPANDABLE_VARIABLES in self.cfg:
             for key, value in self.cfg[MD_EXPANDABLE_VARIABLES].items():
                 if not self.cfg.get(key, False):
                     pandoc_args.append(f'-V {key}="{self.expand_dirs(value, key)}"')
