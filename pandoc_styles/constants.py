@@ -22,6 +22,7 @@ MODIFIED_FILES = 'modified_files'
 
 # Metadata fields constants
 MD_VERBATIM_VARIABLES = "verbatim-variables"
+MD_EXPANDABLE_VARIABLES = "expandable-variables"
 MD_STYLE_PACKS = "stylepacks"
 MD_FILE_LIST = "file-list"
 MD_EXCLUDED_FILES = "excluded-files"

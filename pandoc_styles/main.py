@@ -241,6 +241,14 @@ class PandocStyles:
         # add verbatim variables
         for key, value in self.cfg[MD_VERBATIM_VARIABLES].items():
             pandoc_args.append(f'-V {key}="{value}"')
+        keys_to_delete.append(MD_VERBATIM_VARIABLES)
+
+        # add expandable metadata that can be overridden in the document
+        if self.cfg[MD_EXPANDABLE_VARIABLES]:
+            for key, value in self.cfg[MD_EXPANDABLE_VARIABLES].items():
+                if not self.cfg.get(key, False):
+                    pandoc_args.append(f'-V {key}="{self.expand_dirs(value, key)}"')
+            keys_to_delete.append(MD_EXPANDABLE_VARIABLES)
 
         for key in keys_to_delete:
             del self.cfg[key]
