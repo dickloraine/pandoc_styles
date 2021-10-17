@@ -197,7 +197,8 @@ class TransformFilter(PandocStylesFilter):
         try:
             self.new_text = getattr(self, self.fmt)()
         except AttributeError:
-            self.new_text = None
+            # pylint: disable=assignment-from-none
+            self.new_text = self.other()
 
     def _return_filter(self):
         if self.new_text is None:
