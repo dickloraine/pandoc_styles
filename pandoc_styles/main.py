@@ -74,7 +74,7 @@ class PandocStyles:
         print(self.get_output(fmt))
 
     def build_style(self):
-        style = self.styles.get(ALL_STYLE, {})
+        style = {}
 
         if self.stylepacks:
             style = self._get_stylepack_style(style, self.stylepacks)
@@ -86,6 +86,7 @@ class PandocStyles:
         if MD_STYLE_DEF in self.pandoc_metadata:
             self.update_dict(
                 style, self._get_style(self.pandoc_metadata[MD_STYLE_DEF], self.styles))
+        self.update_dict(self.styles.get(ALL_STYLE, {}), style)
         return style
 
     def _get_stylepack_style(self, style, stylepacks):
