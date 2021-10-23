@@ -41,6 +41,7 @@ class PandocStyles:
                      STYLE_FILE
         self.stylepacks = stylepacks or \
                           make_list(self.pandoc_metadata.get(MD_STYLE_PACKS, []))
+        self.used_stylepacks = []
         self.use_styles.extend(add_styles or [])
         self.styles = yaml_load(style_file)
         self.style = self.build_style()
@@ -102,6 +103,7 @@ class PandocStyles:
                     pack = k
                     used_styles = make_list(v)
 
+            self.used_stylepacks.append(pack)
             pack_path = get_pack_path(pack)
             stylepack_styles = yaml_load(join(pack_path, f'{pack}.yaml'))
 
@@ -201,11 +203,8 @@ class PandocStyles:
         cfg[TO_FMT] = LATEX if fmt == PDF else fmt
         cfg[MD_TEMP_DIR] = self.temp_dir
         cfg[MD_CFG_DIR] = CONFIG_DIR
-        cfg[MD_STYLE_PACKS] = [
-            pack if isinstance(pack, str) else list(pack.keys())[0] for pack in self.stylepacks
-        ]
+        cfg[MD_STYLE_PACKS] = self.used_stylepacks
         for stylepack in cfg[MD_STYLE_PACKS]:
-            cfg[f"{stylepack}-dir"] = get_pack_path(stylepack)
             cfg[MD_VERBATIM_VARIABLES][f"{stylepack}-dir"] = get_pack_path(stylepack)
 
         # add some infos to the verbatim variables
