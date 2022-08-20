@@ -47,6 +47,7 @@ COMMAND_LINE_OPTIONS = [
     "request-header",
     # Options affecting specific writers
     "self-contained",
+    "embed-resources",
     "html-q-tags",
     "ascii",
     "reference-links",
