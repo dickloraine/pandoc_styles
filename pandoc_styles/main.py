@@ -87,7 +87,7 @@ class PandocStyles:
             self.update_dict(
                 style, self._get_style(self.pandoc_metadata[MD_STYLE_DEF], self.styles))
         
-        all_style = self.styles.get(ALL_STYLE, {})
+        all_style = self.styles.get(ALL_STYLE)
         if all_style:
             all_style = self._get_style({MD_INHERITS: ALL_STYLE}, self.styles)
             self.update_dict(all_style, style)
