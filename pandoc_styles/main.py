@@ -76,7 +76,6 @@ class PandocStyles:
 
     def build_style(self):
         style = {}
-
         if self.stylepacks:
             style = self._get_stylepack_style(style, self.stylepacks)
 
@@ -87,7 +86,12 @@ class PandocStyles:
         if MD_STYLE_DEF in self.pandoc_metadata:
             self.update_dict(
                 style, self._get_style(self.pandoc_metadata[MD_STYLE_DEF], self.styles))
-        self.update_dict(self.styles.get(ALL_STYLE, {}), style)
+        
+        all_style = self.styles.get(ALL_STYLE, {})
+        if all_style:
+            all_style = self._get_style({MD_INHERITS: ALL_STYLE}, self.styles)
+            self.update_dict(all_style, style)
+            return all_style
         return style
 
     def _get_stylepack_style(self, style, stylepacks):
@@ -103,9 +107,12 @@ class PandocStyles:
                     pack = k
                     used_styles = make_list(v)
 
-            self.used_stylepacks.append(pack)
             pack_path = get_pack_path(pack)
+            self.used_stylepacks.append(pack)
             stylepack_styles = yaml_load(join(pack_path, f'{pack}.yaml'))
+
+            if stylepack_styles.get(ALL_STYLE):
+                used_styles.insert(0, ALL_STYLE)
 
             for s in used_styles:
                 self.update_dict(style, self._get_style(stylepack_styles[s],
