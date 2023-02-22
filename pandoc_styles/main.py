@@ -236,6 +236,15 @@ class PandocStyles:
             if key not in COMMAND_LINE_OPTIONS:
                 continue
             keys_to_delete.append(key)
+            if key == "filter":
+                for item in make_list(value):
+                    if item.endswith(".lua"):
+                        key = "lua-filter"
+                    else:
+                        key = "filter"
+                    item = self.expand_dirs(item, key)
+                    pandoc_args.append(f'--{key}={item}')
+                continue
             for item in make_list(value):
                 if not item:
                     continue
