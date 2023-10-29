@@ -1,3 +1,5 @@
+# ruff: noqa: F405
+
 import logging
 import re
 import sys
@@ -11,7 +13,7 @@ from pkg_resources import resource_filename
 
 import sass
 
-from .constants import *  # pylint: disable=wildcard-import, unused-wildcard-import
+from .constants import *  # noqa: F403
 from .format_mappings import FORMAT_TO_EXTENSION
 from .pandoc_cmd_line_options import COMMAND_LINE_OPTIONS
 from .utils import (change_dir, expand_directories, file_read, file_write,
@@ -86,7 +88,7 @@ class PandocStyles:
         if MD_STYLE_DEF in self.pandoc_metadata:
             self.update_dict(
                 style, self._get_style(self.pandoc_metadata[MD_STYLE_DEF], self.styles))
-        
+
         all_style = self.styles.get(ALL_STYLE)
         if all_style:
             all_style = self._get_style({MD_INHERITS: ALL_STYLE}, self.styles)
@@ -156,7 +158,7 @@ class PandocStyles:
             self._replace_in_output()
             self._postflight()
             logging.info(f"Build {self.cfg[OUTPUT_FILE]}")
-        except:    # pylint: disable=bare-except
+        except:    # noqa: E722
             logging.error(f"Failed to build {self.cfg[OUTPUT_FILE]}!")
             sys.exit(1)
 

@@ -18,15 +18,15 @@ classifiers=[
 ]
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.7"
 libsass = "^0.21"
 panflute = "^2.0"
 "ruamel.yaml" = "^0.16.0"
 
 [tool.poetry.dev-dependencies]
-pylint = "^2.1"
 pytest = "^4.0"
 pre-commit = "^1.12.0"
+ruff = "^0.1.3"
 
 [tool.poetry.scripts]
 pandoc_styles = "pandoc_styles.main:main"
