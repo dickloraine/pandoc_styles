@@ -209,7 +209,7 @@ class PandocStyles:
         if self.target:
             cfg[OUTPUT_FILE] = join(self.target, cfg[OUTPUT_FILE])
         cfg[FMT] = fmt
-        cfg[TO_FMT] = LATEX if fmt == PDF else fmt
+        cfg[TO_FMT] = fmt
         cfg[MD_TEMP_DIR] = self.temp_dir
         cfg[MD_CFG_DIR] = CONFIG_DIR
         cfg[MD_STYLE_PACKS] = self.used_stylepacks
