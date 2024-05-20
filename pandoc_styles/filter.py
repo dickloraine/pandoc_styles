@@ -1,21 +1,34 @@
 import panflute as pf
 from panflute import (  # pylint: disable=unused-import
-    Null, HorizontalRule, Space, SoftBreak, LineBreak, Str,
-    Code, BlockQuote, Note, Div, Plain, Para, Emph, Strong, Strikeout,
-    Superscript, Subscript, SmallCaps, Span, RawBlock, RawInline, Math,
-    CodeBlock, Link, Image, BulletList, OrderedList, DefinitionList,
-    LineBlock, Header, Quoted, Cite, Table, ListContainer, TableCell, Block,
-    convert_text, Element, run_filter)
-from .constants import (HTML, LATEX, EPUB, MD_PANDOC_STYLES_MD,
-                        FIL_ALL, FIL_OTHER, FIL_CHECK, LATEX_FORMATS)
-from .utils import make_list, yaml_load, yaml_dump
+    Div,
+    Element,
+    ListContainer,
+    Plain,
+    RawBlock,
+    RawInline,
+    convert_text,
+    run_filter,
+)
+
+from .constants import (
+    EPUB,
+    FIL_ALL,
+    FIL_CHECK,
+    FIL_OTHER,
+    HTML,
+    LATEX,
+    LATEX_FORMATS,
+    MD_PANDOC_STYLES_MD,
+)
+from .utils import make_list, yaml_dump, yaml_load
 
 
-class PandocStylesFilter():
-    '''
+class PandocStylesFilter:
+    """
     Base class for filters. Defines methods to help writing filters and to
     run them.
-    '''
+    """
+
     def __init__(self, func, filter_types=None, tags=None):
         self._add_method(func, "func")
         self.filter_types = make_list(filter_types or [])
@@ -81,9 +94,10 @@ class PandocStylesFilter():
             self.fmt = HTML
 
     def check(self):
-        return (not self.filter_types
-                or any(isinstance(self.elem, x) for x in self.filter_types))\
-                and (not self.tags or any(x in self.tags for x in self.classes))
+        return (
+            not self.filter_types
+            or any(isinstance(self.elem, x) for x in self.filter_types)
+        ) and (not self.tags or any(x in self.tags for x in self.classes))
 
     def func(self):
         return
@@ -96,11 +110,11 @@ class PandocStylesFilter():
                 raise TypeError("Only functions are allowed in filter generation!")
 
     def get_metadata(self, key, default=None):
-        '''Gets metadata'''
+        """Gets metadata"""
         return self.doc.get_metadata(key, default)
 
     def get_pandoc_styles_metadata(self):
-        '''Return the pandoc_styles cfg as a dictionary'''
+        """Return the pandoc_styles cfg as a dictionary"""
         try:
             self.cfg = yaml_load(self.get_metadata(MD_PANDOC_STYLES_MD))
         except FileNotFoundError:
@@ -108,38 +122,39 @@ class PandocStylesFilter():
         return self.cfg
 
     def save_pandoc_styles_metadata(self):
-        '''Save the given cfg in the cfg-file'''
+        """Save the given cfg in the cfg-file"""
         yaml_dump(self.cfg, self.get_metadata(MD_PANDOC_STYLES_MD))
 
     def stringify(self, elem=None):
-        '''Stringify an element'''
+        """Stringify an element"""
         return stringify(elem or self.elem)
 
     def transform(self, elem_type):
-        '''Transforms content of this element to elem_type. Return the new Element'''
+        """Transforms content of this element to elem_type. Return the new Element"""
         if isinstance(self.content, ListContainer):
             return elem_type(*self.content)
         return elem_type(self.content)
 
     def raw_block(self, text):
-        '''Return a RawBlock pandoc element in self.fmt. Accepts strings, tuples
+        """Return a RawBlock pandoc element in self.fmt. Accepts strings, tuples
         and lists as arguments.
-        '''
+        """
         return raw(self.fmt, text)
 
     def raw_inline(self, text):
-        '''Return a RawInline pandoc element in self.fmt. Accepts strings, tuples
+        """Return a RawInline pandoc element in self.fmt. Accepts strings, tuples
         and lists as arguments.
-        '''
+        """
         return raw(self.fmt, text, element_type=RawInline)
 
-    def convert_text(self, text=None, input_fmt='markdown', output_fmt='panflute',
-                     extra_args=None):
-        '''Wrapper for panflutes convert_text'''
+    def convert_text(
+        self, text=None, input_fmt="markdown", output_fmt="panflute", extra_args=None
+    ):
+        """Wrapper for panflutes convert_text"""
         text = text or self.text
         return convert_text(text, input_fmt, output_fmt, False, extra_args)
 
-    def get_text(self, elem=None, output_fmt='markdown', extra_args=None):
+    def get_text(self, elem=None, output_fmt="markdown", extra_args=None):
         """
         Converts the content of the given Element to the output format. Use instead
         of stringify to retain inline formatting.
@@ -148,8 +163,8 @@ class PandocStylesFilter():
         if isinstance(elem, ListContainer):
             elem = Plain(*elem)
         else:
-            elem = getattr(elem, 'content')
-        return convert_text(elem, 'panflute', output_fmt, False, extra_args)
+            elem = getattr(elem, "content")
+        return convert_text(elem, "panflute", output_fmt, False, extra_args)
 
 
 def run_pandoc_styles_filter(func, filter_types=None, tags=None):
@@ -165,15 +180,23 @@ def run_pandoc_styles_filter(func, filter_types=None, tags=None):
     """
     PandocStylesFilter(func, filter_types, tags).run()
 
+
 class TransformFilter(PandocStylesFilter):
-    '''
+    """
     Base class for filters. Defines methods to help writing filters and to
     run them.
-    '''
+    """
 
     # pylint: disable=super-init-not-called
-    def __init__(self, tags=None, all_formats=None, other=None, filter_types=None,
-                 check=None, **kwargs):
+    def __init__(
+        self,
+        tags=None,
+        all_formats=None,
+        other=None,
+        filter_types=None,
+        check=None,
+        **kwargs,
+    ):
         self.tags = make_list(tags or [])
         self.filter_types = filter_types if filter_types is not None else [Div]
         self.filter_types = make_list(self.filter_types)
@@ -230,15 +253,20 @@ class TransformFilter(PandocStylesFilter):
             if isinstance(var, str):
                 setattr(self, name, lambda: var.format(text=self.convert_to_fmt()))
             elif isinstance(var, list):
-                setattr(self, name, lambda: [self.content if x == "text" else x
-                                             for x in var])
+                setattr(
+                    self,
+                    name,
+                    lambda: [self.content if x == "text" else x for x in var],
+                )
             elif callable(var):
                 setattr(self, name, var.__get__(self))
             else:
-                raise TypeError("Only strings and functions are allowed in filter generation!")
+                raise TypeError(
+                    "Only strings and functions are allowed in filter generation!"
+                )
 
-    def convert_to_fmt(self, text=None, input_fmt='markdown', extra_args=None):
-        '''Converts text in input_fmt to self.fmt'''
+    def convert_to_fmt(self, text=None, input_fmt="markdown", extra_args=None):
+        """Converts text in input_fmt to self.fmt"""
         text = text or self.text
         return convert_text(text, input_fmt, self.fmt, False, extra_args)
 
@@ -251,13 +279,14 @@ class TransformFilter(PandocStylesFilter):
         if isinstance(elem, ListContainer):
             elem = Plain(*elem)
         else:
-            elem = getattr(elem, 'content')
-        return convert_text(elem, 'panflute', output_fmt or self.fmt, False, extra_args)
+            elem = getattr(elem, "content")
+        return convert_text(elem, "panflute", output_fmt or self.fmt, False, extra_args)
 
 
-def run_transform_filter(tags=None, all_formats=None, other=None, filter_types=None,
-                         check=None, **kwargs):
-    '''
+def run_transform_filter(
+    tags=None, all_formats=None, other=None, filter_types=None, check=None, **kwargs
+):
+    """
     Creates and runs a pandoc filter.
 
     tags: The default check method checks, if these tags are in the classes of
@@ -293,9 +322,10 @@ def run_transform_filter(tags=None, all_formats=None, other=None, filter_types=N
               from markdown to panflute elements if the format doesn't support rawblocks
     > list:   The list can contain Panflute Elements or strings. Strings are converted
               like above.
-    '''
-    pandoc_filter = TransformFilter(tags, all_formats, other, filter_types, check,
-                                    **kwargs)
+    """
+    pandoc_filter = TransformFilter(
+        tags, all_formats, other, filter_types, check, **kwargs
+    )
     pandoc_filter.run()
 
 
@@ -308,8 +338,8 @@ def is_pandoc_element(ele):
 
 
 def raw(fmt, text, element_type=RawBlock):
-    '''Return a Raw pandoc element in the given format.'''
-    if fmt not in ['tex', 'latex', 'html', 'context']:
+    """Return a Raw pandoc element in the given format."""
+    if fmt not in ["tex", "latex", "html", "context"]:
         return convert_text(text)
     return element_type(text, fmt)
 

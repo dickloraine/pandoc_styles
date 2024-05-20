@@ -4,15 +4,16 @@ stylepackname.zip or
 stylepackname_v1.1.zip
 """
 
-from os import path
-from  urllib.request import urlretrieve, urlcleanup
 import re
 import shutil
-from distutils.dir_util import copy_tree
-from tempfile import TemporaryDirectory
 import zipfile as zf
-from .constants import CONFIG_DIR, PATH_STYLE, STYLE_FILE, DEFAULT_STYLE
-from .utils import get_file_name, yaml_load, yaml_dump
+from distutils.dir_util import copy_tree
+from os import path
+from tempfile import TemporaryDirectory
+from urllib.request import urlcleanup, urlretrieve
+
+from .constants import CONFIG_DIR, DEFAULT_STYLE, PATH_STYLE, STYLE_FILE
+from .utils import get_file_name, yaml_dump, yaml_load
 
 
 def import_style_pack(args):
@@ -30,7 +31,7 @@ def import_style_pack(args):
         stylepack_name = args.stylepack
         stylepack_file = f"{stylepack_name}.zip"
 
-    stylepack_name_ = re.match(r'(.*?)_v\d', stylepack_name)
+    stylepack_name_ = re.match(r"(.*?)_v\d", stylepack_name)
     stylepack_name = stylepack_name.group(1) if stylepack_name_ else stylepack_name
 
     if not args.is_global:

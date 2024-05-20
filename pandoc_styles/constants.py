@@ -1,6 +1,5 @@
 from os.path import expanduser, join
 
-
 # Generel constants
 MODULE_NAME = "pandoc_styles"
 CONFIG_DIR = join(expanduser("~"), MODULE_NAME)
@@ -18,7 +17,7 @@ PATH_TEMP = "temp"
 PATH_SASS = "sass"
 PATH_CSS = "css"
 PATH_STYLE = "styles"
-MODIFIED_FILES = 'modified_files'
+MODIFIED_FILES = "modified_files"
 
 # Metadata fields constants
 MD_VERBATIM_VARIABLES = "verbatim-variables"
@@ -74,4 +73,4 @@ FIL_ALL = "all_formats"
 FIL_CHECK = "check"
 
 # Latex formats
-LATEX_FORMATS = [LATEX, PDF, 'beamer']
+LATEX_FORMATS = [LATEX, PDF, "beamer"]

@@ -88,5 +88,5 @@ COMMAND_LINE_OPTIONS = [
     "gladtex",
     # Options for wrapper scripts
     "dump-args",
-    "ignore-args"
+    "ignore-args",
 ]

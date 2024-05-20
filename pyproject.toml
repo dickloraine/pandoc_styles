@@ -19,8 +19,8 @@ classifiers=[
 
 [tool.poetry.dependencies]
 python = "^3.7"
-libsass = "^0.21"
-panflute = "^2.0"
+libsass = "^0.22.0"
+panflute = "^2.3.0"
 "ruamel.yaml" = "^0.16.0"
 
 [tool.poetry.dev-dependencies]

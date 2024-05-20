@@ -1,18 +1,20 @@
-'''Some utility functions'''
+"""Some utility functions"""
 
 import logging
-import subprocess
 import shlex
-from os import chdir, getcwd
-from os.path import join, isfile, isdir, normpath, split, splitext
+import subprocess
 from contextlib import contextmanager
+from os import chdir, getcwd
+from os.path import isdir, isfile, join, normpath, split, splitext
+
 from ruamel.yaml import YAML
 from ruamel.yaml.compat import StringIO
-from .constants import CONFIG_DIR, USER_DIR_PREFIX, PATH_MISC, PATH_STYLE
+
+from .constants import CONFIG_DIR, PATH_MISC, PATH_STYLE, USER_DIR_PREFIX
 
 
 def file_read(file_name, *path, encoding="utf-8"):
-    '''Just a wrapper, since nearly always only read or write are used in this script'''
+    """Just a wrapper, since nearly always only read or write are used in this script"""
     if path:
         path = path + (file_name,)
         file_name = join(path[0], *path[1:])
@@ -21,7 +23,7 @@ def file_read(file_name, *path, encoding="utf-8"):
 
 
 def file_write(file_name, string, *path, mode="w", encoding="utf-8"):
-    '''Just a wrapper, since nearly always only read or write are used in this script'''
+    """Just a wrapper, since nearly always only read or write are used in this script"""
     if path:
         path = path + (file_name,)
         file_name = join(path[0], *path[1:])
@@ -39,6 +41,7 @@ class _StringYAML(YAML):
         YAML.dump(self, data, stream, **kw)
         if as_string:
             return stream.getvalue()
+
 
 def yaml_load(source, is_string=False):
     """Return a dictionary with the content of the yaml in the source file.
@@ -64,7 +67,7 @@ def yaml_dump(doc, target=None, transform=None):
 
 def yaml_dump_pandoc_md(doc, target=None):
     """Return the yaml as a pandoc metadata block"""
-    return yaml_dump(doc, target, lambda s: f'---\n{s}---\n')
+    return yaml_dump(doc, target, lambda s: f"---\n{s}---\n")
 
 
 def run_process(args, get_output=False, shell=False):
@@ -76,9 +79,15 @@ def run_process(args, get_output=False, shell=False):
     name = args[1] if args[0] in ["py", "python", "python3"] else args[0]
     try:
         if get_output:
-            pc = subprocess.run(args, check=True, shell=shell, stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT, universal_newlines=True,
-                                encoding="utf-8")
+            pc = subprocess.run(
+                args,
+                check=True,
+                shell=shell,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                universal_newlines=True,
+                encoding="utf-8",
+            )
             return pc
         subprocess.run(args, check=True, shell=shell)
     except subprocess.CalledProcessError:
@@ -86,7 +95,7 @@ def run_process(args, get_output=False, shell=False):
         logging.debug(f"{name} command-line:\n{name} {args}!")
         raise
     except FileNotFoundError:
-        logging.error(f'{name} not found!')
+        logging.error(f"{name} not found!")
         raise
 
 
@@ -109,8 +118,8 @@ def get_file_extension(path):
 
 
 def has_extension(ffile, extensions):
-    '''Check if ffile has an extension given in extensions. Extensions can be
-    a string or a list of strings.'''
+    """Check if ffile has an extension given in extensions. Extensions can be
+    a string or a list of strings."""
     if get_file_extension(ffile) in make_list(extensions):
         return True
     return False
@@ -129,6 +138,7 @@ def change_dir(new_dir):
     yield
     chdir(current_dir)
 
+
 def get_pack_path(pack):
     for local_path in ["", "./assets", "./styles", "./assets/styles"]:
         pack_path = join(local_path, pack)
@@ -136,15 +146,16 @@ def get_pack_path(pack):
             return pack_path.replace("\\", "/")
     return join(CONFIG_DIR, PATH_STYLE, pack).replace("\\", "/")
 
+
 def expand_directories(item, key=""):
     """
     Look if item is a file in the configuration directory and return the path if
     it is. Searches first for the given path, then looks into a subfolder given by
     key and finally in the "misc" subfolder. If no file is found, just return item.
     """
-    if isinstance(item, str) and '@' in item:
+    if isinstance(item, str) and "@" in item:
         try:
-            pack, path = item.split('@')
+            pack, path = item.split("@")
             pack_path = get_pack_path(pack)
             for folder in ["", key, PATH_MISC]:
                 test_file = normpath(join(pack_path, folder, path))
