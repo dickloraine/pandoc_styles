@@ -161,7 +161,7 @@ def expand_directories(item, key=""):
                 test_file = normpath(join(pack_path, folder, path))
                 if isfile(test_file):
                     return test_file.replace("\\", "/")
-        except:  # pylint: disable=bare-except
+        except:  # noqa: E722
             pass
 
     if isinstance(item, str) and USER_DIR_PREFIX in item:

@@ -1,7 +1,7 @@
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 
 from .cl_stylepacks import import_style_pack, remove_style_pack
-from .constants import *  # pylint: disable=unused-wildcard-import, wildcard-import
+from .constants import *  # noqa F403
 
 
 def main():
