@@ -312,7 +312,7 @@ class PandocStyles:
         # add expandable metadata that can be overridden in the document
         if MD_EXPANDABLE_VARIABLES in self.cfg:
             for key, value in self.cfg[MD_EXPANDABLE_VARIABLES].items():
-                if not self.cfg.get(key, False):
+                if self.cfg.get(key, None) is None:
                     pandoc_args.append(f'-V {key}="{self.expand_dirs(value, key)}"')
             keys_to_delete.append(MD_EXPANDABLE_VARIABLES)
 
