@@ -6,6 +6,8 @@ This script allows you to define styles for pandoc. In styles you can define, wi
   - [Installation](#installation)
     - [Requirements](#requirements)
     - [Install](#install)
+      - [Via pipx](#via-pipx)
+      - [Local python](#local-python)
     - [Setup](#setup)
   - [Usage](#usage)
   - [Defining Styles](#defining-styles)
@@ -35,12 +37,34 @@ To use this script, you need the following:
 1. Python 3.6 or higher:
     You can get [python here](https://www.python.org/).
 
-2. Pandoc 2.11 or higher:
+2. Pandoc 3.1 or higher:
     You can download [pandoc here](http://pandoc.org/index.html).
+
+3. (Optional) pipx:
+    You can find [installation instruction here](https://pipx.pypa.io/stable/installation/)
 
 ### Install
 
-Now you need to install this script itself. Open the console and enter:
+Now you need to install this script itself.
+
+#### Via pipx
+
+The recommended way is via [pipx](https://pipx.pypa.io/stable/). This runs the script in an isolated environment.
+
+Open the console and enter:
+
+    pipx install pandoc-styles
+    pandoc-styles --init
+
+If you need additional python packages in the isolated environment, you can install them via
+
+    pipx inject package-name
+
+#### Local python
+
+You can install the script into your local python environment
+
+Open the console and enter:
 
     pip3 install pandoc_styles
     pandoc-styles --init
