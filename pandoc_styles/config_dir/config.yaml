@@ -1,7 +1,4 @@
 ---
 # only needed, if pandoc is not in PATH
 pandoc-path:
-# path to python for scripts. Only needed, if your operating system needs this.
-# for example: on windows with the standard python installation use "py".
-python-path: python
 ...

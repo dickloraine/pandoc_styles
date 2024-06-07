@@ -1,8 +1,10 @@
 """Some utility functions"""
 
 import logging
+import os
 import shlex
 import subprocess
+import sys
 from contextlib import contextmanager
 from os import chdir, getcwd
 from os.path import isdir, isfile, join, normpath, split, splitext
@@ -75,8 +77,12 @@ def run_process(args, get_output=False, shell=False):
     Run a process with the given args.
     If get_output is true, return the subprocess.
     """
-    args = shlex.split(args) if not shell else args
-    name = args[1] if args[0] in ["py", "python", "python3"] else args[0]
+    args = args if (shell or isinstance(args, list)) else shlex.split(args)
+    env = None
+    if is_venv():
+        venv_bin, _ = os.path.split(sys.executable)
+        env = os.environ
+        env["PATH"] = venv_bin + os.pathsep + env["PATH"]
     try:
         if get_output:
             pc = subprocess.run(
@@ -87,15 +93,15 @@ def run_process(args, get_output=False, shell=False):
                 stderr=subprocess.STDOUT,
                 universal_newlines=True,
                 encoding="utf-8",
+                env=env,
             )
             return pc
-        subprocess.run(args, check=True, shell=shell)
+        subprocess.run(args, check=True, shell=shell, env=env)
     except subprocess.CalledProcessError:
-        logging.error(f"{name} failed!")
-        logging.debug(f"{name} command-line:\n{name} {args}!")
+        logging.error(f"{args} failed!")
         raise
     except FileNotFoundError:
-        logging.error(f"{name} not found!")
+        logging.error(f"{args} not found!")
         raise
 
 
@@ -170,3 +176,14 @@ def expand_directories(item, key=""):
             if isfile(test_file):
                 return test_file.replace("\\", "/")
     return item
+
+
+def is_venv():
+    """
+    Returs True if the script runs in a virtual environment, otherwise False
+    """
+
+    real_prefix = getattr(sys, "real_prefix", None)
+    base_prefix = getattr(sys, "base_prefix", sys.prefix)
+
+    return (base_prefix or real_prefix) != sys.prefix

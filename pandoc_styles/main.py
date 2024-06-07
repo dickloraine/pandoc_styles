@@ -85,7 +85,6 @@ class PandocStyles:
             or get_file_name(files[0])
         )
         self.output_ext = to_file_type
-        self.python_path = "python"
         self._do_user_config()
 
     def run(self):
@@ -229,8 +228,6 @@ class PandocStyles:
             return
         if config.get(CFG_PANDOC_PATH):
             sys.path.append(normpath(dirname(config[CFG_PANDOC_PATH])))
-        if config.get(CFG_PYTHON_PATH):
-            self.python_path = normpath(config[CFG_PYTHON_PATH])
 
     def _get_cfg(self, fmt):
         """Get the style configuration for the current format"""
@@ -365,9 +362,7 @@ class PandocStyles:
             if len(script.split(" ")) == 1 and has_extension(script, "py"):
                 cfg = self._make_cfg_file()
                 script = self.expand_dirs(script, flight_type)
-                if self.python_path:
-                    script = f'{self.python_path} "{script}" '
-                run_process(f'{script} --cfg "{cfg}"')
+                run_process([sys.executable, script, "--cfg", cfg])
                 self._read_cfg_file()
             else:
                 script = script.replace(repl_txt, repl_val)

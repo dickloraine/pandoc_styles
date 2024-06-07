@@ -57,7 +57,6 @@ MD_REPL_IN_OUTPUT = "replace-in-output"
 # Configuartion constants
 CFG_FILE = "config.yaml"
 CFG_PANDOC_PATH = "pandoc-path"
-CFG_PYTHON_PATH = "python-path"
 
 # Some formats:
 ALL_FMTS = "all"
