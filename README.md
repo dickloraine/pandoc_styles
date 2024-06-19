@@ -58,7 +58,11 @@ Open the console and enter:
 
 If you need additional python packages in the isolated environment, you can install them via
 
-    pipx inject package-name
+    pipx inject pandoc-styles package-name
+
+If you for example need the matplotlib stack use
+
+    pipx inject pandoc-styles numpy scipy matplotlib pandas sympy nose
 
 #### Local python
 
