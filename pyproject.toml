@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pandoc_styles"
-version = "0.9.17"
+version = "0.9.18"
 description = "A script to convert files with pandoc using styles."
 authors = ["dickloraine <dickloraine@gmx.net>"]
 license = "MIT"
@@ -18,10 +18,9 @@ classifiers=[
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 libsass = "^0.22.0"
 panflute = "^2.3.0"
-setuptools = "^70.0"
 "ruamel.yaml" = "^0.16.0"
 
 [tool.poetry.dev-dependencies]
@@ -36,5 +35,5 @@ pandoc-styles = "pandoc_styles.main:main"
 pandoc-styles-tools = "pandoc_styles.cl_tools:main"
 
 [build-system]
-requires = ["poetry>=0.12", "setuptools>=70.0"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

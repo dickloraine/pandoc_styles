@@ -1,5 +1,6 @@
 # ruff: noqa: F405
 
+import importlib.resources
 import logging
 import re
 import sys
@@ -11,7 +12,6 @@ from shutil import copy, copytree
 from tempfile import TemporaryDirectory
 
 import sass
-from pkg_resources import resource_filename
 
 from .constants import *  # noqa: F403
 from .format_mappings import FORMAT_TO_EXTENSION
@@ -683,7 +683,7 @@ def main():
     # initialize config directory
     if args.init:
         if not isdir(CONFIG_DIR):
-            copytree(resource_filename(MODULE_NAME, "config_dir"), CONFIG_DIR)
+            copytree(importlib.resources.files(MODULE_NAME) / "config_dir", CONFIG_DIR)
             logging.info(f"Created configuration directory: {CONFIG_DIR}!")
         return
 
